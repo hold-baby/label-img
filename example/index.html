@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="renderer" content="webkit" />
+  <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>标注</title>
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body style="margin: 0;">
+  <div class="pw">
+    <div id="container"></div>
+    <div id="menu">
+      <div class="ctrl-line">
+        <input type="file" id="file">
+        <input type="text" id="addr">
+        <button id="load">load url</button>
+        <button id="source">demo source</button>
+      </div>
+      <div class="ctrl-line">
+        <button id="polygon">polygon</button>
+        <button id="rect">rect</button>
+        <button id="cancle">cancle</button>
+      </div>
+      <div class="ctrl-line">
+        <button id="tag">tag</button>
+        <button id="guide">guide line</button>
+        <button id="data">data</button>
+      </div>
+      <div id="list">
+        <!-- <div class="shape-item shape-active" data-index="0">
+          <div class="name">
+            name
+          </div>
+          <div class="ctrl">
+            <button class="disable">禁用</button>
+            <button class="rm">删除</button>
+          </div>
+          <div class="detail">
+            <div>类型: type</div>
+            <div>点位数: 1</div>
+            <div>状态: 正常</div>
+          </div>
+        </div> -->
+      </div>
+    </div>
+  </div>
+  <script src="http://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
+  <script src="./labelImg.js"></script>
+  <script src="./index.js"></script>
+</body>
+</html>
