@@ -285,17 +285,17 @@
     };
     var homepage = "https://github.com/hold-baby/label-img#readme";
     var devDependencies = {
-    	"@rollup/plugin-commonjs": "^17.0.0",
-    	"@rollup/plugin-json": "^4.1.0",
-    	"@rollup/plugin-node-resolve": "^7.1.3",
-    	"@rollup/plugin-typescript": "^6.1.0",
-    	"@types/lodash": "^4.14.165",
-    	dayjs: "^1.9.7",
-    	rollup: "^2.34.2",
-    	"rollup-plugin-banner2": "^1.0.1",
-    	"rollup-plugin-terser": "^7.0.2",
-    	tslib: "^2.0.3",
-    	typescript: "^4.1.2"
+    	"@rollup/plugin-commonjs": "17.0.0",
+    	"@rollup/plugin-json": "4.1.0",
+    	"@rollup/plugin-node-resolve": "7.1.3",
+    	"@rollup/plugin-typescript": "6.1.0",
+    	"@types/lodash": "4.14.165",
+    	dayjs: "1.9.7",
+    	rollup: "2.34.2",
+    	"rollup-plugin-banner2": "1.0.1",
+    	"rollup-plugin-terser": "7.0.2",
+    	tslib: "2.0.3",
+    	typescript: "4.1.2"
     };
     var dependencies = {
     	lodash: "4.17.20"
@@ -3773,12 +3773,36 @@
     	default: _default$2
     }, '__esModule', {value: true});
 
+    /**
+     * Checks if `value` is `undefined`.
+     *
+     * @static
+     * @since 0.1.0
+     * @memberOf _
+     * @category Lang
+     * @param {*} value The value to check.
+     * @returns {boolean} Returns `true` if `value` is `undefined`, else `false`.
+     * @example
+     *
+     * _.isUndefined(void 0);
+     * // => true
+     *
+     * _.isUndefined(null);
+     * // => false
+     */
+    function isUndefined(value) {
+      return value === undefined;
+    }
+
+    var isUndefined_1 = isUndefined;
+
     var EventReceiver_1$2 = tslib_1.__importStar(EventReceiver_1);
     var Image_1$1 = tslib_1.__importDefault(Image_1);
     var Shape_1$1 = tslib_1.__importStar(Shape_1);
     var ShapeRegister_1$1 = tslib_1.__importDefault(ShapeRegister_1);
     var EventHook_1$1 = tslib_1.__importDefault(EventHook_1);
 
+    var isUndefined_1$1 = tslib_1.__importDefault(isUndefined_1);
     var dfOptions = {
         width: 800,
         height: 600,
@@ -4038,7 +4062,7 @@
                             _this.cache = null;
                             _this.eventHook.trigger("create", shape);
                             if (!_this.continuity) {
-                                _this.cancle();
+                                _this.cancel();
                             }
                         }
                         else {
@@ -4093,7 +4117,7 @@
                     _this.eventHook.trigger("create", shape);
                     _this.cache = null;
                     if (!_this.continuity) {
-                        _this.cancle();
+                        _this.cancel();
                     }
                     _this.render();
                 }
@@ -4228,9 +4252,11 @@
             var opts = this.shapeRegister.get(name);
             return new Shape_1$1.default(Object.assign(opts, options));
         };
-        Platform.prototype.useShape = function (name, continuity) {
+        Platform.prototype.label = function (name, continuity) {
             this.drawing = this.shapeRegister.get(name);
-            this.continuity = !!continuity;
+            if (!isUndefined_1$1.default(continuity)) {
+                this.continuity = !!continuity;
+            }
         };
         Platform.prototype.addShape = function (shape, idx) {
             if (typeof idx === "number") {
@@ -4254,7 +4280,7 @@
             shape.setActive(true);
             this.render();
         };
-        Platform.prototype.cancle = function () {
+        Platform.prototype.cancel = function () {
             this.drawing = null;
             this.continuity = false;
             if (this.cache) {
@@ -4301,12 +4327,15 @@
             });
         };
         Platform.prototype.guideLine = function (status) {
-            this.isGuideLine = typeof status === "undefined" ? !this.isGuideLine : !!status;
+            this.isGuideLine = isUndefined_1$1.default(status) ? !this.isGuideLine : !!status;
             this.render();
         };
         Platform.prototype.tagShow = function (status) {
-            this.isTagShow = typeof status === "undefined" ? !this.isTagShow : !!status;
+            this.isTagShow = isUndefined_1$1.default(status) ? !this.isTagShow : !!status;
             this.render();
+        };
+        Platform.prototype.setContinuity = function (status) {
+            this.continuity = !!status;
         };
         // 渲染相关
         Platform.prototype.clearCanvas = function () {
@@ -4331,10 +4360,10 @@
             var y = height * this.scale;
             var _b = Image.getOrigin(), ox = _b[0], oy = _b[1];
             ctx.drawImage(el, ox, oy, x, y);
-            ctx.beginPath();
-            ctx.fillStyle = "red";
-            ctx.fillText(x + ", " + y, 10, 550);
-            ctx.closePath();
+            // ctx.beginPath()
+            // ctx.fillStyle = "red"
+            // ctx.fillText(`${x}, ${y}`, 10, 550)
+            // ctx.closePath()
         };
         Platform.prototype.renderGuideLine = function () {
             var ctx = this.ctx;

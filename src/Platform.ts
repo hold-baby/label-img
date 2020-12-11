@@ -5,6 +5,7 @@ import ShapeRegister, { IShapeCfg, IShapeContent } from "./ShapeRegister"
 import EventHook from "./EventHook"
 import { isInSide, isInCircle, getRectPoints } from "./utils"
 import { Point, Points } from "./structure"
+import isUndefined from "lodash/isUndefined"
 
 type InputShapeOrID = Shape | string;
 
@@ -309,7 +310,7 @@ export default class Platform extends EventReceiver {
 						this.cache = null;
 						this.eventHook.trigger("create", shape)
 						if(!this.continuity){
-							this.cancle()
+							this.cancel()
 						}
 					}else{
 						cache.positions.push(point)
@@ -362,7 +363,7 @@ export default class Platform extends EventReceiver {
 				this.eventHook.trigger("create", shape)
 				this.cache = null
 				if(!this.continuity){
-					this.cancle()
+					this.cancel()
 				}
 				this.render()
 			}
@@ -496,9 +497,11 @@ export default class Platform extends EventReceiver {
 		const opts = this.shapeRegister.get(name)
 		return new Shape(Object.assign(opts, options))
 	}
-	useShape(name: string, continuity?: boolean){
+	label(name: string, continuity?: boolean){
 		this.drawing = this.shapeRegister.get(name)
-		this.continuity = !!continuity
+		if(!isUndefined(continuity)){
+			this.continuity = !!continuity
+		}
 	}
 	addShape(shape: Shape, idx?: number){
 		if(typeof idx === "number"){
@@ -521,7 +524,7 @@ export default class Platform extends EventReceiver {
 		this.render()
 	}
 	
-	public cancle(){
+	public cancel(){
 		this.drawing = null
 		this.continuity = false
     if(this.cache){
@@ -565,12 +568,15 @@ export default class Platform extends EventReceiver {
     })
 	}
 	guideLine(status?: boolean){
-		this.isGuideLine = typeof status === "undefined" ? !this.isGuideLine : !!status
+		this.isGuideLine = isUndefined(status) ? !this.isGuideLine : !!status
 		this.render()
 	}
 	tagShow(status?: boolean){
-		this.isTagShow = typeof status === "undefined" ? !this.isTagShow : !!status
+		this.isTagShow = isUndefined(status) ? !this.isTagShow : !!status
 		this.render()
+	}
+	setContinuity(status: boolean){
+		this.continuity = !!status
 	}
 
 	// 渲染相关
@@ -596,11 +602,12 @@ export default class Platform extends EventReceiver {
     const x = width * this.scale;
     const y = height * this.scale;
     const [ox, oy] = Image.getOrigin()
-    ctx.drawImage(el, ox, oy, x, y)
-    ctx.beginPath()
-    ctx.fillStyle = "red"
-    ctx.fillText(`${x}, ${y}`, 10, 550)
-    ctx.closePath()
+		ctx.drawImage(el, ox, oy, x, y)
+		
+    // ctx.beginPath()
+    // ctx.fillStyle = "red"
+    // ctx.fillText(`${x}, ${y}`, 10, 550)
+    // ctx.closePath()
   }
 	renderGuideLine(){
 		const ctx = this.ctx

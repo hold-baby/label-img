@@ -2,7 +2,7 @@ const ele = $("#container")
 const btn = {
   polygon: $("#polygon"),
   rect: $("#rect"),
-  cancle: $("#cancle"),
+  cancel: $("#cancel"),
   guide: $("#guide"),
   tag: $("#tag"),
   data: $("#data"),
@@ -13,7 +13,8 @@ const btn = {
 const dom = {
   list: $("#list"),
   file: $("#file"),
-  addr: $("#addr")
+  addr: $("#addr"),
+  continuity: $("#continuity")
 }
 const labeler = new LabelImg(ele)
 const hook = labeler.eventHook
@@ -28,7 +29,7 @@ hook.on("create", () => {
 })
 const Shape = LabelImg.Shape
 
-labeler.register("dbx", {
+labeler.register("polygon", {
   type: "Polygon",
   style: {
     normal: {
@@ -37,20 +38,24 @@ labeler.register("dbx", {
   },
   tag: "多边形",
 })
-labeler.register("cfx", {
+labeler.register("rect", {
   type: "Rect"
 })
 
 const shape1 = new Shape({
-  name: "dbx",
+  name: "polygon",
   type: "Polygon",
   positions: [[50,50],[100,100], [200,100]],
-  tag: "多边形",
+  tag: "polygon",
 })
 
 dom.file.on("change", (e) => {
   const file = e.target.files[0]
   labeler.load(file)
+})
+dom.continuity.on("change", (e) => {
+  const continuity = e.target.checked
+  labeler.setContinuity(continuity)
 })
 btn.load.on("click", () => {
   const url = dom.addr.val()
@@ -61,13 +66,13 @@ btn.source.on("click", () => {
   labeler.load("./dog.jpg")
 })
 btn.polygon.on("click", () => {
-  labeler.useShape("dbx")
+  labeler.label("polygon")
 })
 btn.rect.on("click", () => {
-  labeler.useShape("cfx")
+  labeler.label("rect")
 })
-btn.cancle.on("click", () => {
-  labeler.cancle()
+btn.cancel.on("click", () => {
+  labeler.cancel()
 })
 btn.guide.on("click", () => {
   labeler.guideLine()
