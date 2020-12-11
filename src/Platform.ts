@@ -297,14 +297,10 @@ export default class Platform extends EventReceiver {
 						isClose = true
 					}
 					if(isClose){
-						console.log(cache);
-						
 						const shape = this.createShape(this.drawing.name, {
 							positions: cache.positions,
 							closed: false,
 						})
-						console.log(shape);
-						
 						shape.updatePositions(cache.positions).close()
 						this.shapeList.push(shape)
 						this.cache = null;
