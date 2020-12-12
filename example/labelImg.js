@@ -258,7 +258,7 @@
     });
 
     var name = "label-img";
-    var version = "0.0.32";
+    var version = "0.0.33";
     var description = "image annotation tool with javascript";
     var main = "dist/labelImg.js";
     var build = "dist/labelImg.min.js";
@@ -4051,12 +4051,10 @@
                             isClose = true;
                         }
                         if (isClose) {
-                            console.log(cache);
                             var shape = _this.createShape(_this.drawing.name, {
                                 positions: cache.positions,
                                 closed: false,
                             });
-                            console.log(shape);
                             shape.updatePositions(cache.positions).close();
                             _this.shapeList.push(shape);
                             _this.cache = null;

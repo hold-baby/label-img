@@ -38,11 +38,11 @@ export default class Platform extends EventReceiver {
     load(source: string | File): Promise<unknown>;
     register(name: string, options: IShapeCfg): void;
     createShape(name: string, options?: IShapeContent): Shape;
-    useShape(name: string, continuity?: boolean): void;
+    label(name: string, continuity?: boolean): void;
     addShape(shape: Shape, idx?: number): void;
     remove(input: Shape | string): void;
     setActive(shape: Shape): void;
-    cancle(): void;
+    cancel(): void;
     orderShape(input: InputShapeOrID, flag?: boolean): void;
     private findShapeIndex;
     getShapeList(): Shape[];
@@ -50,6 +50,7 @@ export default class Platform extends EventReceiver {
     private loseActive;
     guideLine(status?: boolean): void;
     tagShow(status?: boolean): void;
+    setContinuity(status: boolean): void;
     clearCanvas(): void;
     renderBackground(): void;
     renderImage(): void;
