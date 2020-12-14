@@ -16,7 +16,8 @@ const dom = {
   addr: $("#addr"),
   continuity: $("#continuity")
 }
-const labeler = new LabelImg(ele)
+
+const labeler = new LabelImg(ele[0])
 const hook = labeler.eventHook
 hook.on("select", (s) => {
   const list = labeler.getShapeList()

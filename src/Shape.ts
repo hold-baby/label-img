@@ -56,7 +56,6 @@ export interface IShapeOptions {
   id?: string;
   type: TShapeType;
   name: string;
-  status: TShapeStatus;
   positions: Points;
   data?: any;
   tag?: string,
@@ -84,6 +83,7 @@ export class Shape extends EventReceiver {
   private visible: boolean
   private insert: boolean
   private showTag: boolean
+  public tagNode: HTMLDivElement
   public tag: string
   public max: number | undefined
   public data: any
@@ -118,6 +118,19 @@ export class Shape extends EventReceiver {
     this.insert = insert
     this.showTag = showTag
     this.tag = tag
+
+    const div = document.createElement("div")
+    const wrap = document.createElement("div")
+    wrap.innerHTML = this.tag
+    wrap.style.background = "red"
+    wrap.style.color = "#fff"
+    wrap.style.position = "absolute"
+    wrap.style.left = 5 + "px"
+    wrap.style.bottom = 5 + "px"
+    wrap.style.display = "inline-block"
+    div.appendChild(wrap)
+    this.tagNode = div
+
     this.max = max
     if(this.type === ShapeType.Rect){
       this.insert = false

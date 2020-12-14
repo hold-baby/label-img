@@ -42,6 +42,7 @@ export class Platform extends EventReceiver {
   constructor(container: HTMLDivElement, options?: AntOptions){
 		super()
 		this.container = container
+		this.container.style.position = "relative"
 		this.options = options || dfOptions
 		this.eventHook = new EventHook()
 
@@ -642,11 +643,11 @@ export class Platform extends EventReceiver {
     
     const rp = Image.getRelativePositions(positions, scale)
 
-    let before: null | Point = null;
+		let before: null | Point = null;
+		// 线
     ctx.beginPath()
     ctx.strokeStyle = lineColor
     ctx.lineWidth = lineWidth * scale
-    
     rp.forEach((point, index) => {
       const [cx, cy] = point
       if(before){
@@ -661,7 +662,7 @@ export class Platform extends EventReceiver {
     })
     ctx.stroke()
     ctx.closePath()
-
+		// 点
     ctx.beginPath()
     rp.forEach((point, idx) => {
       const [cx, cy] = point
@@ -677,6 +678,7 @@ export class Platform extends EventReceiver {
     ctx.closePath()
     ctx.globalAlpha = 1
 
+		// 颜色填充
     rp.forEach((point) => {
       const [cx, cy] = point
       ctx.beginPath()
@@ -685,29 +687,38 @@ export class Platform extends EventReceiver {
       ctx.fill()
       ctx.closePath()
     })
-
+		// 标签
     if(this.isTagShow && shape.isShowTag() && shape.tag && shape.isClose()){
       const [x, y] = rp[0]
-      const scale = this.scale
-      const padding = style.dotRadius * scale
-      const tag = shape.tag
-      const fontSize = this.fontSize * scale
-      const w = fontSize * tag.length + padding * 2
-      const h = fontSize + padding * 2
+			const scale = this.scale
+			const tagNode = shape.tagNode
+			tagNode.style.position = "absolute"
+			tagNode.style.left = x + "px"
+			tagNode.style.top = y + "px"
+			tagNode.style.display = "inline-block"
+			tagNode.style.width = 200 + "px"
+			// tagNode.style.transform = `scale(${scale})`
+			this.container.appendChild(tagNode)
+			
+      // const padding = style.dotRadius * scale
+      // const tag = shape.tag
+      // const fontSize = this.fontSize * scale
+      // const w = fontSize * tag.length + padding * 2
+      // const h = fontSize + padding * 2
 
-      // 底色
-      ctx.beginPath()
-      ctx.fillStyle = style.dotColor
-      ctx.rect(x, y - h - padding, w, h)
-      ctx.fill()
-      ctx.closePath()
+      // // 底色
+      // ctx.beginPath()
+      // ctx.fillStyle = style.dotColor
+      // ctx.rect(x, y - h - padding, w, h)
+      // ctx.fill()
+      // ctx.closePath()
 
-      // 文字
-      ctx.beginPath()
-      ctx.fillStyle = "#fff"
-      ctx.font = `${Math.floor(fontSize)}px/1 Arial`
-      ctx.fillText(tag, x + padding, y - padding * 2.5)
-      ctx.closePath()
+      // // 文字
+      // ctx.beginPath()
+      // ctx.fillStyle = "#fff"
+      // ctx.font = `${Math.floor(fontSize)}px/1 Arial`
+      // ctx.fillText(tag, x + padding, y - padding * 2.5)
+      // ctx.closePath()
     }
     ctx.font = `${Math.floor(this.fontSize)}px/1 Arial`
 
