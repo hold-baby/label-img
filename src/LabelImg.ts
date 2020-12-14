@@ -1,10 +1,9 @@
 import pkg from "../package.json"
 import Platform, { AntOptions } from "./Platform"
-
 import Shape from "./Shape"
 import IDGenerator from "./IDGenerator"
 
-export default class LabelImg extends Platform {
+export class LabelImg extends Platform {
 	public version: string;
 	public author: string;
 	constructor(container: HTMLDivElement, options?: AntOptions){

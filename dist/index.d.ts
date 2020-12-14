@@ -1,6 +1,57 @@
+declare type Map<T> = {
+    [key: string]: T;
+};
 declare type Point = [number, number];
 declare type Points = Point[];
 declare type TColor = string;
+
+declare enum EAntMouseEvents {
+    "mousedown" = "mousedown",
+    "mouseenter" = "mouseenter",
+    "mouseleave" = "mouseleave",
+    "mousemove" = "mousemove",
+    "mouseout" = "mouseout",
+    "mouseover" = "mouseover",
+    "mouseup" = "mouseup",
+    "dblclick" = "dblclick",
+    "click" = "click",
+    "auxclick" = "auxclick",
+    "contextmenu" = "contextmenu",
+    "wheel" = "wheel"
+}
+declare type IAntMouseEvent = keyof typeof EAntMouseEvents;
+declare const antMouseEvents: ("mousedown" | "mouseenter" | "mouseleave" | "mousemove" | "mouseout" | "mouseover" | "mouseup" | "dblclick" | "click" | "auxclick" | "contextmenu" | "wheel")[];
+declare enum AntLv {
+    "top" = "top",
+    "mid" = "mid",
+    "bot" = " bot"
+}
+declare type IAntLv = keyof typeof AntLv;
+declare const antLvs: ("top" | "mid" | "bot")[];
+interface IAnte {
+    offset: Point;
+    isOnImage: boolean;
+    stopPropagation: () => void;
+    isPropagation: boolean;
+    getTargetShape: () => [Shape | null, number];
+    currentTarget: Shape | null;
+}
+interface AntMouseEvent extends MouseEvent, WheelEvent {
+    ante: IAnte;
+}
+declare type ICallback = (e: AntMouseEvent, antEvent: Omit<IAntEvent, "callback">) => void;
+interface IAntEvent {
+    lv: string;
+    type: IAntMouseEvent;
+    callback: ICallback;
+    target: any;
+}
+declare class EventReceiver {
+    private eventMap;
+    constructor();
+    on(eventLv: IAntMouseEvent | string, callback: ICallback): void;
+    getEventsByType(type: IAntMouseEvent, level?: IAntLv): IAntEvent[];
+}
 
 declare enum ShapeType {
     "Polygon" = "Polygon",
@@ -21,6 +72,10 @@ interface IShapeStyle {
     fillColor: TColor;
 }
 declare type IShapeOptionsStyle = Record<TShapeStatus, IShapeStyle>;
+declare type TShapeStyle = Partial<IShapeStyle>;
+declare const normal: IShapeStyle;
+declare const active: IShapeStyle;
+declare const disabled: IShapeStyle;
 interface IShapeOptions {
     id?: string;
     type: TShapeType;
@@ -90,51 +145,16 @@ declare class Shape extends EventReceiver {
     updatePositions(positions: Points): this;
 }
 
-declare enum EAntMouseEvents {
-    "mousedown" = "mousedown",
-    "mouseenter" = "mouseenter",
-    "mouseleave" = "mouseleave",
-    "mousemove" = "mousemove",
-    "mouseout" = "mouseout",
-    "mouseover" = "mouseover",
-    "mouseup" = "mouseup",
-    "dblclick" = "dblclick",
-    "click" = "click",
-    "auxclick" = "auxclick",
-    "contextmenu" = "contextmenu",
-    "wheel" = "wheel"
+interface IIDGenerator {
+    len?: number;
+    start?: number;
 }
-declare type IAntMouseEvent = keyof typeof EAntMouseEvents;
-declare enum AntLv {
-    "top" = "top",
-    "mid" = "mid",
-    "bot" = " bot"
+declare class IDGenerator {
+    private len;
+    constructor(props?: IIDGenerator);
+    getID(): string;
 }
-declare type IAntLv = keyof typeof AntLv;
-interface IAnte {
-    offset: Point;
-    isOnImage: boolean;
-    stopPropagation: () => void;
-    isPropagation: boolean;
-    getTargetShape: () => [Shape | null, number];
-    currentTarget: Shape | null;
-}
-interface AntMouseEvent extends MouseEvent, WheelEvent {
-    ante: IAnte;
-}
-declare type ICallback = (e: AntMouseEvent, antEvent: Omit<IAntEvent, "callback">) => void;
-interface IAntEvent {
-    lv: string;
-    type: IAntMouseEvent;
-    callback: ICallback;
-    target: any;
-}
-declare class EventReceiver {
-    private eventMap;
-    constructor();
-    on(eventLv: IAntMouseEvent | string, callback: ICallback): void;
-    getEventsByType(type: IAntMouseEvent, level?: IAntLv): IAntEvent[];
-}
+declare const IDG: IDGenerator;
 
 declare type IShapeCfg = Omit<IShapeOptions, "data" | "positions">;
 declare type IShapeContent = Partial<Omit<IShapeOptions, "type">>;
@@ -200,16 +220,6 @@ declare class Platform extends EventReceiver {
     render(): void;
 }
 
-interface IIDGenerator {
-    len?: number;
-    start?: number;
-}
-declare class IDGenerator {
-    private len;
-    constructor(props?: IIDGenerator);
-    getID(): string;
-}
-
 declare class LabelImg extends Platform {
     version: string;
     author: string;
@@ -218,4 +228,9 @@ declare class LabelImg extends Platform {
     static IDGenerator: typeof IDGenerator;
 }
 
-export default LabelImg;
+declare const isInSide: (point: Point, vs: Point[]) => boolean;
+declare const getRectPoints: (start: Point, end: Point) => Points;
+declare const getDistance: (p1: Point, p2: Point) => number;
+declare const isInCircle: (p1: Point, p2: Point, r: number) => boolean;
+
+export { AntLv, AntMouseEvent, AntOptions, EAntMouseEvents, IAntLv, IAntMouseEvent, IAnte, IDG, IShapeCfg, IShapeContent, IShapeOptions, IShapeOptionsStyle, IShapeStyle, LabelImg, Map, Point, Points, ShapeType, TColor, TShapeStyle, TShapeType, active, antLvs, antMouseEvents, disabled, getDistance, getRectPoints, isInCircle, isInSide, normal };

@@ -20,14 +20,16 @@ const getBanner = () => (
     ``
   ].join('\n')
 )
-const input = "src/LabelImg.ts"
+const input = "src/main.ts"
+const typeIndex = "src/index.ts"
 
 export default [
   // type
   {
-    input,
+    input: typeIndex,
     output: {
-      file: pkg.types
+      file: pkg.types,
+      format: "es",
     },
     plugins: [
       dts({
