@@ -27,7 +27,7 @@ export default [
   {
     input,
     output: {
-      file: "dist/index.d.ts"
+      file: pkg.types
     },
     plugins: [
       dts({
