@@ -1,8 +1,8 @@
-import EventReceiver, { antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./EventReceiver"
-import Image from "./Image"
-import Shape, { ShapeType } from "./Shape"
-import ShapeRegister, { IShapeCfg, IShapeContent } from "./ShapeRegister"
-import EventHook from "./EventHook"
+import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./EventReceiver"
+import { Image } from "./Image"
+import { Shape, ShapeType } from "./Shape"
+import { ShapeRegister, IShapeCfg, IShapeContent } from "./ShapeRegister"
+import { EventHook } from "./EventHook"
 import { isInSide, isInCircle, getRectPoints } from "./utils"
 import { Point, Points } from "./structure"
 import isUndefined from "lodash/isUndefined"
@@ -17,7 +17,7 @@ const dfOptions = {
 
 export type AntOptions = typeof dfOptions
 
-export default class Platform extends EventReceiver {
+export class Platform extends EventReceiver {
   private container: HTMLDivElement
   private options: AntOptions
   private canvas: HTMLCanvasElement

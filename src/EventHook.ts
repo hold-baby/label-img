@@ -1,4 +1,4 @@
-import Shape from "./Shape"
+import { Shape } from "./Shape"
 enum EventHooks {
   "select" = "select",
   "create" = "create",
@@ -9,7 +9,7 @@ type Fn = (shape?: Shape) => void
 type TEventMap = {
   [key in EventHooks]?: Fn[]
 }
-export default class EventHook {
+export class EventHook {
   private eventMap: TEventMap
   constructor(){
     this.eventMap = {}

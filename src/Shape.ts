@@ -1,4 +1,4 @@
-import EventReceiver from "./EventReceiver"
+import { EventReceiver } from "./EventReceiver"
 import { Points, TColor, Point } from "./structure"
 import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
 import merge from "lodash/merge"
@@ -73,7 +73,7 @@ interface ILinePoint {
   idx: number;
   position: Point;
 }
-export default class Shape extends EventReceiver {
+export class Shape extends EventReceiver {
   readonly id: string
   readonly type: TShapeType
   readonly name: string

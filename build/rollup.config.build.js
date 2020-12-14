@@ -2,31 +2,17 @@ import resolve from '@rollup/plugin-node-resolve';
 import commonjs from '@rollup/plugin-commonjs';
 import banner from "rollup-plugin-banner2"
 import json from '@rollup/plugin-json';
-import pkg from './package.json';
+import pkg from '../package.json';
 import typescript from '@rollup/plugin-typescript'
 import { terser } from "rollup-plugin-terser";
 import dayjs from "dayjs"
 import dts from "rollup-plugin-dts";
-
-const getBanner = () => (
-  [
-    `/**!`,
-    ` * ${pkg.name} - v${pkg.version}`,
-    ` * ${pkg.description}`,
-    ` *`,
-    ` * ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`,
-    ` * ${pkg.license} (c) ${pkg.author}`,
-    `*/`,
-    ``
-  ].join('\n')
-)
-const input = "src/main.ts"
-const typeIndex = "src/index.ts"
+import { name, input } from "./config"
 
 export default [
   // type
   {
-    input: typeIndex,
+    input: input.type,
     output: {
       file: pkg.types,
       format: "es",
@@ -39,9 +25,9 @@ export default [
   },
   // browser-friendly UMD build
   {
-    input,
+    input: input.main,
     output: {
-      name: 'LabelImg',
+      name,
       file: pkg.main,
       format: 'umd',
     },
@@ -56,9 +42,9 @@ export default [
     ]
   },
   {
-    input,
+    input: input.main,
     output: {
-      name: 'LabelImg',
+      name,
       file: pkg.build,
       format: 'umd',
     },
@@ -75,3 +61,17 @@ export default [
   },
 ]
 
+function getBanner (){
+  return (
+    [
+      `/**!`,
+      ` * ${pkg.name} - v${pkg.version}`,
+      ` * ${pkg.description}`,
+      ` *`,
+      ` * ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`,
+      ` * ${pkg.license} (c) ${pkg.author}`,
+      `*/`,
+      ``
+    ].join('\n')
+  )
+}

@@ -65,6 +65,6 @@
     /* Advanced Options */
     "forceConsistentCasingInFileNames": true  /* Disallow inconsistently-cased references to the same file. */
   },
-  "exclude": ["dist", "node_modules", "example", "sw-config.js", "rollup.config.js"],
+  "exclude": ["dist", "node_modules", "example", "sw-config.js"],
   "include": ["src/**/*", "package.json"]
 }

@@ -1,9 +1,9 @@
-import EventReceiver from "./EventReceiver"
+import { EventReceiver } from "./EventReceiver"
 import { Point, Points } from "./structure"
 
 const dfOrigin: Point = [0, 0]
 
-export default class Image extends EventReceiver {
+export class Image extends EventReceiver {
   private origin: Point
   public complate: boolean
   public el: HTMLImageElement | null

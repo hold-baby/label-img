@@ -4,7 +4,7 @@ import { IShapeOptions } from "./Shape"
 export type IShapeCfg = Omit<IShapeOptions, "data" | "positions">
 export type IShapeContent = Partial<Omit<IShapeOptions, "type">>
 
-export default class ShapeRegister {
+export class ShapeRegister {
   private shapeMap: Map<any>
   constructor(){
     this.shapeMap = {}

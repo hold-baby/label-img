@@ -24,3 +24,6 @@ node_modules/
 
 # swartz
 sw-config.js
+
+# test
+test/

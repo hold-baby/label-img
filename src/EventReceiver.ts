@@ -1,4 +1,4 @@
-import Shape from "./Shape"
+import { Shape } from "./Shape"
 import { Map, Point } from "./structure"
 
 export enum EAntMouseEvents {
@@ -46,7 +46,7 @@ interface IAntEvent {
   target: any;
 }
 
-export default class EventReceiver {
+export class EventReceiver {
   private eventMap: Map<IAntEvent[]>
   constructor(){
     this.eventMap = {}

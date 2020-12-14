@@ -1,6 +1,6 @@
 {
   "name": "label-img",
-  "version": "0.0.39",
+  "version": "0.0.40",
   "description": "image annotation tool with javascript",
   "main": "dist/labelImg.js",
   "build": "dist/labelImg.min.js",
@@ -10,8 +10,8 @@
     "dist/"
   ],
   "scripts": {
-    "build": "rollup -c rollup.config.build.js",
-    "dev": "rollup -c"
+    "build": "rollup -c build/rollup.config.build.js",
+    "dev": "rollup -c build/rollup.config.js"
   },
   "repository": {
     "type": "git",

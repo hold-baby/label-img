@@ -5,7 +5,7 @@ interface IIDGenerator {
   len?: number;
   start?: number;
 }
-export default class IDGenerator {
+export class IDGenerator {
   private len: number
   constructor(props?: IIDGenerator){
     const {
