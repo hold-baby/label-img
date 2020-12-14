@@ -2,7 +2,7 @@
  * label-img - v0.0.35
  * image annotation tool with javascript
  *
- * 2020-12-12 13:49:24
+ * 2020-12-14 11:13:58
  * MIT (c) hold-baby
 */
 (function (global, factory) {
@@ -275,7 +275,8 @@
     ];
     var scripts = {
     	build: "rollup -c rollup.config.build.js",
-    	dev: "rollup -c"
+    	dev: "rollup -c",
+    	t: "rollup -c rollup.config.t.js"
     };
     var repository = {
     	type: "git",

@@ -6,6 +6,7 @@ import pkg from './package.json';
 import typescript from '@rollup/plugin-typescript'
 import { terser } from "rollup-plugin-terser";
 import dayjs from "dayjs"
+import dts from "rollup-plugin-dts";
 
 const getBanner = () => (
   [
@@ -19,22 +20,24 @@ const getBanner = () => (
     ``
   ].join('\n')
 )
+const input = "src/LabelImg.ts"
+
 export default [
+  // type
   {
-    input: 'src/LabelImg.ts',
+    input,
     output: {
-      dir: "dist"
+      file: "dist/index.d.ts"
     },
     plugins: [
-      typescript({
-        declaration: true,
-        declarationDir: 'dist/types',
-      }),
+      dts({
+        respectExternal: true,
+      })
     ]
   },
   // browser-friendly UMD build
   {
-    input: 'src/LabelImg.ts',
+    input,
     output: {
       name: 'LabelImg',
       file: pkg.main,
@@ -51,7 +54,7 @@ export default [
     ]
   },
   {
-    input: 'src/LabelImg.ts',
+    input,
     output: {
       name: 'LabelImg',
       file: pkg.build,
