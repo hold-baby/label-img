@@ -1,11 +1,12 @@
 export * from "./EventHook"
 export * from "./EventReceiver"
-export * from "./IDGenerator"
 export * from "./Platform"
-export * from "./Shape"
 export * from "./ShapeRegister"
 export * from "./structure"
-export * from "./utils"
+
+export * as utils from "./utils"
+export * from "./IDGenerator"
+export * from "./Shape"
 
 import LabelImg from "./main"
 export default LabelImg

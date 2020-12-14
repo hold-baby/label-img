@@ -35,5 +35,3 @@ export const getDistance = (p1: Point, p2: Point) => {
 export const isInCircle = (p1: Point, p2: Point, r: number) => {
   return getDistance(p1, p2) < r
 }
-
-export default { isInSide, getRectPoints, getDistance, isInCircle }

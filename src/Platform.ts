@@ -493,6 +493,9 @@ export class Platform extends EventReceiver {
 		const opts = this.shapeRegister.get(name)
 		return new Shape(Object.assign(opts, options))
 	}
+	isRegister(name: string){
+		return this.shapeRegister.is(name)
+	}
 	label(name: string, continuity?: boolean){
 		this.drawing = this.shapeRegister.get(name)
 		if(!isUndefined(continuity)){

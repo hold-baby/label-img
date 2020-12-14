@@ -21,4 +21,7 @@ export class ShapeRegister {
     }
     throw "图形未注册"
   }
+  is(name: string){
+    return !!this.shapeMap[name]
+  }
 }
