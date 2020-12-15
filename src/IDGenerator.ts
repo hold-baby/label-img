@@ -1,4 +1,4 @@
-import padStart from "lodash/padStart"
+import _ from "./lodash"
 let count = 0
 
 interface IIDGenerator {
@@ -16,7 +16,7 @@ export class IDGenerator {
     this.len = len
   }
   getID(){
-    const id = padStart(String(count), this.len, "0")
+    const id = _.padStart(String(count), this.len, "0")
     count++
     return id
   }

@@ -5,7 +5,8 @@ import { ShapeRegister, IShapeCfg, IShapeContent } from "./ShapeRegister"
 import { EventHook } from "./EventHook"
 import { isInSide, isInCircle, getRectPoints } from "./utils"
 import { Point, Points } from "./structure"
-import isUndefined from "lodash/isUndefined"
+import _ from "./lodash"
+import { css, create } from "./element"
 
 type InputShapeOrID = Shape | string;
 
@@ -22,7 +23,8 @@ export class Platform extends EventReceiver {
   private options: AntOptions
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
-  private Image: Image
+	private Image: Image
+	private tagContainer: HTMLDivElement
   private scale: number
   private offset: Point
 
@@ -34,7 +36,6 @@ export class Platform extends EventReceiver {
 
 	private eventHook: EventHook
 
-	private fontSize: number
 	private continuity: boolean
 	private isGuideLine: boolean
 	private isTagShow: boolean
@@ -42,21 +43,28 @@ export class Platform extends EventReceiver {
   constructor(container: HTMLDivElement, options?: AntOptions){
 		super()
 		this.container = container
-		this.container.style.position = "relative"
+		css(this.container, {
+			position: "relative",
+			overflow: "hidden"
+		})
 		this.options = options || dfOptions
 		this.eventHook = new EventHook()
 
-		const canvas = document.createElement("canvas")
+		const canvas = create("canvas")
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
 		canvas.width = this.options.width
 		canvas.height = this.options.height
 		this.container.append(canvas)
 
+		// 标签容器
+		const tagContainer = create("div")
+		this.tagContainer = tagContainer
+		this.container.appendChild(this.tagContainer)
+
 		this.canvas = canvas
 		this.ctx = ctx
 		this.scale = 1
-		this.fontSize = 14
 		this.continuity = false
 		this.isGuideLine = false
 		this.isTagShow = true
@@ -499,7 +507,7 @@ export class Platform extends EventReceiver {
 	}
 	label(name: string, continuity?: boolean){
 		this.drawing = this.shapeRegister.get(name)
-		if(!isUndefined(continuity)){
+		if(!_.isUndefined(continuity)){
 			this.continuity = !!continuity
 		}
 	}
@@ -568,11 +576,11 @@ export class Platform extends EventReceiver {
     })
 	}
 	guideLine(status?: boolean){
-		this.isGuideLine = isUndefined(status) ? !this.isGuideLine : !!status
+		this.isGuideLine = _.isUndefined(status) ? !this.isGuideLine : !!status
 		this.render()
 	}
 	tagShow(status?: boolean){
-		this.isTagShow = isUndefined(status) ? !this.isTagShow : !!status
+		this.isTagShow = _.isUndefined(status) ? !this.isTagShow : !!status
 		this.render()
 	}
 	setContinuity(status: boolean){
@@ -692,36 +700,16 @@ export class Platform extends EventReceiver {
       const [x, y] = rp[0]
 			const scale = this.scale
 			const tagNode = shape.tagNode
-			tagNode.style.position = "absolute"
-			tagNode.style.left = x + "px"
-			tagNode.style.top = y + "px"
-			tagNode.style.display = "inline-block"
-			tagNode.style.width = 200 + "px"
-			// tagNode.style.transform = `scale(${scale})`
-			this.container.appendChild(tagNode)
-			
-      // const padding = style.dotRadius * scale
-      // const tag = shape.tag
-      // const fontSize = this.fontSize * scale
-      // const w = fontSize * tag.length + padding * 2
-      // const h = fontSize + padding * 2
-
-      // // 底色
-      // ctx.beginPath()
-      // ctx.fillStyle = style.dotColor
-      // ctx.rect(x, y - h - padding, w, h)
-      // ctx.fill()
-      // ctx.closePath()
-
-      // // 文字
-      // ctx.beginPath()
-      // ctx.fillStyle = "#fff"
-      // ctx.font = `${Math.floor(fontSize)}px/1 Arial`
-      // ctx.fillText(tag, x + padding, y - padding * 2.5)
-      // ctx.closePath()
+			css(tagNode, {
+				position: "absolute",
+				left: x + "px",
+				top: y + "px",
+				display: "inline-block",
+				width: 200 + "px"
+			})
+			this.tagContainer.appendChild(tagNode)
     }
-    ctx.font = `${Math.floor(this.fontSize)}px/1 Arial`
-
+    // ctx.font = `${Math.floor(this.fontSize)}px/1 Arial`
   }
 	private renderCache(){
 		if(!this.cache) return

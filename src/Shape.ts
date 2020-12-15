@@ -1,7 +1,8 @@
 import { EventReceiver } from "./EventReceiver"
 import { Points, TColor, Point } from "./structure"
 import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
-import merge from "lodash/merge"
+import { css, create } from "./element"
+import _ from "./lodash"
 import { IDG } from "./IDGenerator"
 
 export enum ShapeType {
@@ -112,22 +113,23 @@ export class Shape extends EventReceiver {
     this.status = disabled ? "disabled" : active ? "active" : "normal"
     this.positions = positions
     this.data = data || null
-    this.style = merge(defaultStyle, style)
+    this.style = _.merge(defaultStyle, style)
     this.closed = closed
     this.visible = visible
     this.insert = insert
     this.showTag = showTag
     this.tag = tag
 
-    const div = document.createElement("div")
-    const wrap = document.createElement("div")
+    const div = create("div")
+    const wrap = create("div")
     wrap.innerHTML = this.tag
-    wrap.style.background = "red"
-    wrap.style.color = "#fff"
-    wrap.style.position = "absolute"
-    wrap.style.left = 5 + "px"
-    wrap.style.bottom = 5 + "px"
-    wrap.style.display = "inline-block"
+    css(wrap, {
+      background: this.getStyle().dotColor,
+      position: "absolute",
+      bottom: 5 + "px",
+      display: "inline-block",
+      color: "#fff"
+    })
     div.appendChild(wrap)
     this.tagNode = div
 
