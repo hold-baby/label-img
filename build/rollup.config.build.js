@@ -43,11 +43,18 @@ export default [
   },
   {
     input: input.main,
-    output: {
-      name,
-      file: pkg.build,
-      format: 'umd',
-    },
+    output: [
+      {
+        name,
+        file: pkg.build,
+        format: 'umd',
+      },
+      {
+        name,
+        file: pkg.eg,
+        format: 'umd',
+      }
+    ],
     plugins: [
       json(),
       resolve(),

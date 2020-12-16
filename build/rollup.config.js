@@ -3,7 +3,6 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import pkg from '../package.json';
 import typescript from '@rollup/plugin-typescript'
-import { terser } from "rollup-plugin-terser";
 import { name, input } from "./config"
 
 export default {
@@ -20,6 +19,5 @@ export default {
 			extensions: ['.js', '.ts'],
 		}),
 		typescript(),
-		terser()
 	]
 }

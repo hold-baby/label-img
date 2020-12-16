@@ -4,6 +4,7 @@ import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
 import { css, create } from "./element"
 import _ from "./lodash"
 import { IDG } from "./IDGenerator"
+import { Dictionary } from "lodash"
 
 export enum ShapeType {
   "Polygon" = "Polygon",
@@ -41,7 +42,7 @@ export const active: IShapeStyle = {
   fillColor: "#c30",
 }
 export const disabled: IShapeStyle = {
-  dotColor: "#ccc",
+  dotColor: "#666",
   dotRadius: 3,
   lineColor: "transparent",
   lineWidth: 0,
@@ -84,7 +85,7 @@ export class Shape extends EventReceiver {
   private visible: boolean
   private insert: boolean
   private showTag: boolean
-  public tagNode: HTMLDivElement
+  private nodes: Dictionary<HTMLDivElement>
   public tag: string
   public max: number | undefined
   public data: any
@@ -120,19 +121,22 @@ export class Shape extends EventReceiver {
     this.showTag = showTag
     this.tag = tag
 
-    const div = create("div")
-    const wrap = create("div")
-    wrap.innerHTML = this.tag
-    css(wrap, {
-      background: this.getStyle().dotColor,
+    const tagNode = create("div")
+    const tagBody = create("div")
+    this.nodes = {
+      tagNode,
+      tagBody
+    }
+    tagBody.innerHTML = this.tag
+    css(tagNode, {
       position: "absolute",
-      bottom: 5 + "px",
       display: "inline-block",
-      color: "#fff"
+      width: 200 + "px",
+      transformOrigin: "left"
     })
-    div.appendChild(wrap)
-    this.tagNode = div
-
+    this.tagBodyStyle()
+    tagNode.appendChild(tagBody)
+    
     this.max = max
     if(this.type === ShapeType.Rect){
       this.insert = false
@@ -286,6 +290,7 @@ export class Shape extends EventReceiver {
   }
   disabled(){
     this.status = "disabled"
+    this.tagBodyStyle()
     return this
   }
   isDisabled(){
@@ -293,9 +298,14 @@ export class Shape extends EventReceiver {
   }
   normal(){
     this.status = "normal"
+    this.tagBodyStyle()
     return this
   }
   hidden(){
+    this.visible = false
+    return this
+  }
+  show(){
     this.visible = true
     return this
   }
@@ -306,13 +316,28 @@ export class Shape extends EventReceiver {
     return this.insert
   }
   isShowTag(){
-    return this.showTag
+    return this.showTag && !!this.tag && this.isClose()
   }
   tagShow(status?: boolean){
     this.showTag = typeof status === "undefined" ? !this.showTag : !!status
+    this.tagBodyStyle()
   }
   setTag(tag: string){
     this.tag = tag
+  }
+  tagNode(){
+    return this.nodes.tagNode
+  }
+  private tagBodyStyle = () => {
+    const tagBody = this.nodes.tagBody
+    css(tagBody, {
+      background: this.getStyle().dotColor,
+      position: "absolute",
+      bottom: 5 + "px",
+      display: "inline-block",
+      color: "#fff",
+      padding: `0 4px`
+    })
   }
 
   updatePositions(positions: Points){

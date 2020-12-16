@@ -42,14 +42,10 @@ labeler.register("polygon", {
 labeler.register("rect", {
   type: "Rect"
 })
-
-const shape1 = new Shape({
-  name: "polygon",
-  type: "Polygon",
-  positions: [[50,50],[100,100], [200,100]],
-  tag: "polygon",
+labeler.register("black-dog", {
+  type: "Rect",
+  tag: "black dog"
 })
-
 dom.file.on("change", (e) => {
   const file = e.target.files[0]
   labeler.load(file)
@@ -63,8 +59,20 @@ btn.load.on("click", () => {
   if(!url) return
   labeler.load(url)
 })
+const blackDogs = [
+  [[620,244],[799,244],[799,441],[620,441]],
+  [[265,26],[420,26],[420,436],[265,436]]
+]
 btn.source.on("click", () => {
-  labeler.load("./dog.jpg")
+  labeler.load("./dog.jpg").then(() => {
+    blackDogs.forEach((positions) => {
+      const shape = labeler.createShape("black-dog", {
+        positions
+      })
+      labeler.addShape(shape)
+    })
+    renderList(labeler.getShapeList())
+  })
 })
 btn.polygon.on("click", () => {
   labeler.label("polygon")
@@ -84,6 +92,7 @@ btn.tag.on("click", () => {
 btn.data.on("click", () => {
   const list = labeler.getShapeList()
   console.log(list);
+  alert(JSON.stringify(list))
 })
 const className = {
   item: "shape-item",
@@ -91,6 +100,8 @@ const className = {
   disable: "disable",
   normal: "normal",
   tag: "tag",
+  hidden: "hidden",
+  show: "show"
 }
 dom.list.on("click", (e) => {
   const tartget = $(e.target)
@@ -110,15 +121,26 @@ dom.list.on("click", (e) => {
   if(tartget.hasClass(className.tag)){
     shape.tagShow()
   }
+  if(tartget.hasClass(className.hidden)){
+    shape.hidden()
+  }
+  if(tartget.hasClass(className.show)){
+    shape.show()
+  }
   const list = labeler.getShapeList()
   renderList(list, idx)
   labeler.render()
 })
 
+console.log(labeler)
+
 function renderCtrl(shape){
+  const statusBtn = shape.isDisabled() ? "normal" : "disable"
+  const hiddenBtn = shape.isHidden() ? "show" : "hidden"
   return (
     `<div class="ctrl">
-      ${shape.isDisabled() ? `<button class="normal">normal</button>` : `<button class="disable">disable</button>`}
+      <button class="${hiddenBtn}">${hiddenBtn}</button>
+      <button class="${statusBtn}">${statusBtn}</button>
       <button class="rm">delete</button>
       <button class="tag">tag</button>
     </div>`

@@ -39,7 +39,6 @@ export class Platform extends EventReceiver {
 	private continuity: boolean
 	private isGuideLine: boolean
 	private isTagShow: boolean
-	private renderLocker: boolean
   constructor(container: HTMLDivElement, options?: AntOptions){
 		super()
 		this.container = container
@@ -68,7 +67,6 @@ export class Platform extends EventReceiver {
 		this.continuity = false
 		this.isGuideLine = false
 		this.isTagShow = true
-		this.renderLocker = false
 		this.offset = [0, 0]
 
 		this.cache = null
@@ -104,6 +102,7 @@ export class Platform extends EventReceiver {
 		antMouseEvents.forEach((type) => {
 			const Image = this.Image
 			this.canvas.addEventListener(type, (e) => {
+				e.preventDefault()
 				const offset = [e.offsetX, e.offsetY] as Point
 				const isOnImage = isInSide(offset, Image.getPosition(this.scale))
 				const isPropagation = true
@@ -630,10 +629,15 @@ export class Platform extends EventReceiver {
 		ctx.setLineDash([5])
 		ctx.stroke()
 		ctx.closePath()
+		ctx.setLineDash([0])
 	}
 	private renderShape(shape: Shape){
 		const Image = this.Image
     if(shape.isHidden()){
+			const tagNode = shape.tagNode()
+			if(this.tagContainer.contains(tagNode)){
+				this.tagContainer.removeChild(tagNode)
+			}
       return
     }
     const ctx = this.ctx
@@ -696,20 +700,24 @@ export class Platform extends EventReceiver {
       ctx.closePath()
     })
 		// 标签
-    if(this.isTagShow && shape.isShowTag() && shape.tag && shape.isClose()){
+    if(this.isTagShow && shape.isShowTag()){
       const [x, y] = rp[0]
 			const scale = this.scale
-			const tagNode = shape.tagNode
+			const tagNode = shape.tagNode()
 			css(tagNode, {
-				position: "absolute",
-				left: x + "px",
-				top: y + "px",
-				display: "inline-block",
-				width: 200 + "px"
+				left: `${x}px`,
+				top: `${y}px`,
+				transform: `scale(${scale})`
 			})
-			this.tagContainer.appendChild(tagNode)
-    }
-    // ctx.font = `${Math.floor(this.fontSize)}px/1 Arial`
+			if(!this.tagContainer.contains(tagNode)){
+				this.tagContainer.appendChild(tagNode)
+			}
+    }else{
+			const tagNode = shape.tagNode()
+			if(this.tagContainer.contains(tagNode)){
+				this.tagContainer.removeChild(tagNode)
+			}
+		}
   }
 	private renderCache(){
 		if(!this.cache) return
@@ -739,13 +747,8 @@ export class Platform extends EventReceiver {
 		if(this.isGuideLine){
 			this.renderGuideLine()
 		}
-		this.renderLocker = false
 	}
-	render(){
-		if(this.renderLocker) return
-		this.renderLocker = true
-		setTimeout(() => {
-			this.forceRender()
-		}, 17)
-	}
+	public render = _.throttle(() => {
+		this.forceRender()
+	}, 17)
 }

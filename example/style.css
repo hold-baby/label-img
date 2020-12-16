@@ -28,13 +28,6 @@
   border-bottom: 1px solid #f0f0f0;
   cursor: pointer;
 }
-.shape-item .name{
-  display: inline-block;
-  width: 200px;
-}
-.shape-item .ctrl{
-  display: inline-block;
-}
 .detail{
   font-size: 12px;
   color: #999;
