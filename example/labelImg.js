@@ -1,8 +1,8 @@
 /**!
- * label-img - v0.0.41
+ * label-img - v0.0.43
  * image annotation tool with javascript
  *
- * 2020-12-16 18:19:22
+ * 2020-12-16 18:24:08
  * MIT (c) hold-baby
 */
 !function(t,e){"object"==typeof exports&&"undefined"!=typeof module?module.exports=e():"function"==typeof define&&define.amd?define(e):(t="undefined"!=typeof globalThis?globalThis:t||self).LabelImg=e()}(this,(function(){"use strict";
