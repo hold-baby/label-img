@@ -519,8 +519,12 @@ export class Platform extends EventReceiver {
 		this.render()
 	}
 	remove(input: Shape | string){
-		const [idx] = this.findShapeIndex(input)
+		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return
+		const tagNode = (shape as Shape).tagNode()
+		if(this.tagContainer.contains(tagNode)){
+			this.tagContainer.removeChild(tagNode)
+		}
 		this.shapeList.splice(idx, 1)
 		this.render()
 		this.eventHook.trigger("update")
