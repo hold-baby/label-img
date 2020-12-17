@@ -60,8 +60,8 @@ export interface IShapeOptions {
   name: string;
   positions: Points;
   data?: any;
-  tag?: string,
-  showTag?: boolean,
+  tag?: string;
+  showTag?: boolean;
   closed?: boolean;
   visible?: boolean;
   active?: boolean;

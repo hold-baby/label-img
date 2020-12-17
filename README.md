@@ -1,4 +1,126 @@
-# label-img
+# 图片标注工具
 image annotation tool with javascript
+>本工具专注图形标注,不局限某种方式与格式,只输出关键点位信息,不与业务逻辑耦,并提供方法自定义展示方式与实体属性填写的实现
 
+### 示例
 [demo](https://hold-baby.github.io/label-img/example/)
+
+### 安装
+```
+npm install label-img
+```
+or
+```html
+  <script src="./labelImg.js"></script>
+```
+### 使用
+```javascript
+/**
+ * 生成实例
+ * @element   挂载节点
+ * @options   配置 非必填
+ */
+const labeler = new LabelImg(element, {
+  width: 800,
+  height: 600,
+	bgColor: `#000`, // 背景色
+})
+// 注册图形
+labeler.register("polygon", {
+  type: "Polygon",
+  tag: "多边形",
+})
+// 加载图片
+labeler.load(url)
+// 选择标注多边形
+labeler.label("polygon")
+```
+### 图形
+```js
+const { Shape } from "label-img"
+// or
+const Shape = LabelImg.Shape
+
+// IShapeOptions
+const shapeOptions = {
+  id, // 图形唯一id 可自动生成
+  type, // 图形类型 必填 Polygon | Ract
+  name, // 图形名称
+  positions, // 坐标集合 ex: [[0, 0], [100, 100]]
+  data, // 自定义数据 可用于存储实体属性等内容
+  tag, // 展示在图形上的说明标签
+  showTag, // 是否展示标签
+  closed, // 是否闭合
+  visible, // 是否可见
+  active, // 是否被选中
+  disabled, // 是否禁用
+  /**
+   * { normal, active, disabled }
+   * {
+   *  normal: {
+   *    dotColor: "red", // 坐标点颜色
+   *    dotRadius: 3, // 坐标点大小
+   *    lineColor: "#c30", // 连线颜色
+   *    lineWidth: 2, // 连线宽度
+   *    fillColor: "pink", // 填充色
+   *  }
+   * }
+   */
+  style, // 图形样式
+}
+const shape = new Shape(shapeOptions)
+// or
+/**
+ * @name    图形注册名
+ * @options 配置  Partial<Omit<IShapeOptions, "type">>
+ * 
+ */
+const shape = LabelImg.createShape(name, options)
+// 添加到画布中
+labeler.addShape(shape)
+```
+### 注册图形
+```js
+/**
+ * @name      图形名称  Polygon: 多边形, Ract: 矩形
+ * @options   图形配置  Omit<IShapeOptions, "data" | "positions">
+ */
+labeler.register(type, options)
+```
+### 加载图片
+```js
+/**
+ * @param   url || file
+ * return   Promise
+ */
+labeler.load(param)
+```
+### labeler API
+```js
+isRegister(name)  // 判断是否注册
+label(name)  // 选择标注类型
+cancel()  // 取消当前标注
+addShape(shape)  // 添加图形
+remove(shape || id)  // 删除图形
+setActive(shape)  // 选中某一图形
+getShapeList()  // 获取图形列表
+guideLine(status?: boolean)  // 是否启用参照线
+tagShow(status?: boolean)  // 是否启用标签
+render()  // 渲染画面
+forceRender()  // 强制渲染
+```
+### Shape API
+```js
+getPositions()  // 获取坐标点集合
+updatePositions(positions) // 更新坐标信息
+isActive()  // 是否被选中
+isClose()  // 是否闭合
+isDisabled()  // 是否禁用
+disabled()  // 禁用
+isHidden()  // 是否隐藏
+hidden()  // 隐藏
+show()  // 显示
+isShowTag()  // 是否展示标签
+tagShow(status?: boolean) // 控制标签展示
+setTag(val)  // 标签内容
+```
