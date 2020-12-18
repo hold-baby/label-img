@@ -3,6 +3,7 @@ import commonjs from '@rollup/plugin-commonjs';
 import json from '@rollup/plugin-json';
 import pkg from '../package.json';
 import typescript from '@rollup/plugin-typescript'
+import browsersync from 'rollup-plugin-browsersync'
 import { name, input } from "./config"
 
 export default {
@@ -19,5 +20,10 @@ export default {
 			extensions: ['.js', '.ts'],
 		}),
 		typescript(),
+		browsersync({
+			server: "example",
+			port: 9001,
+			open: true
+		})
 	]
 }

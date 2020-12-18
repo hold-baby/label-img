@@ -43,7 +43,7 @@ export const active: IShapeStyle = {
 }
 export const disabled: IShapeStyle = {
   dotColor: "#666",
-  dotRadius: 3,
+  dotRadius: 0,
   lineColor: "transparent",
   lineWidth: 0,
   fillColor: "#666",
