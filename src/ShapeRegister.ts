@@ -9,19 +9,19 @@ export class ShapeRegister {
   constructor(){
     this.shapeMap = {}
   }
-  add(name: string, shapeCfg: IShapeCfg){
-    if(!this.shapeMap[name]){
-      shapeCfg.name = name
-      this.shapeMap[name] = shapeCfg
+  add(rid: string, shapeCfg: Omit<IShapeCfg, "registerID">){
+    if(!this.shapeMap[rid]){
+      (shapeCfg as IShapeCfg).registerID = rid
+      this.shapeMap[rid] = shapeCfg
     }
   }
-  get(name: string){
-    if(this.shapeMap[name]){
-      return Object.assign({}, this.shapeMap[name])
+  get(rid: string){
+    if(this.shapeMap[rid]){
+      return Object.assign({}, this.shapeMap[rid])
     }
     throw "图形未注册"
   }
-  is(name: string){
-    return !!this.shapeMap[name]
+  is(rid: string){
+    return !!this.shapeMap[rid]
   }
 }

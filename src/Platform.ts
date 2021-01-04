@@ -16,11 +16,11 @@ const dfOptions = {
 	bgColor: `#000`,
 }
 
-export type AntOptions = typeof dfOptions
+export type LabelImgOptions = typeof dfOptions
 
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
-  private options: AntOptions
+  private options: LabelImgOptions
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 	private Image: Image
@@ -34,19 +34,19 @@ export class Platform extends EventReceiver {
 	private activeShape: Shape | null
 	private shapeList: Shape[]
 
-	private eventHook: EventHook
+	public eventHook: EventHook
 
 	private continuity: boolean
 	private isGuideLine: boolean
 	private isTagShow: boolean
-  constructor(container: HTMLDivElement, options?: AntOptions){
+  constructor(container: HTMLDivElement, options?: Partial<LabelImgOptions>){
 		super()
 		this.container = container
 		css(this.container, {
 			position: "relative",
 			overflow: "hidden"
 		})
-		this.options = options || dfOptions
+		this.options = Object.assign({}, options, dfOptions)
 		this.eventHook = new EventHook()
 
 		const canvas = create("canvas")
@@ -305,7 +305,7 @@ export class Platform extends EventReceiver {
 						isClose = true
 					}
 					if(isClose){
-						const shape = this.createShape(this.drawing.name, {
+						const shape = this.createShape(this.drawing.registerID, {
 							positions: cache.positions,
 							closed: false,
 						})
@@ -327,7 +327,7 @@ export class Platform extends EventReceiver {
 				}else if(this.drawing.type === ShapeType.Rect){
 					positions = [point, point, point, point]
 				}
-				const shape = this.createShape(this.drawing.name, {
+				const shape = this.createShape(this.drawing.registerID, {
 					positions,
 					closed: false,
 					id: "cache"
@@ -359,7 +359,7 @@ export class Platform extends EventReceiver {
 			start = [0, 0]
 			if(shapeType === ShapeType.Rect && cache && this.drawing){
 				const positions = cache.getPositions()
-				const shape = this.createShape(this.drawing.name, {
+				const shape = this.createShape(this.drawing.registerID, {
 					positions
 				})
 				shape.close()
@@ -494,21 +494,28 @@ export class Platform extends EventReceiver {
 			})
 		})
 	}
-	register(name: string, options: IShapeCfg){
-    this.shapeRegister.add(name, options)
+	register(rid: string, options: Omit<IShapeCfg, "registerID">){
+    this.shapeRegister.add(rid, options)
 	}
-	createShape(name: string, options?: IShapeContent){
-		const opts = this.shapeRegister.get(name)
+	createShape(id: string, options?: IShapeContent){
+		const opts = this.shapeRegister.get(id)
 		return new Shape(Object.assign(opts, options))
 	}
-	isRegister(name: string){
-		return this.shapeRegister.is(name)
+	isRegister(id: string){
+		return this.shapeRegister.is(id)
 	}
-	label(name: string, continuity?: boolean){
-		this.drawing = this.shapeRegister.get(name)
+	label(id: string, continuity?: boolean){
+		const drawing = this.shapeRegister.get(id)
+		if((this.drawing && drawing && id !== this.drawing.id) || (!this.drawing && drawing)){
+			this.drawing = drawing
+			this.eventHook.trigger("labelType")
+		}
 		if(!_.isUndefined(continuity)){
 			this.continuity = !!continuity
 		}
+	}
+	public getDrawing = () => {
+		return this.drawing
 	}
 	addShape(shape: Shape, idx?: number){
 		if(typeof idx === "number"){
@@ -538,6 +545,7 @@ export class Platform extends EventReceiver {
 	public cancel(){
 		this.drawing = null
 		this.continuity = false
+		this.eventHook.trigger("labelType")
     if(this.cache){
       this.cache = null
       this.render()
@@ -554,7 +562,7 @@ export class Platform extends EventReceiver {
 			this.shapeList.push(shape as Shape)
 		}
 	}
-	private findShapeIndex(input: InputShapeOrID): [null | number, null | Shape]{
+	private findShapeIndex = (input: InputShapeOrID): [null | number, null | Shape] => {
 		let idx: null | number = null
 		if(input instanceof Shape){
 			const shape = input

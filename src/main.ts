@@ -1,10 +1,10 @@
-import { Platform, AntOptions } from "./Platform"
+import { Platform, LabelImgOptions } from "./Platform"
 import { Shape } from "./Shape"
 import { IDGenerator } from "./IDGenerator"
 import * as utils from "./utils"
 
 export default class LabelImg extends Platform {
-	constructor(container: HTMLDivElement, options?: AntOptions){
+	constructor(container: HTMLDivElement, options?: Partial<LabelImgOptions>){
 		super(container, options)
 	}
 	static Shape = Shape

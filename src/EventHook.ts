@@ -2,7 +2,9 @@ import { Shape } from "./Shape"
 enum EventHooks {
   "select" = "select",
   "create" = "create",
-  "update" = "update"
+  "update" = "update",
+  "labelType" = "labelType",
+  "initData" = "initData"
 }
 type TEventHooks = keyof typeof EventHooks
 type Fn = (shape?: Shape) => void

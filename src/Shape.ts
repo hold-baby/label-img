@@ -57,6 +57,7 @@ const defaultStyle: IShapeOptionsStyle = {
 export interface IShapeOptions {
   id?: string;
   type: TShapeType;
+  registerID: string;
   name: string;
   positions: Points;
   data?: any;
@@ -78,11 +79,12 @@ export class Shape extends EventReceiver {
   readonly id: string
   readonly type: TShapeType
   readonly name: string
+  readonly registerID: string
   public positions: Points
   public style: IShapeOptionsStyle
-  private status: TShapeStatus
+  public status: TShapeStatus
   private closed: boolean
-  private visible: boolean
+  public visible: boolean
   private insert: boolean
   private showTag: boolean
   private nodes: Dictionary<HTMLDivElement>
@@ -94,6 +96,7 @@ export class Shape extends EventReceiver {
     const {
       id = IDG.getID(),
       type, 
+      registerID,
       name, 
       positions, 
       data,
@@ -104,13 +107,14 @@ export class Shape extends EventReceiver {
       visible = true,
       showTag = true,
       max,
-      tag = "",
+      tag = name,
       style = {}
     } = options
 
     this.id = id
     this.type = type
     this.name = name
+    this.registerID = registerID
     this.status = disabled ? "disabled" : active ? "active" : "normal"
     this.positions = positions
     this.data = data || null

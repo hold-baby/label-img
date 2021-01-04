@@ -10,7 +10,7 @@ export class IDGenerator {
   constructor(props?: IIDGenerator){
     const {
       len = 8,
-      start = 0
+      start = 1
     } = props || {}
     count = start
     this.len = len
