@@ -17,20 +17,20 @@ const dom = {
   continuity: $("#continuity")
 }
 
-const labeler = new LabelImg(ele[0])
-const hook = labeler.eventHook
+const lb = new LabelImg(ele[0])
+const hook = lb.eventHook
 hook.on("select", (s) => {
-  const list = labeler.getShapeList()
-  const target = labeler.findShapeIndex(s)
+  const list = lb.getShapeList()
+  const target = lb.findShapeIndex(s)
   renderList(list, target[0])
 })
 hook.on("create", () => {
-  const list = labeler.getShapeList()
+  const list = lb.getShapeList()
   renderList(list)
 })
 const Shape = LabelImg.Shape
 
-labeler.register("polygon", {
+lb.register("polygon", {
   type: "Polygon",
   style: {
     normal: {
@@ -39,58 +39,58 @@ labeler.register("polygon", {
   },
   tag: "多边形",
 })
-labeler.register("rect", {
+lb.register("rect", {
   type: "Rect"
 })
-labeler.register("black-dog", {
+lb.register("black-dog", {
   type: "Rect",
   tag: "black dog"
 })
 dom.file.on("change", (e) => {
   const file = e.target.files[0]
-  labeler.load(file)
+  lb.load(file)
 })
 dom.continuity.on("change", (e) => {
   const continuity = e.target.checked
-  labeler.setContinuity(continuity)
+  lb.setContinuity(continuity)
 })
 btn.load.on("click", () => {
   const url = dom.addr.val()
   if(!url) return
-  labeler.load(url)
+  lb.load(url)
 })
 const blackDogs = [
   [[620,244],[799,244],[799,441],[620,441]],
   [[265,26],[420,26],[420,436],[265,436]]
 ]
 btn.source.on("click", () => {
-  labeler.load("./dog.jpg").then(() => {
+  lb.load("./dog.jpg").then(() => {
     blackDogs.forEach((positions) => {
-      const shape = labeler.createShape("black-dog", {
+      const shape = lb.createShape("black-dog", {
         positions
       })
-      labeler.addShape(shape)
+      lb.addShape(shape)
     })
-    renderList(labeler.getShapeList())
+    renderList(lb.getShapeList())
   })
 })
 btn.polygon.on("click", () => {
-  labeler.label("polygon")
+  lb.label("polygon")
 })
 btn.rect.on("click", () => {
-  labeler.label("rect")
+  lb.label("rect")
 })
 btn.cancel.on("click", () => {
-  labeler.cancel()
+  lb.cancel()
 })
 btn.guide.on("click", () => {
-  labeler.guideLine()
+  lb.guideLine()
 })
 btn.tag.on("click", () => {
-  labeler.tagShow()
+  lb.tagShow()
 })
 btn.data.on("click", () => {
-  const list = labeler.getShapeList()
+  const list = lb.getShapeList()
   console.log(list);
   alert(JSON.stringify(list))
 })
@@ -108,9 +108,9 @@ dom.list.on("click", (e) => {
   const item = tartget.hasClass(className.item) ? tartget : tartget.parents(`.${className.item}`)
   if(!item.length) return
   const idx = item.data("index")
-  const shape = labeler.getShapeList()[idx]
+  const shape = lb.getShapeList()[idx]
   if(tartget.hasClass(className.rm)){
-    labeler.remove(shape)
+    lb.remove(shape)
   }
   if(tartget.hasClass(className.disable)){
     shape.disabled()
@@ -127,13 +127,11 @@ dom.list.on("click", (e) => {
   if(tartget.hasClass(className.show)){
     shape.show()
   }
-  const list = labeler.getShapeList()
+  const list = lb.getShapeList()
   renderList(list, idx)
-  labeler.render()
+  lb.render()
 })
-
-console.log(labeler)
-
+console.log(lb)
 function renderCtrl(shape){
   const statusBtn = shape.isDisabled() ? "normal" : "disable"
   const hiddenBtn = shape.isHidden() ? "show" : "hidden"
