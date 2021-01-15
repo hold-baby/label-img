@@ -157,7 +157,7 @@ function renderList(shapes, index){
   const html = shapes.map((shape, idx) => (
     `<div class="shape-item ${index === idx ? "shape-active" : ""}" data-index="${idx}">
       <div class="name">
-        ${shape.name}-${shape.id}
+        ${shape.registerID}-${shape.id}
       </div>
       ${renderCtrl(shape)}
       ${renderDetail(shape)}

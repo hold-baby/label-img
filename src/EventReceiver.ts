@@ -28,8 +28,8 @@ export const antLvs = Object.keys(AntLv) as IAntLv[]
 
 export interface IAnte {
   offset: Point;
-  isOnImage: boolean;
-  isOnShape: boolean;
+  // isOnImage: boolean;
+  // isOnShape: boolean;
   stopPropagation: () => void;
   isPropagation: boolean;
   getTargetShape: () => [Shape | null, number];

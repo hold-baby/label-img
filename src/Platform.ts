@@ -30,6 +30,12 @@ const displayCursor = (cursor: ICursor) => {
 }
 
 let isMouseDown = false
+let isOnShape = false
+let isOnImage = false
+const outSideFn = () => {
+	isMouseDown = false;
+	isOnShape = false;
+}
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
   private options: LabelImgOptions
@@ -131,39 +137,53 @@ export class Platform extends EventReceiver {
 				this.canvas.addEventListener(type, (e) => {
 					e.preventDefault()
 					const offset = [e.offsetX, e.offsetY] as Point
-					const isOnImage = isInSide(offset, Image.getPosition(this.scale))
+					isOnImage = isInSide(offset, Image.getPosition(this.scale))
 					const isPropagation = true
 	
 					const getTargetShape = () => {
 						let target = null
 						let arcIndex = -1
-						let shapeLen = this.shapeList.length
-						while(shapeLen > 0){
-							const shape = this.shapeList[shapeLen - 1]
-							const shapeOffset = Image.getRelative(offset, this.scale)
-	
+						const shapeOffset = Image.getRelative(offset, this.scale)
+
+						if(this.activeShape){
+							const shape = this.activeShape
 							arcIndex = shape.isOnArc(shapeOffset)
 							if(arcIndex !== -1){
 								target = shape
-								break
 							}
 							const isInShape = shape.isOnShape(shapeOffset)
 							if(isInShape){
 								target = shape
-								break
 							}
-							shapeLen--
+						}
+						if(!target){
+							let shapeLen = this.shapeList.length
+							while(shapeLen > 0){
+								const shape = this.shapeList[shapeLen - 1]
+		
+								arcIndex = shape.isOnArc(shapeOffset)
+								if(arcIndex !== -1){
+									target = shape
+									break
+								}
+								const isInShape = shape.isOnShape(shapeOffset)
+								if(isInShape){
+									target = shape
+									break
+								}
+								shapeLen--
+							}
 						}
 						
 						return [target, arcIndex]
 					}
 					const [currentTarget] = getTargetShape()
-					const isOnShape = !!currentTarget
+					isOnShape = isMouseDown ? isOnShape : !!currentTarget
 					
 					const ante = {
 						offset,
-						isOnImage,
-						isOnShape,
+						// isOnImage,
+						// isOnShape,
 						isPropagation,
 						stopPropagation: () => {
 							ante.isPropagation = false
@@ -175,6 +195,15 @@ export class Platform extends EventReceiver {
 					switch(type){
 						case "mousedown":
 							isMouseDown = true
+							break
+						case "mouseup":
+							outSideFn()
+							break
+						case "mouseout":
+							outSideFn()
+							break
+						case "mouseleave":
+							outSideFn()
 							break
 					}
 	
@@ -197,7 +226,8 @@ export class Platform extends EventReceiver {
 								sLen--
 							}
 						})
-	
+
+						ev.ante.isPropagation = true
 						const iEvList = Image.getEventsByType(type, lv)
 						let iLen = iEvList.length
 						while(iLen){
@@ -211,6 +241,7 @@ export class Platform extends EventReceiver {
 							iLen--
 						}
 	
+						ev.ante.isPropagation = true
 						const pEvList = this.getEventsByType(type, lv)
 						let pLen = pEvList.length
 						while(pLen){
@@ -227,7 +258,6 @@ export class Platform extends EventReceiver {
 					})
 				})
 			})
-			
 			this.on("mousemove", ({ ante }) => {
 				if(!this.Image || isMouseDown) return
 				const { currentTarget: shape, offset } = ante
@@ -242,6 +272,8 @@ export class Platform extends EventReceiver {
 							this.cursor("pointer")
 						}
 					}
+				}else if(this.drawing){
+					this.cursor("point")
 				}else{
 					this.cursor("default")
 				}
@@ -258,7 +290,6 @@ export class Platform extends EventReceiver {
 			let start = [0, 0] // 点击在图片的起始位置
 			const Image = this.Image
 			Image.on("mousedown.bot", (e) => {
-				const { isOnShape } = e.ante
 				if(isOnShape || !Image.complate) return
 				const { offset } = e.ante
 				const [sx, sy] = offset // start x, start y
@@ -266,11 +297,10 @@ export class Platform extends EventReceiver {
 				start = [sx - x, sy - y]
 			})
 			Image.on("mousemove.bot", (e) => {
-				const { isOnImage, isOnShape, currentTarget } = e.ante
 				if(!isOnImage || !isMouseDown) return;
 				if(isOnShape) return;
 				if(this.drawing) return
-				
+
 				const { offset } = e.ante
 				const [ox, oy] = offset // offset x, offset y
 				const diff = [ox - start[0], oy - start[1]] as Point
@@ -280,7 +310,7 @@ export class Platform extends EventReceiver {
 				this.render()
 			})
 			const cancel = () => {
-				isMouseDown = false
+				outSideFn()
 				start = [0, 0]
 			}
 			Image.on("mouseup.bot", cancel)
@@ -329,11 +359,10 @@ export class Platform extends EventReceiver {
 			const Image = this.Image
 			this.on( "mousedown.top", (e) => {
 				if(!this.drawing || !Image.el) return
-				const { offset, isOnImage } = e.ante
-	
+				const { offset } = e.ante
+				
 				// 判断当前点击是否在img上
 				if(!isOnImage) return
-				
 				// 计算出当前点位在img的什么位置
 				let point = Image.getRelative(offset, this.scale)
 	
@@ -383,12 +412,11 @@ export class Platform extends EventReceiver {
 				}
 				this.render()
 			})
-	
 			this.on("mousemove.top", (e) => {
 				const cache = this.cache
 				const Image = this.Image
 				if(!this.drawing || !Image.complate || !cache) return
-				// if(this.isMoving || !this.isOnShape) return
+				
 				const shapeType = this.drawing.type
 	
 				if(shapeType === ShapeType.Rect){
@@ -427,7 +455,6 @@ export class Platform extends EventReceiver {
 			let start: Point = [0, 0]
 			let cp = [] as Points // cache postion
 			let arcIndex = -1
-			let isOnShape = false
 	
 			const select = (shape: Shape) => {
 				this.loseActive()
@@ -440,10 +467,7 @@ export class Platform extends EventReceiver {
 			this.on("mousedown.top", (e) => {
 				const { getTargetShape, offset } = e.ante
 				start = offset
-				
 				const [shape, index] = getTargetShape()
-				isOnShape = !!shape
-	
 				if(this.drawing) return
 				if(!shape) return
 				if(shape.isDisabled()){
@@ -473,7 +497,7 @@ export class Platform extends EventReceiver {
 				// }
 			})
 			this.on("mousemove.top", (e) => {
-				if(!isOnShape || !this.activeShape || this.drawing) return
+				if(!isOnShape || !this.activeShape || this.drawing || !isMouseDown) return
 				const { offsetX, offsetY } = e
 				const diff: Point = [offsetX - start[0], offsetY - start[1]]
 				let rp: Points = []
@@ -513,7 +537,6 @@ export class Platform extends EventReceiver {
 			this.on("mouseup.top", (e) => {
 				start = [0, 0]
 				arcIndex = -1
-				isOnShape = false
 			})
 		}
 		_initMouseEvent()
