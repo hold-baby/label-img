@@ -1,6 +1,6 @@
 {
   "name": "label-img",
-  "version": "0.0.47",
+  "version": "0.0.48",
   "description": "image annotation tool with javascript",
   "main": "dist/labelImg.js",
   "build": "dist/labelImg.min.js",
@@ -23,7 +23,8 @@
     "deep-learning",
     "image-annotation",
     "label-image",
-    "标注"
+    "标注",
+    "图片标注"
   ],
   "author": "hold-baby",
   "license": "MIT",
