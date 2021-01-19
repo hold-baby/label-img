@@ -1,8 +1,9 @@
 import { EventReceiver } from "./EventReceiver"
 import { Point, Points } from "./structure"
 
-const dfOrigin: Point = [0, 0]
+export type ImageLoadSource = File | string;
 
+const dfOrigin: Point = [0, 0]
 export class Image extends EventReceiver {
   private origin: Point
   public complate: boolean
@@ -12,8 +13,12 @@ export class Image extends EventReceiver {
     this.origin = origin || dfOrigin
     this.complate = false
     this.el = null
-  }
-  load(source: string | File){
+	}
+	/**
+	 * 加载图片
+	 * @param source ImageLoadSource 图片对象或图片路径
+	 */
+  load(source: ImageLoadSource){
     this.origin = dfOrigin
     return new Promise<HTMLImageElement>((resolve, reject) => {
       this.complate = false;
@@ -48,9 +53,17 @@ export class Image extends EventReceiver {
 			})
     })
 	}
+	/**
+	 * 获取图片对象
+	 * @return {HTMLImageElement | null}
+	 */
 	getEl(){
 		return this.el
 	}
+	/**
+	 * 获取图片宽高
+	 * @return [width: number, width: number]
+	 */
 	getSize(){
 		if(this.el){
 			const { width, height } = this.el
@@ -58,9 +71,17 @@ export class Image extends EventReceiver {
 		}
 		return dfOrigin
 	}
+	/**
+	 * 获取图片原点
+	 * @return Point
+	 */
 	getOrigin(){
-		return this.origin
+		return this.origin.slice()
 	}
+	/**
+	 * 获取图片缩放后的坐标点
+	 * @param scale number 缩放大小
+	 */
 	getPosition(scale = 1){
 		const [w, h] = this.getSize()
 		const sw = w * scale
@@ -74,7 +95,13 @@ export class Image extends EventReceiver {
 		]
 		return postion
 	}
-	getRelative(offset: Point, scale: number){
+	/**
+	 * 获取容器点位在图片上的坐标点位
+	 * @param offset Point 容器的坐标点位
+	 * @param scale 缩放大小
+	 * @return Point 
+	 */
+	toImagePoint(offset: Point, scale: number){
 		const [px, py] = offset
 		const [ox, oy] = this.origin
 		const point: Point = [
@@ -83,8 +110,13 @@ export class Image extends EventReceiver {
 		]
 		return point
 	}
-  // shape相对于图片的坐标转换成相对于画布的坐标
-	getRelativePositions(positions: Points, scale: number){
+	/**
+	 * 获取shape坐标点转换成画布的坐标
+	 * @param positions Points Shape的坐标点集合
+	 * @param scale 缩放大小
+	 * @return Points
+	 */
+	getShape2CanvasPoints(positions: Points, scale: number){
     const orgin = this.getOrigin()
     const [ox, oy] = orgin
     const rp: Points = positions.map(([sx, sy]) => {
@@ -94,6 +126,10 @@ export class Image extends EventReceiver {
     })
     return rp
 	}
+	/**
+	 * 设置图片的原点坐标
+	 * @param origin Point 原点坐标
+	 */
 	setOrigin(origin: Point){
 		this.origin = origin
 	}

@@ -84,10 +84,10 @@ btn.cancel.on("click", () => {
   lb.cancel()
 })
 btn.guide.on("click", () => {
-  lb.guideLine()
+  lb.setGuideLine()
 })
 btn.tag.on("click", () => {
-  lb.tagShow()
+  lb.setTagShow()
 })
 btn.data.on("click", () => {
   const list = lb.getShapeList()

@@ -104,8 +104,10 @@ addShape(shape)  // 添加图形
 remove(shape || id)  // 删除图形
 setActive(shape)  // 选中某一图形
 getShapeList()  // 获取图形列表
-guideLine(status?: boolean)  // 是否启用参照线
-tagShow(status?: boolean)  // 是否启用标签
+setGuideLine(status?: boolean)  // 是否启用参照线
+setTagShow(status?: boolean)  // 是否启用标签
+isTagShow()  // 获取是否启用标签
+setContinuity(status: boolean)  // 设置是否连续标注
 render()  // 渲染画面
 forceRender()  // 强制渲染
 ```

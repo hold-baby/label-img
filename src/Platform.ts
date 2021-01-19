@@ -1,33 +1,38 @@
 import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./EventReceiver"
-import { Image } from "./Image"
-import { Shape, ShapeType } from "./Shape"
+import { Image, ImageLoadSource } from "./Image"
+import { Shape, ShapeType, QueryShapeInput } from "./Shape"
 import { ShapeRegister, IShapeCfg, IShapeContent } from "./ShapeRegister"
 import { EventHook } from "./EventHook"
-import { isInSide, isInCircle, getRectPoints } from "./utils"
+import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
 import _ from "./lodash"
 import { css, create } from "./element"
 
-type InputShapeOrID = Shape | string;
-
-const dfOptions = {
+// 默认配置
+const defaulOptions = {
 	width: 800,
   height: 600,
 	bgColor: `#000`,
+	tagShow: true,
+	guideLine: false
 }
+export type LabelImgOptions = typeof defaulOptions
+let options: LabelImgOptions = Object.assign({}, defaulOptions)
 
-export type LabelImgOptions = typeof dfOptions
+// all-scroll
 enum Cursor {
 	"draggable" = "grab",
-	"default" = "all-scroll",
+	"default" = "",
 	"point" = "crosshair",
 	"drag" = "grabbing",
-	"pointer" = "pointer"
+	"pointer" = "pointer",
+	"disabled" = "disabled"
 }
 type ICursor = keyof typeof Cursor
 const displayCursor = (cursor: ICursor) => {
 	return Cursor[cursor]
 }
+let isInit = false
 
 let isMouseDown = false
 let isOnShape = false
@@ -36,9 +41,9 @@ const outSideFn = () => {
 	isMouseDown = false;
 	isOnShape = false;
 }
+
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
-  private options: LabelImgOptions
   private canvas: HTMLCanvasElement
   private ctx: CanvasRenderingContext2D
 	private Image: Image
@@ -55,23 +60,21 @@ export class Platform extends EventReceiver {
 	public eventHook: EventHook
 
 	private continuity: boolean
-	private isGuideLine: boolean
-	private isTagShow: boolean
-  constructor(container: HTMLDivElement, options?: Partial<LabelImgOptions>){
+  constructor(container: HTMLDivElement, LabelImgOptions?: Partial<LabelImgOptions>){
 		super()
 		this.container = container
 		css(this.container, {
 			position: "relative",
 			overflow: "hidden"
 		})
-		this.options = Object.assign({}, options, dfOptions)
+		options = Object.assign({}, LabelImgOptions, defaulOptions)
 		this.eventHook = new EventHook()
 
 		const canvas = create("canvas")
 		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
 
-		canvas.width = this.options.width
-		canvas.height = this.options.height
+		canvas.width = options.width
+		canvas.height = options.height
 		this.container.append(canvas)
 
 		// 标签容器
@@ -83,8 +86,6 @@ export class Platform extends EventReceiver {
 		this.ctx = ctx
 		this.scale = 1
 		this.continuity = false
-		this.isGuideLine = false
-		this.isTagShow = true
 		this.offset = [0, 0]
 
 		this.cache = null
@@ -107,30 +108,22 @@ export class Platform extends EventReceiver {
 		this.drawing = null
 		this.shapeList = []
 	}
+	/**
+	 * 重置图片大小与坐标点
+	 */
 	public resize = () => {
 		if(!this.Image || !this.Image.el) return
-		this.scale = this._getInitImgScale(this.Image.el)
+		this.scale = getAdaptImgScale(this.Image.el, options)
 		this.Image.setOrigin([0, 0])
 		this.render()
 	}
-	private _getInitImgScale = (img: HTMLImageElement) => {
-		const { width, height } = img
-		const options = this.options
-		let scale = 1
-		// 初始化图片缩放
-		if(options.width < width || options.height < height){
-			if(width > height){
-				// 长大于高
-				scale = options.width / width
-			}else{
-				// 高大于长
-				scale = options.height / height
-			}
-		}
-		return scale
-	}
+	/**
+	 * 初始化
+	 */
 	private _init = () => {
-		// 事件相关
+		if(isInit) return
+		isInit = true
+		// 初始化事件相关
 		const _initMouseEvent = () => {
 			antMouseEvents.forEach((type) => {
 				const Image = this.Image
@@ -143,7 +136,7 @@ export class Platform extends EventReceiver {
 					const getTargetShape = () => {
 						let target = null
 						let arcIndex = -1
-						const shapeOffset = Image.getRelative(offset, this.scale)
+						const shapeOffset = Image.toImagePoint(offset, this.scale)
 
 						if(this.activeShape){
 							const shape = this.activeShape
@@ -262,7 +255,7 @@ export class Platform extends EventReceiver {
 				if(!this.Image || isMouseDown) return
 				const { currentTarget: shape, offset } = ante
 				if(shape){
-					const shapeOffset = this.Image.getRelative(offset, this.scale)
+					const shapeOffset = this.Image.toImagePoint(offset, this.scale)
 					const arcIndex = shape.isOnArc(shapeOffset)
 					if(arcIndex !== -1){
 						this.cursor("point")
@@ -280,12 +273,14 @@ export class Platform extends EventReceiver {
 			})
 
 		}
+		// 初始化辅助线
 		const _initGuideLine = () => {
 			this.on("mousemove.top", (e) => {
 				this.offset = e.ante.offset
 				this.render()
 			})
 		}
+		// 初始化图片事件
 		const _initImageEvent = () => {
 			let start = [0, 0] // 点击在图片的起始位置
 			const Image = this.Image
@@ -354,6 +349,7 @@ export class Platform extends EventReceiver {
 				this.render()
 			})
 		}
+		// 初始化标注事件
 		const _initDrawEvent = () => {
 			let start: Point = [0, 0]
 			const Image = this.Image
@@ -364,7 +360,7 @@ export class Platform extends EventReceiver {
 				// 判断当前点击是否在img上
 				if(!isOnImage) return
 				// 计算出当前点位在img的什么位置
-				let point = Image.getRelative(offset, this.scale)
+				let point = Image.toImagePoint(offset, this.scale)
 	
 				start = point
 				const cache = this.cache
@@ -374,7 +370,7 @@ export class Platform extends EventReceiver {
 						if(cache.positions.length > 2){
 							const first = cache.positions[0]
 							const style = cache.getStyle()
-							isClose = isInCircle(point, first, style.dotRadius)
+							isClose = isInCircle(point, style.dotRadius, first,)
 						}
 						if(cache.max && cache.positions.length + 1 >= cache.max){
 							cache.positions.push(point)
@@ -421,7 +417,7 @@ export class Platform extends EventReceiver {
 	
 				if(shapeType === ShapeType.Rect){
 					const { offset } = e.ante
-					const end = Image.getRelative(offset, this.scale)
+					const end = Image.toImagePoint(offset, this.scale)
 					const positions: Points = getRectPoints(start, end)
 					cache.updatePositions(positions)
 					this.render()
@@ -450,7 +446,7 @@ export class Platform extends EventReceiver {
 			this.on("mouseout.top", () => {
 			}) 
 		}
-		// 绑定图形事件
+		// 初始化图形事件
 		const _initShapeEvent = () => {
 			let start: Point = [0, 0]
 			let cp = [] as Points // cache postion
@@ -545,13 +541,15 @@ export class Platform extends EventReceiver {
 		_initShapeEvent()
 		_initImageEvent()
 	}
-
-	// 加载
-	public load = (source: string | File) => {
+	/**
+	 * 加载图片
+	 * @param source ImageLoadSource 图片对象或图片路径
+	 */
+	public load = (source: ImageLoadSource) => {
 		this.reset()
 		return new Promise((c, e) => {
 			this.Image.load(source).then((img) => {
-        this.scale = this._getInitImgScale(img)
+        this.scale = getAdaptImgScale(img, options)
 				this.render()
 				c(img)
 			}, (err) => {
@@ -616,7 +614,7 @@ export class Platform extends EventReceiver {
     }
 	}
 	// 提升图形层级到最顶层
-  public orderShape = (input: InputShapeOrID, flag?: boolean) => {
+  public orderShape = (input: QueryShapeInput, flag?: boolean) => {
 		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return
 		this.shapeList.splice(idx, 1)
@@ -626,7 +624,7 @@ export class Platform extends EventReceiver {
 			this.shapeList.push(shape as Shape)
 		}
 	}
-	private findShapeIndex = (input: InputShapeOrID): [null | number, null | Shape] => {
+	private findShapeIndex = (input: QueryShapeInput): [null | number, null | Shape] => {
 		let idx: null | number = null
 		if(input instanceof Shape){
 			const shape = input
@@ -650,29 +648,52 @@ export class Platform extends EventReceiver {
       shape.setActive(false)
     })
 	}
-	public guideLine = (status?: boolean) => {
-		this.isGuideLine = _.isUndefined(status) ? !this.isGuideLine : !!status
+	/**
+	 * 设置辅助线显示
+	 * @param status boolean
+	 */
+	public setGuideLine = (status?: boolean) => {
+		options.guideLine = _.isUndefined(status) ? !options.guideLine : !!status
 		this.render()
 	}
-	public tagShow = (status?: boolean) => {
-		this.isTagShow = _.isUndefined(status) ? !this.isTagShow : !!status
+	/**
+	 * 获取是否允许标签显示
+	 * @return boolean
+	 */
+	public isTagShow = () => {
+		return options.tagShow
+	}
+	/**
+	 * 设置标签显示
+	 * @param status boolean 标签是否显示
+	 */
+	public setTagShow = (status?: boolean) => {
+		options.tagShow = _.isUndefined(status) ? !this.isTagShow : !!status
 		this.render()
 	}
+	/**
+	 * 设置是否连续标注
+	 * @param status boolean
+	 */
 	public setContinuity = (status: boolean) => {
 		this.continuity = !!status
 	}
+	/**
+	 * 设置手势
+	 * @param cursor ICursor 
+	 */
 	public cursor = _.throttle((cursor: ICursor) => {
 		this.canvas.style.cursor = displayCursor(cursor)
 	}, 100)
 	// 渲染相关
 	private _clearCanvas = () => {
 		const ctx = this.ctx
-		const { width, height } = this.options
+		const { width, height } = options
 		ctx.clearRect(0, 0, width, height)
 	}
 	private _renderBackground = () => {
 		const ctx = this.ctx
-		const { bgColor, width, height } = this.options
+		const { bgColor, width, height } = options
 		ctx.fillStyle = bgColor
 		ctx.fillRect(0, 0, width, height)
 	}
@@ -693,10 +714,10 @@ export class Platform extends EventReceiver {
 		ctx.beginPath()
 		ctx.strokeStyle = "red"
 		ctx.moveTo(0, y)
-		ctx.lineTo(this.options.width, y)
+		ctx.lineTo(options.width, y)
 
 		ctx.moveTo(x, 0)
-		ctx.lineTo(x, this.options.height)
+		ctx.lineTo(x, options.height)
 		ctx.setLineDash([5])
 		ctx.stroke()
 		ctx.closePath()
@@ -724,7 +745,7 @@ export class Platform extends EventReceiver {
       fillColor
     } = style
     
-    const rp = Image.getRelativePositions(positions, scale)
+    const rp = Image.getShape2CanvasPoints(positions, scale)
 
 		let before: null | Point = null;
 		// 线
@@ -771,7 +792,7 @@ export class Platform extends EventReceiver {
       ctx.closePath()
     })
 		// 标签
-    if(this.isTagShow && shape.isShowTag()){
+    if(this.isTagShow() && shape.isShowTag()){
       const [x, y] = rp[0]
 			const scale = this.scale
 			const tagNode = shape.tagNode()
@@ -817,7 +838,7 @@ export class Platform extends EventReceiver {
 		this._renderImage()
 		this._renderShapeList()
 		this._renderCache()
-		if(this.isGuideLine){
+		if(options.guideLine){
 			this._renderGuideLine()
 		}
 	}

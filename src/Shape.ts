@@ -54,8 +54,10 @@ const defaultStyle: IShapeOptionsStyle = {
   active,
   disabled
 }
+type ShapeID = string;
+export type QueryShapeInput = Shape | ShapeID;
 export interface IShapeOptions {
-  id?: string;
+  id?: ShapeID;
   type: TShapeType;
   registerID: string;
   name: string;
@@ -76,7 +78,7 @@ interface ILinePoint {
   position: Point;
 }
 export class Shape extends EventReceiver {
-  readonly id: string
+  readonly id: ShapeID
   readonly type: TShapeType
   readonly name: string
   readonly registerID: string
@@ -160,7 +162,7 @@ export class Shape extends EventReceiver {
     const positions = this.getPositions()
     const style = this.getStyle()
     const { dotRadius } = style
-    const arcIndex = positions.findIndex((point) => isInCircle(offset, point, dotRadius))
+    const arcIndex = positions.findIndex((point) => isInCircle(offset, dotRadius, point))
     return arcIndex
   }
   /**
