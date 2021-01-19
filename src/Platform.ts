@@ -1,7 +1,7 @@
 import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./EventReceiver"
 import { Image, ImageLoadSource } from "./Image"
 import { Shape, ShapeType, QueryShapeInput } from "./Shape"
-import { ShapeRegister, IShapeCfg, IShapeContent } from "./ShapeRegister"
+import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegister"
 import { EventHook } from "./EventHook"
 import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
@@ -107,6 +107,7 @@ export class Platform extends EventReceiver {
 		this.activeShape = null
 		this.drawing = null
 		this.shapeList = []
+		this.tagContainer.innerHTML = ""
 	}
 	/**
 	 * 重置图片大小与坐标点
@@ -167,7 +168,10 @@ export class Platform extends EventReceiver {
 								shapeLen--
 							}
 						}
-						
+						if(target && target.isHidden()){
+							target = null
+							arcIndex = -1
+						}
 						return [target, arcIndex]
 					}
 					const [currentTarget] = getTargetShape()
@@ -557,19 +561,39 @@ export class Platform extends EventReceiver {
 			})
 		})
 	}
-	public register = (rid: string, options: Omit<IShapeCfg, "registerID">) => {
+	/**
+	 * 注册图形
+	 * @param rid RegisterID 图形注册ID
+	 * @param options IShapeCfg 图形配置
+	 */
+	public register = (rid: RegisterID, options: Omit<IShapeCfg, "registerID">) => {
     this.shapeRegister.add(rid, options)
 	}
-	public createShape = (id: string, options?: IShapeContent) => {
-		const opts = this.shapeRegister.get(id)
+	/**
+	 * 以注册的图形模版创建图形
+	 * @param rid RegisterID 图形注册ID
+	 * @param options IShapeCfg 图形配置
+	 * @returns Shape
+	 */
+	public createShape = (rid: RegisterID, options?: IShapeContent) => {
+		const opts = this.shapeRegister.get(rid)
 		return new Shape(Object.assign(opts, options))
+	}/**
+	 * 判断图形是否注册
+	 * @param rid RegisterID 图形注册ID
+	 * @returns boolean
+	 */
+	public isRegister = (rid: RegisterID) => {
+		return this.shapeRegister.is(rid)
 	}
-	public isRegister = (id: string) => {
-		return this.shapeRegister.is(id)
-	}
-	public label = (id: string, continuity?: boolean) => {
-		const drawing = this.shapeRegister.get(id)
-		if((this.drawing && drawing && id !== this.drawing.id) || (!this.drawing && drawing)){
+	/**
+	 * 设置标注图形
+	 * @param rid RegisterID 图形注册ID
+	 * @param continuity boolean 是否连续标注
+	 */
+	public label = (rid: RegisterID, continuity?: boolean) => {
+		const drawing = this.shapeRegister.get(rid)
+		if((this.drawing && drawing && rid !== this.drawing.id) || (!this.drawing && drawing)){
 			this.drawing = drawing
 			this.eventHook.trigger("labelType")
 		}
@@ -577,9 +601,18 @@ export class Platform extends EventReceiver {
 			this.continuity = !!continuity
 		}
 	}
+	/**
+	 * 获取当前标注的图形配置
+	 * @returns IShapeOptions
+	 */
 	public getDrawing = () => {
 		return this.drawing
 	}
+	/**
+	 * 添加图形
+	 * @param shape Shape 待添加的图形
+	 * @param idx number 待插入的位置
+	 */
 	public addShape = (shape: Shape, idx?: number) => {
 		if(typeof idx === "number"){
 			this.shapeList.splice(idx, 0, shape)
@@ -588,7 +621,11 @@ export class Platform extends EventReceiver {
 		}
 		this.render()
 	}
-	public remove = (input: Shape | string) => {
+/**
+ * 删除图形
+ * @param input QueryShapeInput 待删除的图形或ID
+ */
+	public remove = (input: QueryShapeInput) => {
 		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return
 		const tagNode = (shape as Shape).tagNode()
@@ -599,11 +636,18 @@ export class Platform extends EventReceiver {
 		this.render()
 		this.eventHook.trigger("update")
 	}
+	/**
+	 * 设置选中的图形
+	 * @param shape Shape 选中的图形
+	 */
 	public setActive = (shape: Shape) => {
 		this.loseActive()
 		shape.setActive(true)
 		this.render()
 	}
+	/**
+	 * 取消标注状态
+	 */
 	public cancel = () => {
 		this.drawing = null
 		this.continuity = false
@@ -613,7 +657,11 @@ export class Platform extends EventReceiver {
       this.render()
     }
 	}
-	// 提升图形层级到最顶层
+	/**
+	 * 改变图形排序
+	 * @param input QueryShapeInput 图形对象或ID
+	 * @param flag boolean true: 添加到列表最前 false: 添加到列表最后
+	 */
   public orderShape = (input: QueryShapeInput, flag?: boolean) => {
 		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return
@@ -624,6 +672,11 @@ export class Platform extends EventReceiver {
 			this.shapeList.push(shape as Shape)
 		}
 	}
+	/**
+	 * 查询index与Shape对象
+	 * @param input QueryShapeInput 图形对象或ID
+	 * @returns [number | null, Shape | null]
+	 */
 	private findShapeIndex = (input: QueryShapeInput): [null | number, null | Shape] => {
 		let idx: null | number = null
 		if(input instanceof Shape){
@@ -636,13 +689,19 @@ export class Platform extends EventReceiver {
 		const shape = idx === null ? null : this.shapeList[idx]
 		return [idx, shape]
 	}
+	/**
+	 * 获取图形列表
+	 * @returns Shape[] 图形列表
+	 */
 	public getShapeList = () => {
 		return this.shapeList
 	}
 	public getShapeByName = (name: string) => {
 		return this.shapeList.filter((shape) => shape.name === name)
 	}
-	// 取消所有图形高亮状态
+	/**
+	 * 取消所有图形高亮状态
+	 */
   private loseActive = () => {
     this.shapeList.forEach((shape) => {
       shape.setActive(false)

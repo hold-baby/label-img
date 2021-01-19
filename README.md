@@ -97,7 +97,7 @@ labeler.load(param)
 ```
 ### labeler API
 ```js
-isRegister(name)  // 判断是否注册
+isRegister(id)  // 判断是否注册
 label(name)  // 选择标注类型
 cancel()  // 取消当前标注
 addShape(shape)  // 添加图形

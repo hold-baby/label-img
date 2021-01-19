@@ -87,7 +87,7 @@ btn.guide.on("click", () => {
   lb.setGuideLine()
 })
 btn.tag.on("click", () => {
-  lb.setTagShow()
+  lb.setTagShow(!lb.isTagShow())
 })
 btn.data.on("click", () => {
   const list = lb.getShapeList()
