@@ -5,6 +5,7 @@ import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegi
 import { EventHook } from "./EventHook"
 import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
+import { ICursor, displayCursor } from "./cursor"
 import _ from "./lodash"
 import { css, create } from "./element"
 
@@ -19,19 +20,6 @@ const defaulOptions = {
 export type LabelImgOptions = typeof defaulOptions
 let options: LabelImgOptions = Object.assign({}, defaulOptions)
 
-// all-scroll
-enum Cursor {
-	"draggable" = "grab",
-	"default" = "",
-	"point" = "crosshair",
-	"drag" = "grabbing",
-	"pointer" = "pointer",
-	"disabled" = "disabled"
-}
-type ICursor = keyof typeof Cursor
-const displayCursor = (cursor: ICursor) => {
-	return Cursor[cursor]
-}
 let isInit = false
 
 let isMouseDown = false
@@ -251,7 +239,6 @@ export class Platform extends EventReceiver {
 							callback(ev, other)
 							pLen--
 						}
-						
 					})
 				})
 			})
@@ -275,7 +262,6 @@ export class Platform extends EventReceiver {
 					this.cursor("default")
 				}
 			})
-
 		}
 		// 初始化辅助线
 		const _initGuideLine = () => {
@@ -357,7 +343,7 @@ export class Platform extends EventReceiver {
 		const _initDrawEvent = () => {
 			let start: Point = [0, 0]
 			const Image = this.Image
-			this.on( "mousedown.top", (e) => {
+			this.on("mousedown.top", (e) => {
 				if(!this.drawing || !Image.el) return
 				const { offset } = e.ante
 				
@@ -410,6 +396,8 @@ export class Platform extends EventReceiver {
 					})
 					this.cache = shape
 				}
+				console.log(this.cache);
+				
 				this.render()
 			})
 			this.on("mousemove.top", (e) => {
@@ -427,7 +415,6 @@ export class Platform extends EventReceiver {
 					this.render()
 				}
 			})
-	
 			this.on("mouseup.top", () => {
 				const cache = this.cache
 				const shapeType = this.drawing?.type

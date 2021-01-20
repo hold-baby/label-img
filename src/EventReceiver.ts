@@ -44,9 +44,21 @@ interface IAntEvent {
   callback: ICallback;
   target: any;
 }
-const eventMap: Map<IAntEvent[]> = {}
 export class EventReceiver {
+  public getEventList: (type: IAntMouseEvent) => IAntEvent[]
+  private addEvent: (type: string, antEvent: IAntEvent) => void;
   constructor(){
+    const eventMap: Map<IAntEvent[]> = {}
+    this.getEventList = (type: IAntMouseEvent) => {
+      return eventMap[type] || []
+    }
+    this.addEvent = (type: string, antEvent: IAntEvent) => {
+      if(eventMap[type]){
+        eventMap[type].push(antEvent)
+      }else{
+        eventMap[type] = [antEvent]
+      }
+    }
   }
   on(eventLv: IAntMouseEvent | string, callback: ICallback){
     const [type, lv = "mid"] = eventLv.split(".") as [IAntMouseEvent, IAntLv]
@@ -57,16 +69,11 @@ export class EventReceiver {
       callback,
       target: this
     }
+    this.addEvent(kType, antEvent)
     
-    if(eventMap[kType]){
-			eventMap[kType].push(antEvent)
-		}else{
-			eventMap[kType] = [antEvent]
-		}
   }
   public getEventsByType = (type: IAntMouseEvent, level?: IAntLv) => {
     const lv = level || "mid"
-    const eMap = eventMap[`${type}.${lv}`]
-    return eMap || []
+    return this.getEventList(`${type}.${lv}` as IAntMouseEvent)
   }
 }

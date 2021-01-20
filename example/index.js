@@ -5,6 +5,7 @@ const btn = {
   cancel: $("#cancel"),
   guide: $("#guide"),
   tag: $("#tag"),
+  resize: $("#resize"),
   data: $("#data"),
   addr: $("#addr"),
   load: $("#load"),
@@ -88,6 +89,9 @@ btn.guide.on("click", () => {
 })
 btn.tag.on("click", () => {
   lb.setTagShow(!lb.isTagShow())
+})
+btn.resize.on("click", () => {
+  lb.resize()
 })
 btn.data.on("click", () => {
   const list = lb.getShapeList()

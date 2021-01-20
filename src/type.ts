@@ -3,6 +3,7 @@ export * from "./EventReceiver"
 export * from "./Platform"
 export * from "./ShapeRegister"
 export * from "./structure"
+export * from "./cursor"
 
 export * as utils from "./utils"
 export * from "./IDGenerator"
