@@ -4,7 +4,6 @@ import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
 import { css, create } from "./element"
 import _ from "./lodash"
 import { IDG } from "./IDGenerator"
-import { Dictionary } from "lodash"
 
 export enum ShapeType {
   "Polygon" = "Polygon",
@@ -89,7 +88,8 @@ export class Shape extends EventReceiver {
   public visible: boolean
   private insert: boolean
   private showTag: boolean
-  private nodes: Dictionary<HTMLDivElement>
+  public tagNode: () => HTMLDivElement
+  public tagBody: () => HTMLDivElement
   public tag: string
   public max: number | undefined
   public data: any
@@ -129,10 +129,9 @@ export class Shape extends EventReceiver {
 
     const tagNode = create("div")
     const tagBody = create("div")
-    this.nodes = {
-      tagNode,
-      tagBody
-    }
+    this.tagNode = () => tagNode
+    this.tagBody = () => tagBody
+   
     tagBody.innerHTML = this.tag
     css(tagNode, {
       position: "absolute",
@@ -140,7 +139,8 @@ export class Shape extends EventReceiver {
       width: 200 + "px",
       transformOrigin: "left"
     })
-    this.tagBodyStyle()
+    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
+
     tagNode.appendChild(tagBody)
     
     this.max = max
@@ -267,7 +267,6 @@ export class Shape extends EventReceiver {
       }
       return sp
     }).sort((sp1, sp2) => sp1.distance - sp2.distance)
-
     const min = sort[0] // 获取最小的距离点
     if(min){
       // 如果最小点距离小于5 在返回此点位
@@ -296,7 +295,7 @@ export class Shape extends EventReceiver {
   }
   disabled(){
     this.status = "disabled"
-    this.tagBodyStyle()
+    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
     return this
   }
   isDisabled(){
@@ -304,7 +303,7 @@ export class Shape extends EventReceiver {
   }
   normal(){
     this.status = "normal"
-    this.tagBodyStyle()
+    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
     return this
   }
   hidden(){
@@ -326,28 +325,23 @@ export class Shape extends EventReceiver {
   }
   tagShow(status?: boolean){
     this.showTag = typeof status === "undefined" ? !this.showTag : !!status
-    this.tagBodyStyle()
+    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
   }
   setTag(tag: string){
     this.tag = tag
   }
-  tagNode(){
-    return this.nodes.tagNode
-  }
-  private tagBodyStyle = () => {
-    const tagBody = this.nodes.tagBody
-    css(tagBody, {
-      background: this.getStyle().dotColor,
-      position: "absolute",
-      bottom: 5 + "px",
-      display: "inline-block",
-      color: "#fff",
-      padding: `0 4px`
-    })
-  }
-
   updatePositions(positions: Points){
     this.positions = positions
     return this
   }
+}
+function tagBodyStyle(tagBody: HTMLDivElement, bgColor: string) {
+  css(tagBody, {
+    background: bgColor,
+    position: "absolute",
+    bottom: 5 + "px",
+    display: "inline-block",
+    color: "#fff",
+    padding: `0 4px`
+  })
 }

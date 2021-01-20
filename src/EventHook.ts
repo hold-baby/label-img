@@ -20,13 +20,12 @@ type IEvent = {
 type TEventMap = {
   [key in TEventHooks]?: IEvent[]
 }
+const eventMap: Dictionary<IEvent[]> = {}
 export class EventHook {
-  private eventMap: Dictionary<IEvent[]>
   constructor(){
-    this.eventMap = {}
   }
   trigger(name: TEventHooks | string, shape?: Shape){
-    const fns = this.eventMap[name]
+    const fns = eventMap[name]
     if(!fns) return
     fns.forEach(({ fn, type }, idx) => {
       fn(shape)
@@ -36,28 +35,28 @@ export class EventHook {
     })
   }
   on(name: TEventHooks | string, cb: Fn){
-    if(!this.eventMap[name]){
-      this.eventMap[name] = []
+    if(!eventMap[name]){
+      eventMap[name] = []
     };
-    (this.eventMap[name] as IEvent[]).push({
+    (eventMap[name] as IEvent[]).push({
       fn: cb,
       type: "on"
     })
     return () => {
-      const idx = this.eventMap[name]?.findIndex(({ fn }) => fn === cb)
-      idx && this.eventMap[name] && (this.eventMap[name] as IEvent[]).splice(idx, 1)
+      const idx = eventMap[name]?.findIndex(({ fn }) => fn === cb)
+      idx && eventMap[name] && (eventMap[name] as IEvent[]).splice(idx, 1)
     }
   }
   once(name: TEventHooks | string, cb: Fn){
-    if(!this.eventMap[name]){
-      this.eventMap[name] = []
+    if(!eventMap[name]){
+      eventMap[name] = []
     };
-    (this.eventMap[name] as IEvent[]).push({
+    (eventMap[name] as IEvent[]).push({
       fn: cb,
       type: "once"
     })
   }
   config(options: TEventMap){
-    this.eventMap = Object.assign(this.eventMap, options)
+    Object.assign(eventMap, options)
   }
 }

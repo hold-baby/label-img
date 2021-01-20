@@ -621,10 +621,10 @@ export class Platform extends EventReceiver {
 		}
 		this.render()
 	}
-/**
- * 删除图形
- * @param input QueryShapeInput 待删除的图形或ID
- */
+  /**
+	 * 删除图形
+	 * @param input QueryShapeInput 待删除的图形或ID
+	 */
 	public remove = (input: QueryShapeInput) => {
 		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return

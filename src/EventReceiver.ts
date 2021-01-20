@@ -28,8 +28,6 @@ export const antLvs = Object.keys(AntLv) as IAntLv[]
 
 export interface IAnte {
   offset: Point;
-  // isOnImage: boolean;
-  // isOnShape: boolean;
   stopPropagation: () => void;
   isPropagation: boolean;
   getTargetShape: () => [Shape | null, number];
@@ -46,11 +44,9 @@ interface IAntEvent {
   callback: ICallback;
   target: any;
 }
-
+const eventMap: Map<IAntEvent[]> = {}
 export class EventReceiver {
-  private eventMap: Map<IAntEvent[]>
   constructor(){
-    this.eventMap = {}
   }
   on(eventLv: IAntMouseEvent | string, callback: ICallback){
     const [type, lv = "mid"] = eventLv.split(".") as [IAntMouseEvent, IAntLv]
@@ -61,16 +57,16 @@ export class EventReceiver {
       callback,
       target: this
     }
-    const eMap = this.eventMap
-    if(eMap[kType]){
-			eMap[kType].push(antEvent)
+    
+    if(eventMap[kType]){
+			eventMap[kType].push(antEvent)
 		}else{
-			eMap[kType] = [antEvent]
+			eventMap[kType] = [antEvent]
 		}
   }
-  getEventsByType(type: IAntMouseEvent, level?: IAntLv){
+  public getEventsByType = (type: IAntMouseEvent, level?: IAntLv) => {
     const lv = level || "mid"
-    const eMap = this.eventMap[`${type}.${lv}`]
+    const eMap = eventMap[`${type}.${lv}`]
     return eMap || []
   }
 }
