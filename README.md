@@ -99,7 +99,7 @@ labeler.load(param)
 ```js
 isRegister(id)  // 判断是否注册
 label(name)  // 选择标注类型
-cancel()  // 取消当前标注
+labelOff()  // 取消当前标注
 addShape(shape)  // 添加图形
 remove(shape || id)  // 删除图形
 setActive(shape)  // 选中某一图形

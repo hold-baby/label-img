@@ -324,7 +324,7 @@ export class Shape extends EventReceiver {
     return this.showTag && !!this.tag && this.isClose()
   }
   tagShow(status?: boolean){
-    this.showTag = typeof status === "undefined" ? !this.showTag : !!status
+    this.showTag = _.isUndefined(status) ? !this.showTag : !!status
     tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
   }
   setTag(tag: string){

@@ -81,7 +81,7 @@ btn.rect.on("click", () => {
   lb.label("rect")
 })
 btn.cancel.on("click", () => {
-  lb.cancel()
+  lb.labelOff()
 })
 btn.guide.on("click", () => {
   lb.setGuideLine()

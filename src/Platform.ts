@@ -390,7 +390,7 @@ export class Platform extends EventReceiver {
 							this.cache = null;
 							this.eventHook.trigger("create", shape)
 							if(!this.continuity){
-								this.cancel()
+								this.labelOff()
 							}
 						}else{
 							cache.positions.push(point)
@@ -442,7 +442,7 @@ export class Platform extends EventReceiver {
 					this.eventHook.trigger("create", shape)
 					this.cache = null
 					if(!this.continuity){
-						this.cancel()
+						this.labelOff()
 					}
 					this.render()
 				}
@@ -648,7 +648,7 @@ export class Platform extends EventReceiver {
 	/**
 	 * 取消标注状态
 	 */
-	public cancel = () => {
+	public labelOff = () => {
 		this.drawing = null
 		this.continuity = false
 		this.eventHook.trigger("labelType")
