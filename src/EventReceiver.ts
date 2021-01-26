@@ -1,5 +1,6 @@
 import { Shape } from "./Shape"
 import { Map, Point } from "./structure"
+import _ from "./lodash"
 
 export enum EAntMouseEvents {
   "mousedown" = "mousedown",
@@ -37,9 +38,12 @@ export interface AntMouseEvent extends MouseEvent, WheelEvent {
   ante: IAnte;
 }
 type ICallback = (e: AntMouseEvent, antEvent: Omit<IAntEvent, "callback">) => void;
-
+interface EventHandler {
+  lv: IAntLv;
+  callback: ICallback;
+}
 interface IAntEvent {
-  lv: string;
+  lv: IAntLv;
   type: IAntMouseEvent;
   callback: ICallback;
   target: any;
@@ -59,9 +63,11 @@ export class EventReceiver {
         eventMap[type] = [antEvent]
       }
     }
-  }
-  on(eventLv: IAntMouseEvent | string, callback: ICallback){
-    const [type, lv = "mid"] = eventLv.split(".") as [IAntMouseEvent, IAntLv]
+  } 
+  on(type: IAntMouseEvent, level: IAntLv | ICallback, handler?: ICallback){
+    let callback = _.isFunction(level) ? level : handler as ICallback
+    let lv = _.isFunction(level) ? "mid" : level
+
     const kType = `${type}.${lv}`
     const antEvent = {
       lv,
@@ -70,7 +76,6 @@ export class EventReceiver {
       target: this
     }
     this.addEvent(kType, antEvent)
-    
   }
   public getEventsByType = (type: IAntMouseEvent, level?: IAntLv) => {
     const lv = level || "mid"

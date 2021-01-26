@@ -17,46 +17,49 @@ type IEvent = {
   type: IEventHookTypes;
   fn: Fn;
 }
-type TEventMap = {
-  [key in TEventHooks]?: IEvent[]
-}
-const eventMap: Dictionary<IEvent[]> = {}
 export class EventHook {
+  private getEvents: (name: string) => IEvent[]
+  private createEvent: (name: string, event: IEvent) => void;
   constructor(){
+    const eventMap: Dictionary<IEvent[]> = {}
+    this.getEvents = (name) => {
+      return eventMap[name]
+    }
+    this.createEvent = (name, { type, fn }: IEvent) => {
+      if(!eventMap[name]){
+        eventMap[name] = []
+      };
+      (eventMap[name] as IEvent[]).push({
+        fn,
+        type
+      })
+    }
   }
-  trigger(name: TEventHooks | string, shape?: Shape){
-    const fns = eventMap[name]
+  emit(name: TEventHooks | string, data?: any){
+    const fns = this.getEvents(name)
     if(!fns) return
     fns.forEach(({ fn, type }, idx) => {
-      fn(shape)
+      fn(data)
       if(type === "once"){
         fns.splice(idx, 1)
       }
     })
   }
-  on(name: TEventHooks | string, cb: Fn){
-    if(!eventMap[name]){
-      eventMap[name] = []
-    };
-    (eventMap[name] as IEvent[]).push({
+  on(name: TEventHooks, cb: Fn){
+    this.createEvent(name, {
       fn: cb,
       type: "on"
     })
     return () => {
-      const idx = eventMap[name]?.findIndex(({ fn }) => fn === cb)
-      idx && eventMap[name] && (eventMap[name] as IEvent[]).splice(idx, 1)
+      const events = this.getEvents(name)
+      const idx = events.findIndex(({ fn }) => fn === cb)
+      idx && events && events.splice(idx, 1)
     }
   }
-  once(name: TEventHooks | string, cb: Fn){
-    if(!eventMap[name]){
-      eventMap[name] = []
-    };
-    (eventMap[name] as IEvent[]).push({
+  once(name: TEventHooks, cb: Fn){
+    this.createEvent(name, {
       fn: cb,
       type: "once"
     })
-  }
-  config(options: TEventMap){
-    Object.assign(eventMap, options)
   }
 }

@@ -3,6 +3,7 @@ import { Image, ImageLoadSource } from "./Image"
 import { Shape, ShapeType, QueryShapeInput } from "./Shape"
 import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegister"
 import { EventHook } from "./EventHook"
+import { Canvas } from "./Canvas"
 import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
 import { ICursor, displayCursor } from "./cursor"
@@ -32,8 +33,7 @@ const outSideFn = () => {
 
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
-  private canvas: HTMLCanvasElement
-  private ctx: CanvasRenderingContext2D
+  private canvas: Canvas
 	private Image: Image
 	private tagContainer: HTMLDivElement
   private scale: number
@@ -58,20 +58,17 @@ export class Platform extends EventReceiver {
 		options = Object.assign({}, LabelImgOptions, defaulOptions)
 		this.eventHook = new EventHook()
 
-		const canvas = create("canvas")
-		const ctx = canvas.getContext("2d") as CanvasRenderingContext2D
-
-		canvas.width = options.width
-		canvas.height = options.height
-		this.container.append(canvas)
+		this.canvas = new Canvas()
+		
+		this.canvas.size(options.width, options.height)
+		
+		this.container.append(this.canvas.el())
 
 		// 标签容器
 		const tagContainer = create("div")
 		this.tagContainer = tagContainer
 		this.container.appendChild(this.tagContainer)
 
-		this.canvas = canvas
-		this.ctx = ctx
 		this.scale = 1
 		this.continuity = false
 		this.offset = [0, 0]
@@ -114,9 +111,10 @@ export class Platform extends EventReceiver {
 		isInit = true
 		// 初始化事件相关
 		const _initMouseEvent = () => {
+			const canvas = this.canvas.el()
 			antMouseEvents.forEach((type) => {
 				const Image = this.Image
-				this.canvas.addEventListener(type, (e) => {
+				canvas.addEventListener(type, (e) => {
 					e.preventDefault()
 					const offset = [e.offsetX, e.offsetY] as Point
 					isOnImage = isInSide(offset, Image.getPosition(this.scale))
@@ -265,23 +263,25 @@ export class Platform extends EventReceiver {
 		}
 		// 初始化辅助线
 		const _initGuideLine = () => {
-			this.on("mousemove.top", (e) => {
+			const lv = "top"
+			this.on("mousemove", lv, (e) => {
 				this.offset = e.ante.offset
 				this.render()
 			})
 		}
 		// 初始化图片事件
 		const _initImageEvent = () => {
+			const lv = "bot"
 			let start = [0, 0] // 点击在图片的起始位置
 			const Image = this.Image
-			Image.on("mousedown.bot", (e) => {
+			Image.on("mousedown", lv, (e) => {
 				if(isOnShape || !Image.complate) return
 				const { offset } = e.ante
 				const [sx, sy] = offset // start x, start y
 				const [x, y] = Image.getOrigin() // image origin
 				start = [sx - x, sy - y]
 			})
-			Image.on("mousemove.bot", (e) => {
+			Image.on("mousemove", lv, (e) => {
 				if(!isOnImage || !isMouseDown) return;
 				if(isOnShape) return;
 				if(this.drawing) return
@@ -298,8 +298,8 @@ export class Platform extends EventReceiver {
 				outSideFn()
 				start = [0, 0]
 			}
-			Image.on("mouseup.bot", cancel)
-			Image.on("mouseout.bot", cancel)
+			Image.on("mouseup", lv, cancel)
+			Image.on("mouseout", lv, cancel)
 			
 			Image.on("wheel", (e) => {
 				const Image = this.Image
@@ -341,9 +341,10 @@ export class Platform extends EventReceiver {
 		}
 		// 初始化标注事件
 		const _initDrawEvent = () => {
+			const lv = "top"
 			let start: Point = [0, 0]
 			const Image = this.Image
-			this.on("mousedown.top", (e) => {
+			this.on("mousedown", lv, (e) => {
 				if(!this.drawing || !Image.el) return
 				const { offset } = e.ante
 				
@@ -374,7 +375,7 @@ export class Platform extends EventReceiver {
 							shape.updatePositions(cache.positions).close()
 							this.shapeList.push(shape)
 							this.cache = null;
-							this.eventHook.trigger("create", shape)
+							this.eventHook.emit("create", shape)
 							if(!this.continuity){
 								this.labelOff()
 							}
@@ -400,7 +401,7 @@ export class Platform extends EventReceiver {
 				
 				this.render()
 			})
-			this.on("mousemove.top", (e) => {
+			this.on("mousemove", lv, (e) => {
 				const cache = this.cache
 				const Image = this.Image
 				if(!this.drawing || !Image.complate || !cache) return
@@ -415,7 +416,7 @@ export class Platform extends EventReceiver {
 					this.render()
 				}
 			})
-			this.on("mouseup.top", () => {
+			this.on("mouseup", lv, () => {
 				const cache = this.cache
 				const shapeType = this.drawing?.type
 				start = [0, 0]
@@ -426,7 +427,7 @@ export class Platform extends EventReceiver {
 					})
 					shape.close()
 					this.shapeList.push(shape)
-					this.eventHook.trigger("create", shape)
+					this.eventHook.emit("create", shape)
 					this.cache = null
 					if(!this.continuity){
 						this.labelOff()
@@ -434,11 +435,12 @@ export class Platform extends EventReceiver {
 					this.render()
 				}
 			})
-			this.on("mouseout.top", () => {
+			this.on("mouseout", lv, () => {
 			}) 
 		}
 		// 初始化图形事件
 		const _initShapeEvent = () => {
+			const lv = "top"
 			let start: Point = [0, 0]
 			let cp = [] as Points // cache postion
 			let arcIndex = -1
@@ -447,11 +449,11 @@ export class Platform extends EventReceiver {
 				this.loseActive()
 				shape.setActive(true)
 				this.activeShape = shape
-				this.eventHook.trigger("select", shape)
+				this.eventHook.emit("select", shape)
 				this.render()
 			}
 	
-			this.on("mousedown.top", (e) => {
+			this.on("mousedown", lv, (e) => {
 				const { getTargetShape, offset } = e.ante
 				start = offset
 				const [shape, index] = getTargetShape()
@@ -483,7 +485,7 @@ export class Platform extends EventReceiver {
 				// 	}
 				// }
 			})
-			this.on("mousemove.top", (e) => {
+			this.on("mousemove", lv, (e) => {
 				if(!isOnShape || !this.activeShape || this.drawing || !isMouseDown) return
 				const { offsetX, offsetY } = e
 				const diff: Point = [offsetX - start[0], offsetY - start[1]]
@@ -521,7 +523,7 @@ export class Platform extends EventReceiver {
 				this.activeShape.updatePositions(rp)
 				this.render()
 			})
-			this.on("mouseup.top", (e) => {
+			this.on("mouseup", lv, (e) => {
 				start = [0, 0]
 				arcIndex = -1
 			})
@@ -582,7 +584,7 @@ export class Platform extends EventReceiver {
 		const drawing = this.shapeRegister.get(rid)
 		if((this.drawing && drawing && rid !== this.drawing.id) || (!this.drawing && drawing)){
 			this.drawing = drawing
-			this.eventHook.trigger("labelType")
+			this.eventHook.emit("labelType")
 		}
 		if(!_.isUndefined(continuity)){
 			this.continuity = !!continuity
@@ -621,7 +623,7 @@ export class Platform extends EventReceiver {
 		}
 		this.shapeList.splice(idx, 1)
 		this.render()
-		this.eventHook.trigger("update")
+		this.eventHook.emit("update")
 	}
 	/**
 	 * 设置选中的图形
@@ -638,7 +640,7 @@ export class Platform extends EventReceiver {
 	public labelOff = () => {
 		this.drawing = null
 		this.continuity = false
-		this.eventHook.trigger("labelType")
+		this.eventHook.emit("labelType")
     if(this.cache){
       this.cache = null
       this.render()
@@ -729,22 +731,22 @@ export class Platform extends EventReceiver {
 	 * @param cursor ICursor 
 	 */
 	public cursor = _.throttle((cursor: ICursor) => {
-		this.canvas.style.cursor = displayCursor(cursor)
+		this.canvas.cursor(displayCursor(cursor))
 	}, 100)
 	// 渲染相关
 	private _clearCanvas = () => {
-		const ctx = this.ctx
+		const ctx = this.canvas.ctx()
 		const { width, height } = options
 		ctx.clearRect(0, 0, width, height)
 	}
 	private _renderBackground = () => {
-		const ctx = this.ctx
+		const ctx = this.canvas.ctx()
 		const { bgColor, width, height } = options
 		ctx.fillStyle = bgColor
 		ctx.fillRect(0, 0, width, height)
 	}
 	private _renderImage = () => {
-		const ctx = this.ctx
+		const ctx = this.canvas.ctx()
 		const Image = this.Image
 		if(!Image || !Image.complate) return
 		const el = Image.getEl() as HTMLImageElement
@@ -755,7 +757,7 @@ export class Platform extends EventReceiver {
 		ctx.drawImage(el, ox, oy, x, y)
   }
 	private _renderGuideLine = () => {
-		const ctx = this.ctx
+		const ctx = this.canvas.ctx()
 		const [x, y] = this.offset
 		ctx.beginPath()
 		ctx.strokeStyle = "red"
@@ -778,7 +780,7 @@ export class Platform extends EventReceiver {
 			}
       return
     }
-    const ctx = this.ctx
+    const ctx = this.canvas.ctx()
     const scale = this.scale
     const { positions } = shape
     const style = shape.getStyle()
@@ -836,7 +838,8 @@ export class Platform extends EventReceiver {
       ctx.arc(cx, cy, dotRadius * this.scale, 0, 2 * Math.PI)
       ctx.fill()
       ctx.closePath()
-    })
+		})
+		
 		// 标签
     if(this.isTagShow() && shape.isShowTag()){
       const [x, y] = rp[0]
