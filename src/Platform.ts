@@ -30,7 +30,6 @@ const outSideFn = () => {
 	isMouseDown = false;
 	isOnShape = false;
 }
-
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
   private canvas: Canvas
@@ -48,6 +47,7 @@ export class Platform extends EventReceiver {
 	public eventHook: EventHook
 
 	private continuity: boolean
+
   constructor(container: HTMLDivElement, LabelImgOptions?: Partial<LabelImgOptions>){
 		super()
 		this.container = container
@@ -265,6 +265,7 @@ export class Platform extends EventReceiver {
 		const _initGuideLine = () => {
 			const lv = "top"
 			this.on("mousemove", lv, (e) => {
+				if(!options.guideLine) return
 				this.offset = e.ante.offset
 				this.render()
 			})
@@ -292,7 +293,9 @@ export class Platform extends EventReceiver {
 				const position = diff
 				
 				Image.setOrigin(position)
-				this.render()
+				if(isMouseDown){
+					this.render()
+				}
 			})
 			const cancel = () => {
 				outSideFn()
@@ -521,7 +524,9 @@ export class Platform extends EventReceiver {
 					}
 				}
 				this.activeShape.updatePositions(rp)
-				this.render()
+				if(isMouseDown){
+					this.render()
+				}
 			})
 			this.on("mouseup", lv, (e) => {
 				start = [0, 0]
@@ -735,15 +740,13 @@ export class Platform extends EventReceiver {
 	}, 100)
 	// 渲染相关
 	private _clearCanvas = () => {
-		const ctx = this.canvas.ctx()
-		const { width, height } = options
-		ctx.clearRect(0, 0, width, height)
+		this.canvas.clear()
 	}
 	private _renderBackground = () => {
-		const ctx = this.canvas.ctx()
 		const { bgColor, width, height } = options
-		ctx.fillStyle = bgColor
-		ctx.fillRect(0, 0, width, height)
+		this.canvas.fillReact([0, 0], [width, height], {
+			fillColor: bgColor
+		})
 	}
 	private _renderImage = () => {
 		const ctx = this.canvas.ctx()
@@ -757,19 +760,29 @@ export class Platform extends EventReceiver {
 		ctx.drawImage(el, ox, oy, x, y)
   }
 	private _renderGuideLine = () => {
-		const ctx = this.canvas.ctx()
 		const [x, y] = this.offset
-		ctx.beginPath()
-		ctx.strokeStyle = "red"
-		ctx.moveTo(0, y)
-		ctx.lineTo(options.width, y)
 
-		ctx.moveTo(x, 0)
-		ctx.lineTo(x, options.height)
-		ctx.setLineDash([5])
-		ctx.stroke()
-		ctx.closePath()
-		ctx.setLineDash([0])
+		const lineColor = "red"
+		const lineWidth = 1
+		const lineDash = [5]
+		const row: Points = [
+			[0, y],
+			[options.width, y]
+		]
+		this.canvas.line(row, {
+			lineColor,
+			lineWidth,
+			lineDash
+		})
+		const col: Points = [
+			[x, 0],
+			[x, options.height]
+		]
+		this.canvas.line(col, {
+			lineColor,
+			lineWidth,
+			lineDash
+		})
 	}
 	private _renderShape = (shape: Shape) => {
 		const Image = this.Image
@@ -780,7 +793,6 @@ export class Platform extends EventReceiver {
 			}
       return
     }
-    const ctx = this.canvas.ctx()
     const scale = this.scale
     const { positions } = shape
     const style = shape.getStyle()
@@ -793,56 +805,26 @@ export class Platform extends EventReceiver {
       fillColor
     } = style
     
-    const rp = Image.getShape2CanvasPoints(positions, scale)
+    const points = Image.getShape2CanvasPoints(positions, scale)
 
-		let before: null | Point = null;
-		// 线
-    ctx.beginPath()
-    ctx.strokeStyle = lineColor
-    ctx.lineWidth = lineWidth * scale
-    rp.forEach((point, index) => {
-      const [cx, cy] = point
-      if(before){
-        ctx.moveTo(before[0], before[1])
-        ctx.lineTo(cx, cy)
-        if(rp.length - 1 === index && (shape.isClose() || shape.type === ShapeType.Rect)){
-          const [[x, y],] = rp
-          ctx.lineTo(x, y)
-        }
-      }
-      before = [cx, cy]
-    })
-    ctx.stroke()
-    ctx.closePath()
-		// 点
-    ctx.beginPath()
-    rp.forEach((point, idx) => {
-      const [cx, cy] = point
-      if(idx === 0){
-        ctx.moveTo(point[0], point[1])
-      }else{
-        ctx.lineTo(cx, cy)
-      }
-    })
-    ctx.globalAlpha = .7
-    ctx.fillStyle = fillColor
-    ctx.fill()
-    ctx.closePath()
-    ctx.globalAlpha = 1
-
-		// 颜色填充
-    rp.forEach((point) => {
-      const [cx, cy] = point
-      ctx.beginPath()
-      ctx.fillStyle = dotColor
-      ctx.arc(cx, cy, dotRadius * this.scale, 0, 2 * Math.PI)
-      ctx.fill()
-      ctx.closePath()
-		})
+		// 判断是否闭合
+		if((shape.isClose() || shape.type === ShapeType.Rect)){
+			points.push(points[0])
+		}
 		
+		// 图形
+		this.canvas.polygon(points, {
+			lineColor: lineColor,
+			lineWidth: lineWidth * scale,
+			dotRadius: dotRadius * this.scale,
+			dotColor: dotColor,
+			fillColor: fillColor,
+			opacity: .7
+		})
+
 		// 标签
     if(this.isTagShow() && shape.isShowTag()){
-      const [x, y] = rp[0]
+      const [x, y] = points[0]
 			const scale = this.scale
 			const tagNode = shape.tagNode()
 			css(tagNode, {

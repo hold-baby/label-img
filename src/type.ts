@@ -4,10 +4,10 @@ export * from "./Platform"
 export * from "./ShapeRegister"
 export * from "./structure"
 export * from "./cursor"
-
-export * as utils from "./utils"
 export * from "./IDGenerator"
 export * from "./Shape"
+export * from "./Canvas"
+export * as utils from "./utils"
 
 import LabelImg from "./main"
 export default LabelImg

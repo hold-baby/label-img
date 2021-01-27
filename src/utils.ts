@@ -1,4 +1,5 @@
 import { Point, Points } from "./structure"
+import { Shape } from "./Shape"
 
 /**
  * 判断点位是否在图形内部

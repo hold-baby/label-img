@@ -1,17 +1,29 @@
 import { create } from "./element"
 import { Point, Points } from "./structure"
-import { ICursor, displayCursor } from "./cursor"
 
 type StrokeStyle = string | CanvasPattern | CanvasGradient;
 type FillStyle = string | CanvasGradient | CanvasPattern;
 
 interface IBasePoint {
-  fillStyle: FillStyle;
-  radius: number;
+  dotColor: FillStyle;
+  dotRadius: number;
 }
 interface ILineStyle {
-  strokeStyle: StrokeStyle
+  lineColor: StrokeStyle;
   lineWidth: number;
+  lineDash: number[];
+}
+interface IFillStyle {
+  fillColor: FillStyle;
+  opacity: number;
+}
+interface IPolygonStyle {
+  lineWidth: number;
+  lineColor: StrokeStyle;
+  dotRadius: number;
+  dotColor: FillStyle;
+  fillColor: FillStyle;
+  opacity: number;
 }
 export class Canvas {
   public el: () => HTMLCanvasElement;
@@ -23,15 +35,18 @@ export class Canvas {
     this.el = () => el
     this.ctx = () => ctx
   }
-  public line = (points: Points, lineStyle: ILineStyle) => {
+  public line = (points: Points, lineStyle: Partial<ILineStyle>) => {
     if(points.length > 1){
       const ctx = this.ctx()
       let before: null | Point = null;
-      const { strokeStyle, lineWidth, } = lineStyle
+      const { lineColor = "", lineWidth = 1, lineDash = [0] } = lineStyle
+      
+      const _lineDash = ctx.getLineDash()
 
       ctx.beginPath()
-      ctx.strokeStyle = strokeStyle
+      ctx.strokeStyle = lineColor
       ctx.lineWidth = lineWidth
+      ctx.setLineDash(lineDash)
       points.forEach((point) => {
         const [cx, cy] = point
         if(before){
@@ -41,19 +56,80 @@ export class Canvas {
         before = [cx, cy]
       })
       ctx.stroke()
+      ctx.setLineDash(_lineDash)
+      ctx.closePath()
     }
     return this
   }
-  public dot = (point: Point, pointStyle: IBasePoint) => {
+  public fill = (points: Points, style: Partial<IFillStyle>) => {
+    if(points.length > 2){
+      const ctx = this.ctx()
+      const { 
+        fillColor = "",
+        opacity
+      } = style
+      
+      // 填充
+      ctx.beginPath()
+      const _opacity = this.el().style.opacity || 1
+      
+      points.forEach(([x, y], idx) => {
+        if(idx === 0){
+          ctx.moveTo(x, y)
+        }else{
+          ctx.lineTo(x, y)
+        }
+      })
+      ctx.fillStyle = fillColor
+      
+      if(opacity){
+        this.opacity(opacity)
+      }
+      ctx.fill()
+      ctx.closePath()
+      this.opacity(Number(_opacity))
+    }
+  }
+  public fillReact = (start: Point, end: Point, style: Partial<IFillStyle>) => {
     const ctx = this.ctx()
-    const { fillStyle, radius } = pointStyle
+    const { 
+      fillColor = "",
+      opacity
+    } = style
+    
+    // 填充
+    ctx.beginPath()
+    const _opacity = this.el().style.opacity || 1
+    ctx.fillStyle = fillColor
+    if(opacity){
+      this.opacity(opacity)
+    }
+    ctx.fillRect(...start, ...end)
+    ctx.closePath()
+    this.opacity(Number(_opacity))
+    return this
+  }
+  public polygon = (points: Points, style: Partial<IPolygonStyle>) => {
+    this.fill(points, style)
+    this.line(points, style)
+    this.dots(points, style)
+    return this
+  }
+  public dot = (point: Point, pointStyle: Partial<IBasePoint>) => {
+    const ctx = this.ctx()
+    const { dotColor = "", dotRadius = 1 } = pointStyle
     const [x, y] = point
     ctx.beginPath()
-    ctx.fillStyle = fillStyle
-    ctx.arc(x, y, radius, 0, 2 * Math.PI)
+    ctx.fillStyle = dotColor
+    ctx.arc(x, y, dotRadius, 0, 2 * Math.PI)
     ctx.fill()
     ctx.closePath()
     return this
+  }
+  public dots = (points: Points, pointStyle: Partial<IBasePoint>) => {
+    points.forEach((point) => {
+      this.dot(point, pointStyle)
+    })
   }
   public opacity = (alpha: number) => {
     this.ctx().globalAlpha = alpha
@@ -65,5 +141,9 @@ export class Canvas {
   }
   public cursor = (cursor: string) => {
     this.el().style.cursor = cursor
+  }
+  public clear = () => {
+    const { width, height } = this.el()
+    this.ctx().clearRect(0, 0, width, height)
   }
 }
