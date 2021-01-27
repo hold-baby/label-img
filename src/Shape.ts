@@ -120,7 +120,7 @@ export class Shape extends EventReceiver {
     this.status = disabled ? "disabled" : active ? "active" : "normal"
     this.positions = positions
     this.data = data || null
-    this.style = _.merge(defaultStyle, style)
+    this.style = _.merge({}, defaultStyle, style)
     this.closed = closed
     this.visible = visible
     this.insert = insert

@@ -62,12 +62,13 @@ export class Image extends EventReceiver {
 	}
 	/**
 	 * 获取图片宽高
+	 * @param scale number 缩放大小
 	 * @return [width: number, width: number]
 	 */
-	getSize(){
+	getSize(scale?: number){
 		if(this.el){
 			const { width, height } = this.el
-			return [width, height]
+			return [width * (scale || 1), height * (scale || 1)]
 		}
 		return dfOrigin
 	}

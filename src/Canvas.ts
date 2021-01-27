@@ -139,6 +139,11 @@ export class Canvas {
     el.width = width;
     el.height = height
   }
+  public getSize = () => {
+    const el = this.el()
+    const { width = 0, height = 0 } = el
+    return [width, height]
+  }
   public cursor = (cursor: string) => {
     this.el().style.cursor = cursor
   }

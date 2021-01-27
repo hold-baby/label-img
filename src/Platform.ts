@@ -304,14 +304,33 @@ export class Platform extends EventReceiver {
 			Image.on("mouseup", lv, cancel)
 			Image.on("mouseout", lv, cancel)
 			
+			const slmt = 0.25 // scale limit
+			const step = 0.05;
+
 			Image.on("wheel", (e) => {
 				const Image = this.Image
 				if(!Image.el) return
+				const direction = e.deltaY < 0 ? 1 : -1;
+
+				// canvas width and height
+				const [cw, ch] = this.canvas.getSize()
+				// image width and height
+				const [iw, ih] = this.Image.getSize(this.scale)
+				let count = 0
+
+				// 判断缩小到1/4则不允许再缩小
+				if(direction === -1){
+					if(cw * slmt >= iw){
+						count++
+					}
+					if(ch * slmt >= ih){
+						count++
+					}
+					if(count === 2) return
+				}
+
 				const { offset } = e.ante
 				const [px, py] = offset
-				
-				const step = 0.05;
-				const direction = e.deltaY < 0 ? 1 : -1;
 	
 				const after = direction * step;
 				let scale = Number((after + this.scale).toFixed(2));

@@ -47,6 +47,17 @@ lb.register("black-dog", {
   type: "Rect",
   tag: "black dog"
 })
+lb.register("dog-ear", {
+  type: "Polygon",
+  tag: "狗耳朵",
+  style: {
+    normal: {
+      lineColor: "aqua",
+      fillColor: "blueviolet",
+      dotColor: "burlywood"
+    }
+  }
+})
 dom.file.on("change", (e) => {
   const file = e.target.files[0]
   lb.load(file)
@@ -64,6 +75,9 @@ const blackDogs = [
   [[620,244],[799,244],[799,441],[620,441]],
   [[265,26],[420,26],[420,436],[265,436]]
 ]
+const dogEar = [
+  [[559,116],[554,125],[547,135],[542,151],[532,166],[535,180],[539,189],[546,189],[558,183],[566,175],[574,170],[579,166],[582,159],[581,152],[576,146],[570,134],[567,126],[563,118]]
+]
 btn.source.on("click", () => {
   lb.load("./dog.jpg").then(() => {
     blackDogs.forEach((positions) => {
@@ -72,7 +86,15 @@ btn.source.on("click", () => {
       })
       lb.addShape(shape)
     })
-    renderList(lb.getShapeList())
+    dogEar.forEach((positions) => {
+      const shape = lb.createShape("dog-ear", {
+        positions
+      })
+      lb.addShape(shape)
+    })
+    const list = lb.getShapeList()
+    console.log(list)
+    renderList(list)
   })
 })
 btn.polygon.on("click", () => {
@@ -94,7 +116,13 @@ btn.resize.on("click", () => {
   lb.resize()
 })
 btn.data.on("click", () => {
-  const list = lb.getShapeList()
+  const list = lb.getShapeList().map(({ id, tag, positions }) => {
+    return {
+      id: id,
+      tag: tag,
+      positions: positions
+    }
+  })
   console.log(list);
   alert(JSON.stringify(list))
 })
