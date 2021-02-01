@@ -26,10 +26,7 @@ let isInit = false
 let isMouseDown = false
 let isOnShape = false
 let isOnImage = false
-const outSideFn = () => {
-	isMouseDown = false;
-	isOnShape = false;
-}
+
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
   private canvas: Canvas
@@ -37,7 +34,7 @@ export class Platform extends EventReceiver {
 	private tagContainer: HTMLDivElement
   private scale: number
   private offset: Point
-
+	private _options: LabelImgOptions
   private shapeRegister: ShapeRegister
 	private drawing: IShapeCfg | null
 	private cache: Shape | null
@@ -45,7 +42,6 @@ export class Platform extends EventReceiver {
 	private shapeList: Shape[]
 
 	public eventHook: EventHook
-
 	private continuity: boolean
 
   constructor(container: HTMLDivElement, LabelImgOptions?: Partial<LabelImgOptions>){
@@ -55,7 +51,7 @@ export class Platform extends EventReceiver {
 			position: "relative",
 			overflow: "hidden"
 		})
-		options = Object.assign({}, LabelImgOptions, defaulOptions)
+		this._options = Object.assign({}, LabelImgOptions, defaulOptions)
 		this.eventHook = new EventHook()
 
 		this.canvas = new Canvas()
@@ -85,6 +81,13 @@ export class Platform extends EventReceiver {
 		this.render()
 		this._init()
 	}
+	public options = () => {
+		return Object.assign({}, this._options)
+	}
+	public setOptions = (options: Partial<LabelImgOptions>) =>{
+		this._options = _.merge(this._options, options)
+		this.render()
+	}
 	public reset = () => {
 		this.scale = 1
 		this.offset = [0, 0]
@@ -109,6 +112,11 @@ export class Platform extends EventReceiver {
 	private _init = () => {
 		if(isInit) return
 		isInit = true
+
+		const outSideFn = () => {
+			isMouseDown = false;
+			isOnShape = false;
+		}
 		// 初始化事件相关
 		const _initMouseEvent = () => {
 			const canvas = this.canvas.el()
@@ -304,7 +312,7 @@ export class Platform extends EventReceiver {
 			Image.on("mouseup", lv, cancel)
 			Image.on("mouseout", lv, cancel)
 			
-			const slmt = 0.25 // scale limit
+			const slmt = 0.25 // min scale limit
 			const step = 0.05;
 
 			Image.on("wheel", (e) => {
