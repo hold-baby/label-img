@@ -5,23 +5,27 @@ export type IShapeCfg = Omit<IShapeOptions, "data" | "positions">
 export type IShapeContent = Partial<Omit<IShapeOptions, "type">>
 export type RegisterID = string;
 export class ShapeRegister {
-  private shapeMap: Map<any>
+  public add: (rid: RegisterID, shapeCfg: Omit<IShapeCfg, "registerID">) => void;
+  public get: (rid: RegisterID) => any
+  public is: (rid: RegisterID) => boolean
+  public getMap: () => Map<any>
   constructor(){
-    this.shapeMap = {}
-  }
-  add(rid: RegisterID, shapeCfg: Omit<IShapeCfg, "registerID">){
-    if(!this.shapeMap[rid]){
-      (shapeCfg as IShapeCfg).registerID = rid
-      this.shapeMap[rid] = shapeCfg
+    const shapeMap: Map<any> = {}
+    this.add = (rid, shapeCfg) => {
+      if(!shapeMap[rid]){
+        (shapeCfg as IShapeCfg).registerID = rid
+        shapeMap[rid] = shapeCfg
+      }
     }
-  }
-  get(rid: RegisterID){
-    if(this.shapeMap[rid]){
-      return Object.assign({}, this.shapeMap[rid])
+    this.get = (rid) => {
+      if(shapeMap[rid]){
+        return Object.assign({}, shapeMap[rid])
+      }
+      throw "图形未注册"
     }
-    throw "图形未注册"
-  }
-  is(rid: RegisterID){
-    return !!this.shapeMap[rid]
+    this.is = (rid) => {
+      return !!shapeMap[rid]
+    }
+    this.getMap = () => Object.assign({}, shapeMap)
   }
 }

@@ -1,4 +1,5 @@
 import { Shape } from "./Shape"
+import { Image } from "./Image"
 import { Map, Point } from "./structure"
 import _ from "./lodash"
 
@@ -32,7 +33,9 @@ export interface IAnte {
   stopPropagation: () => void;
   isPropagation: boolean;
   getTargetShape: () => [Shape | null, number];
-  currentTarget: Shape | null
+  currentTarget: Shape | null;
+  isOnImage: boolean;
+  isOnShape: boolean;
 }
 export interface AntMouseEvent extends MouseEvent, WheelEvent {
   ante: IAnte;
@@ -46,7 +49,7 @@ interface IAntEvent {
   lv: IAntLv;
   type: IAntMouseEvent;
   callback: ICallback;
-  target: any;
+  target: null | Image | Shape;
 }
 export class EventReceiver {
   public getEventList: (type: IAntMouseEvent) => IAntEvent[]
@@ -73,7 +76,7 @@ export class EventReceiver {
       lv,
       type,
       callback,
-      target: this
+      target: this as any
     }
     this.addEvent(kType, antEvent)
   }
