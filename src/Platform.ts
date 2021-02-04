@@ -2,7 +2,7 @@ import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./E
 import { Image, ImageLoadSource } from "./Image"
 import { Shape, ShapeType, QueryShapeInput } from "./Shape"
 import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegister"
-import { EventHook } from "./EventHook"
+import { EventEmitter } from "./EventEmitter"
 import { Canvas } from "./Canvas"
 import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
@@ -33,7 +33,7 @@ export class Platform extends EventReceiver {
 	private activeShape: Shape | null
 	private shapeList: Shape[]
 
-	public eventHook: EventHook
+	public emitter: EventEmitter
 	private continuity: boolean
 
 	private _isInit: boolean
@@ -49,7 +49,7 @@ export class Platform extends EventReceiver {
 			overflow: "hidden"
 		})
 		this._options = Object.assign({}, LabelImgOptions, defaulOptions)
-		this.eventHook = new EventHook()
+		this.emitter = new EventEmitter()
 
 		this.canvas = new Canvas()
 		
@@ -417,7 +417,7 @@ export class Platform extends EventReceiver {
 							shape.updatePositions(cache.positions).close()
 							this.shapeList.push(shape)
 							this.cache = null;
-							this.eventHook.emit("create", shape)
+							this.emitter.emit("create", shape)
 							if(!this.continuity){
 								this.labelOff()
 							}
@@ -470,7 +470,7 @@ export class Platform extends EventReceiver {
 					})
 					shape.close()
 					this.shapeList.push(shape)
-					this.eventHook.emit("create", shape)
+					this.emitter.emit("create", shape)
 					this.cache = null
 					if(!this.continuity){
 						this.labelOff()
@@ -492,7 +492,7 @@ export class Platform extends EventReceiver {
 				this.loseActive()
 				shape.setActive(true)
 				this.activeShape = shape
-				this.eventHook.emit("select", shape)
+				this.emitter.emit("select", shape)
 				this.render()
 			}
 	
@@ -634,7 +634,7 @@ export class Platform extends EventReceiver {
 		const drawing = this.shapeRegister.get(rid)
 		if((this.drawing && drawing && rid !== this.drawing.id) || (!this.drawing && drawing)){
 			this.drawing = drawing
-			this.eventHook.emit("labelType")
+			this.emitter.emit("labelType")
 		}
 		if(!_.isUndefined(continuity)){
 			this.continuity = !!continuity
@@ -673,7 +673,7 @@ export class Platform extends EventReceiver {
 		}
 		this.shapeList.splice(idx, 1)
 		this.render()
-		this.eventHook.emit("update")
+		this.emitter.emit("update")
 	}
 	/**
 	 * 设置选中的图形
@@ -690,7 +690,7 @@ export class Platform extends EventReceiver {
 	public labelOff = () => {
 		this.drawing = null
 		this.continuity = false
-		this.eventHook.emit("labelType")
+		this.emitter.emit("labelType")
     if(this.cache){
       this.cache = null
       this.render()
@@ -872,18 +872,19 @@ export class Platform extends EventReceiver {
 		})
 
 		// 标签
-    if(this.isTagShow() && shape.isShowTag() && !this._isMouseDown){
+    if(this.isTagShow() && shape.isShowTag()){
       const [x, y] = points[0]
 			const scale = this.scale
 			const tagNode = shape.tagNode()
+			
+			if(!this.tagContainer.contains(tagNode)){
+				this.tagContainer.appendChild(tagNode)
+			}
 			css(tagNode, {
 				left: `${x}px`,
 				top: `${y}px`,
 				transform: `scale(${scale})`
 			})
-			if(!this.tagContainer.contains(tagNode)){
-				this.tagContainer.appendChild(tagNode)
-			}
     }else{
 			const tagNode = shape.tagNode()
 			if(this.tagContainer.contains(tagNode)){

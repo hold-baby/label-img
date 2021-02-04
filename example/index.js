@@ -19,13 +19,13 @@ const dom = {
 }
 
 const lb = new LabelImg(ele[0])
-const hook = lb.eventHook
-hook.on("select", (s) => {
+const emitter = lb.emitter
+emitter.on("select", (s) => {
   const list = lb.getShapeList()
   const target = lb.findShapeIndex(s)
   renderList(list, target[0])
 })
-hook.on("create", () => {
+emitter.on("create", () => {
   const list = lb.getShapeList()
   renderList(list)
 })

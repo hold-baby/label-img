@@ -71,21 +71,21 @@ const shapeOptions = {
 const shape = new Shape(shapeOptions)
 // or
 /**
- * @name    图形注册名
+ * @id      图形注册ID
  * @options 配置  Partial<Omit<IShapeOptions, "type">>
  * 
  */
-const shape = LabelImg.createShape(name, options)
+const shape = LabelImg.createShape(id, options)
 // 添加到画布中
 labeler.addShape(shape)
 ```
 ### 注册图形
 ```js
 /**
- * @name      图形名称  Polygon: 多边形, Ract: 矩形
- * @options   图形配置  Omit<IShapeOptions, "data" | "positions">
+ * @id        图形ID   Polygon: 多边形, Ract: 矩形
+ * @options   图形配置  Omit<IShapeCfg, "registerID">
  */
-labeler.register(type, options)
+labeler.register(id, options)
 ```
 ### 加载图片
 ```js
@@ -98,9 +98,9 @@ labeler.load(param)
 ### labeler API
 ```js
 isRegister(id)  // 判断是否注册
-label(name)  // 选择标注类型
+label(id, continuity)  // 选择标注类型
 labelOff()  // 取消当前标注
-addShape(shape)  // 添加图形
+addShape(shape, index)  // 添加图形
 remove(shape || id)  // 删除图形
 setActive(shape)  // 选中某一图形
 getShapeList()  // 获取图形列表
@@ -115,12 +115,14 @@ forceRender()  // 强制渲染
 ```js
 getPositions()  // 获取坐标点集合
 updatePositions(positions) // 更新坐标信息
+setActive(status) // 设置选中
 isActive()  // 是否被选中
+close()  // 图形闭合
 isClose()  // 是否闭合
+disabled() //禁用
 isDisabled()  // 是否禁用
-disabled()  // 禁用
-isHidden()  // 是否隐藏
 hidden()  // 隐藏
+isHidden()  // 是否隐藏
 show()  // 显示
 isShowTag()  // 是否展示标签
 tagShow(status?: boolean) // 控制标签展示

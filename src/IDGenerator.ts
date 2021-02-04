@@ -1,23 +1,23 @@
 import _ from "./lodash"
-let count = 0
 
-interface IIDGenerator {
+interface IIDGProps {
   len?: number;
   start?: number;
 }
 export class IDGenerator {
   private len: number
-  constructor(props?: IIDGenerator){
+  private count: number
+  constructor(props?: IIDGProps){
     const {
       len = 8,
       start = 1
     } = props || {}
-    count = start
+    this.count = start
     this.len = len
   }
   getID(){
-    const id = _.padStart(String(count), this.len, "0")
-    count++
+    const id = _.padStart(String(this.count), this.len, "0")
+    this.count++
     return id
   }
 }

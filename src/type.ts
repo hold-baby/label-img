@@ -1,4 +1,4 @@
-export * from "./EventHook"
+export * from "./EventEmitter"
 export * from "./EventReceiver"
 export * from "./Platform"
 export * from "./ShapeRegister"
