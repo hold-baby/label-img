@@ -4,11 +4,12 @@ type ShapeEvent = (shape: Shape) => void; // 特定shape事件
 type NotifyEvent = (props: any) => void; // 通知事件
 type EmitEventFn = ShapeEvent | NotifyEvent
 
+// 内置事件
 interface EmitEventMap {
-  "select": ShapeEvent;
-  "create": ShapeEvent;
-  "update": NotifyEvent;
-  "labelType": NotifyEvent;
+  "select": ShapeEvent; // shape被选中
+  "create": ShapeEvent; // shape创建
+  "update": NotifyEvent; // 更新
+  "labelType": NotifyEvent; // 标注类型修改
 }
 type EmitEventKey = keyof EmitEventMap
 

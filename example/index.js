@@ -35,7 +35,8 @@ lb.register("polygon", {
   type: "Polygon",
   style: {
     normal: {
-      lineColor: "black"
+      lineColor: "black",
+      opacity: .2
     }
   },
   tag: "多边形",

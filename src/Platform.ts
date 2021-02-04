@@ -114,10 +114,16 @@ export class Platform extends EventReceiver {
 		if(this._isInit) return
 		this._isInit = true
 
-		const mouseup = () => {
+		// 重置状态
+		const resetStatus = () => {
+			const isMoving = this._isShapeMoving
 			this._isMouseDown = false;
 			this._isShapeMoving = false;
-			this.render()
+
+			// shape移动结束 重新render
+			if(isMoving){
+				this.render()
+			}
 		}
 		// 初始化事件相关
 		const _initMouseEvent = () => {
@@ -153,7 +159,6 @@ export class Platform extends EventReceiver {
 							let shapeLen = this.shapeList.length
 							while(shapeLen > 0){
 								const shape = this.shapeList[shapeLen - 1]
-		
 								arcIndex = shape.isOnArc(shapeOffset)
 								if(arcIndex !== -1){
 									target = shape
@@ -195,13 +200,13 @@ export class Platform extends EventReceiver {
 							this._isMouseDown = true
 							break
 						case "mouseup":
-							mouseup()
+							resetStatus()
 							break
 						case "mouseout":
-							mouseup()
+							resetStatus()
 							break
 						case "mouseleave":
-							mouseup()
+							resetStatus()
 							break
 					}
 	
@@ -319,7 +324,7 @@ export class Platform extends EventReceiver {
 				}
 			})
 			const cancel = () => {
-				mouseup()
+				resetStatus()
 				start = [0, 0]
 			}
 			this.on("mouseup", lv, cancel)
@@ -507,7 +512,6 @@ export class Platform extends EventReceiver {
 					return
 				} 
 				e.ante.stopPropagation()
-				this._isShapeMoving = true
 	
 				// 获取shape相对于画布的坐标
 				arcIndex = index
@@ -871,8 +875,12 @@ export class Platform extends EventReceiver {
 			opacity: .7
 		})
 
-		// 标签
-    if(this.isTagShow() && shape.isShowTag()){
+		/**
+		 * 判断是否显示标签
+		 * shape移动和标注状态不显示标签
+		 */
+		const isTagShow = this.isTagShow() && shape.isShowTag() && !this._isShapeMoving && !this.drawing
+    if(isTagShow){
       const [x, y] = points[0]
 			const scale = this.scale
 			const tagNode = shape.tagNode()
@@ -890,7 +898,7 @@ export class Platform extends EventReceiver {
 			if(this.tagContainer.contains(tagNode)){
 				this.tagContainer.removeChild(tagNode)
 			}
-		}
+		}		
   }
 	private _renderCache = () => {
 		if(!this.cache) return
