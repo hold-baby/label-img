@@ -310,7 +310,7 @@ export class Platform extends EventReceiver {
 			})
 			this.on("mousemove", lv, (e) => {
 				const { offset, isOnShape } = e.ante
-				if(!this._isMouseDown) return;
+				if(!this._isMouseDown || this._isShapeMoving) return;
 				if(isOnShape) return;
 				if(this.drawing) return
 				
@@ -444,8 +444,6 @@ export class Platform extends EventReceiver {
 					})
 					this.cache = shape
 				}
-				console.log(this.cache);
-				
 				this.render()
 			})
 			this.on("mousemove", lv, (e) => {
@@ -519,6 +517,8 @@ export class Platform extends EventReceiver {
 				// this.orderShape(shape)
 	
 				if(this.activeShape !== shape){
+					// 选中则变为moving状态
+					this._isShapeMoving = true
 					select(shape)
 				}
 				// if(shape.isInsert() && shape.isClose()){
