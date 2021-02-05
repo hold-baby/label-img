@@ -65,7 +65,7 @@ export class Platform extends EventReceiver {
 
 		this.scale = 1
 		this.continuity = false
-		this._guideLineOrigin = [0, 0]
+		this._guideLineOrigin = [0, 0] // 辅助线中心点
 
 		this.cache = null
 		this.activeShape = null
@@ -159,6 +159,8 @@ export class Platform extends EventReceiver {
 							let shapeLen = this.shapeList.length
 							while(shapeLen > 0){
 								const shape = this.shapeList[shapeLen - 1]
+								if(shape.isHidden()) continue
+								if(shape.isDisabled()) break
 								arcIndex = shape.isOnArc(shapeOffset)
 								if(arcIndex !== -1){
 									target = shape
@@ -671,10 +673,7 @@ export class Platform extends EventReceiver {
 	public remove = (input: QueryShapeInput) => {
 		const [idx, shape] = this.findShapeIndex(input)
 		if(idx === null) return
-		const tagNode = (shape as Shape).tagNode()
-		if(this.tagContainer.contains(tagNode)){
-			this.tagContainer.removeChild(tagNode)
-		}
+		shape?.tagger.remove()
 		this.shapeList.splice(idx, 1)
 		this.render()
 		this.emitter.emit("update")
@@ -840,10 +839,11 @@ export class Platform extends EventReceiver {
 	private _renderShape = (shape: Shape) => {
 		const Image = this.Image
     if(shape.isHidden()){
-			const tagNode = shape.tagNode()
-			if(this.tagContainer.contains(tagNode)){
-				this.tagContainer.removeChild(tagNode)
-			}
+			// const tagNode = shape.tagNode()
+			// if(this.tagContainer.contains(tagNode)){
+			// 	this.tagContainer.removeChild(tagNode)
+			// }
+			shape.tagger.remove()
       return
     }
     const scale = this.scale
@@ -880,24 +880,13 @@ export class Platform extends EventReceiver {
 		 * shape移动和标注状态不显示标签
 		 */
 		const isTagShow = this.isTagShow() && shape.isShowTag() && !this._isShapeMoving && !this.drawing
+		const tagger = shape.tagger
     if(isTagShow){
-      const [x, y] = points[0]
 			const scale = this.scale
-			const tagNode = shape.tagNode()
-			
-			if(!this.tagContainer.contains(tagNode)){
-				this.tagContainer.appendChild(tagNode)
-			}
-			css(tagNode, {
-				left: `${x}px`,
-				top: `${y}px`,
-				transform: `scale(${scale})`
-			})
+			tagger.addTo(this.tagContainer)
+			tagger.move(points[0], scale)
     }else{
-			const tagNode = shape.tagNode()
-			if(this.tagContainer.contains(tagNode)){
-				this.tagContainer.removeChild(tagNode)
-			}
+			tagger.remove()
 		}		
   }
 	private _renderCache = () => {

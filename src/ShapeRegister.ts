@@ -4,6 +4,9 @@ import { IShapeOptions } from "./Shape"
 export type IShapeCfg = Omit<IShapeOptions, "data" | "positions">
 export type IShapeContent = Partial<Omit<IShapeOptions, "type">>
 export type RegisterID = string;
+/**
+ * 图形样式注册
+ */
 export class ShapeRegister {
   public add: (rid: RegisterID, shapeCfg: Omit<IShapeCfg, "registerID">) => void;
   public get: (rid: RegisterID) => any

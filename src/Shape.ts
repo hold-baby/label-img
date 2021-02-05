@@ -4,6 +4,7 @@ import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
 import { css, create } from "./element"
 import _ from "./lodash"
 import { IDG } from "./IDGenerator"
+import { Popover, PopoverContent } from "./Popover"
 
 export enum ShapeType {
   "Polygon" = "Polygon",
@@ -62,7 +63,7 @@ export interface IShapeOptions {
   name: string;
   positions: Points;
   data?: any;
-  tag?: string;
+  tag?: PopoverContent;
   showTag?: boolean;
   closed?: boolean;
   visible?: boolean;
@@ -88,9 +89,7 @@ export class Shape extends EventReceiver {
   public visible: boolean
   private insert: boolean
   private showTag: boolean
-  public tagNode: () => HTMLDivElement
-  public tagBody: () => HTMLDivElement
-  public tag: string
+  public tagger: Popover
   public max: number | undefined
   public data: any
   constructor(options: IShapeOptions){
@@ -125,24 +124,13 @@ export class Shape extends EventReceiver {
     this.visible = visible
     this.insert = insert
     this.showTag = showTag
-    this.tag = tag
-
-    const tagNode = create("div")
-    const tagBody = create("div")
-    this.tagNode = () => tagNode
-    this.tagBody = () => tagBody
-   
-    tagBody.innerHTML = this.tag
-    css(tagNode, {
-      position: "absolute",
-      display: "inline-block",
-      width: 200 + "px",
-      transformOrigin: "left"
+    this.tagger = new Popover({
+      content: tag,
+      style: {
+        color: "#fff",
+        bgColor: this.getStyle().dotColor
+      }
     })
-    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
-
-    tagNode.appendChild(tagBody)
-    
     this.max = max
     if(this.type === ShapeType.Rect){
       this.insert = false
@@ -295,7 +283,9 @@ export class Shape extends EventReceiver {
   }
   disabled(){
     this.status = "disabled"
-    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
+    this.tagger.css({
+      bgColor: this.getStyle().dotColor
+    })
     return this
   }
   isDisabled(){
@@ -303,7 +293,9 @@ export class Shape extends EventReceiver {
   }
   normal(){
     this.status = "normal"
-    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
+    this.tagger.css({
+      bgColor: this.getStyle().dotColor
+    })
     return this
   }
   hidden(){
@@ -321,27 +313,19 @@ export class Shape extends EventReceiver {
     return this.insert
   }
   isShowTag(){
-    return this.showTag && !!this.tag && this.isClose()
+    return this.showTag && !!this.tagger.content && this.isClose()
   }
   tagShow(status?: boolean){
     this.showTag = _.isUndefined(status) ? !this.showTag : !!status
-    tagBodyStyle(this.tagBody(), this.getStyle().dotColor)
+    this.tagger.css({
+      bgColor: this.getStyle().dotColor
+    })
   }
-  setTag(tag: string){
-    this.tag = tag
+  setTag(tag: PopoverContent){
+    this.tagger.content = tag
   }
   updatePositions(positions: Points){
     this.positions = positions
     return this
   }
-}
-function tagBodyStyle(tagBody: HTMLDivElement, bgColor: string) {
-  css(tagBody, {
-    background: bgColor,
-    position: "absolute",
-    bottom: 5 + "px",
-    display: "inline-block",
-    color: "#fff",
-    padding: `0 4px`
-  })
 }
