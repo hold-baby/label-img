@@ -10,6 +10,8 @@ interface EmitEventMap {
   "create": ShapeEvent; // shape创建
   "update": NotifyEvent; // 更新
   "labelType": NotifyEvent; // 标注类型修改
+  "init": NotifyEvent; // 初始化
+  "imageReady": NotifyEvent; // 图片加载成功
 }
 type EmitEventKey = keyof EmitEventMap
 
@@ -53,7 +55,7 @@ export class EventEmitter {
       }
     })
   }
-  on(type: EmitEventKey, cb: EmitEventFn){
+  on<K extends keyof EmitEventMap>(type: K, cb: EmitEventMap[K]){
     this.createEvent(type, {
       fn: cb,
       type: "on"
@@ -64,7 +66,7 @@ export class EventEmitter {
       idx && events && events.splice(idx, 1)
     }
   }
-  once(type: EmitEventKey, cb: EmitEventFn){
+  once<K extends keyof EmitEventMap>(type: K, cb: EmitEventMap[K]){
     this.createEvent(type, {
       fn: cb,
       type: "once"

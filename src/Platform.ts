@@ -25,7 +25,7 @@ export class Platform extends EventReceiver {
   private canvas: Canvas
 	private Image: Image
 	private tagContainer: HTMLDivElement
-  private scale: number
+  private _scale: number
 	private _options: LabelImgOptions
   private shapeRegister: ShapeRegister
 	private drawing: IShapeCfg | null
@@ -63,7 +63,7 @@ export class Platform extends EventReceiver {
 		this.tagContainer = tagContainer
 		this.container.appendChild(this.tagContainer)
 
-		this.scale = 1
+		this._scale = 1
 		this.continuity = false
 		this._guideLineOrigin = [0, 0] // 辅助线中心点
 
@@ -91,7 +91,7 @@ export class Platform extends EventReceiver {
 		this.render()
 	}
 	public reset = () => {
-		this.scale = 1
+		this._scale = 1
 		this.cache = null
 		this.activeShape = null
 		this.drawing = null
@@ -103,8 +103,8 @@ export class Platform extends EventReceiver {
 	 */
 	public resize = () => {
 		if(!this.Image || !this.Image.el) return
-		this.scale = getAdaptImgScale(this.Image.el, this.options())
-		this.Image.setOrigin([0, 0])
+		this._scale = getAdaptImgScale(this.Image.el, this.options())
+		this.Image.moveTo([0, 0])
 		this.render()
 	}
 	/**
@@ -136,13 +136,13 @@ export class Platform extends EventReceiver {
 					const isPropagation = true
 
 					// 判断是否在image上
-					const isOnImage = isInSide(offset, Image.getPosition(this.scale))
+					const isOnImage = isInSide(offset, Image.getPosition(this._scale))
 
 					// 判断是否在shape上
 					const getTargetShape = () => {
 						let target = null
 						let arcIndex = -1
-						const shapeOffset = Image.toImagePoint(offset, this.scale)
+						const shapeOffset = Image.toImagePoint(offset, this._scale)
 
 						if(this.activeShape){
 							const shape = this.activeShape
@@ -156,7 +156,7 @@ export class Platform extends EventReceiver {
 							}
 						}
 						if(!target){
-							let shapeLen = this.shapeList.length
+							let shapeLen = this.shapeList.filter((shape) => !shape.isHidden()).length
 							while(shapeLen > 0){
 								const shape = this.shapeList[shapeLen - 1]
 								if(shape.isHidden()) continue
@@ -252,18 +252,20 @@ export class Platform extends EventReceiver {
 							}
 						}
 	
-						ev.ante.isPropagation = true
-						const pEvList = this.getEventsByType(type, lv)
-						let pLen = pEvList.length
-						while(pLen){
-							if(!ev.ante.isPropagation){
-								pLen = 0;
-								break
+						if(Image.complate){
+							ev.ante.isPropagation = true
+							const pEvList = this.getEventsByType(type, lv)
+							let pLen = pEvList.length
+							while(pLen){
+								if(!ev.ante.isPropagation){
+									pLen = 0;
+									break
+								}
+								const event = pEvList[pLen - 1]
+								const { callback, ...other } = event
+								callback(ev, other)
+								pLen--
 							}
-							const event = pEvList[pLen - 1]
-							const { callback, ...other } = event
-							callback(ev, other)
-							pLen--
 						}
 					})
 				})
@@ -272,7 +274,7 @@ export class Platform extends EventReceiver {
 				if(!this.Image || this._isMouseDown) return
 				const { currentTarget: shape, offset, isOnShape } = ante
 				if(isOnShape && shape){
-					const shapeOffset = this.Image.toImagePoint(offset, this.scale)
+					const shapeOffset = this.Image.toImagePoint(offset, this._scale)
 					const arcIndex = shape.isOnArc(shapeOffset)
 					if(arcIndex !== -1){
 						this.cursor("point")
@@ -320,7 +322,7 @@ export class Platform extends EventReceiver {
 				const diff = [ox - start[0], oy - start[1]] as Point
 				const position = diff
 				
-				Image.setOrigin(position)
+				Image.moveTo(position)
 				if(this._isMouseDown){
 					this.render()
 				}
@@ -331,62 +333,16 @@ export class Platform extends EventReceiver {
 			}
 			this.on("mouseup", lv, cancel)
 			this.on("mouseout", lv, cancel)
-			
-			const slmt = 0.25 // min scale limit
-			const step = 0.05;
-
+		}
+		// 初始化缩放事件
+		const _initScaler = () => {
+			const Image = this.Image
 			Image.on("wheel", (e) => {
 				const Image = this.Image
 				if(!Image.el) return
-				const direction = e.deltaY < 0 ? 1 : -1;
-
-				// canvas width and height
-				const [cw, ch] = this.canvas.getSize()
-				// image width and height
-				const [iw, ih] = this.Image.getSize(this.scale)
-				let count = 0
-
-				// 判断缩小到1/4则不允许再缩小
-				if(direction === -1){
-					if(cw * slmt >= iw){
-						count++
-					}
-					if(ch * slmt >= ih){
-						count++
-					}
-					if(count === 2) return
-				}
-
 				const { offset } = e.ante
-				const [px, py] = offset
-	
-				const after = direction * step;
-				let scale = Number((after + this.scale).toFixed(2));
-	
-				if(scale < 0.01){
-					scale = 0.01;
-				}
-				// 计算画布缩放(以鼠标位置为中心点)
-				const [width, height] = Image.getSize()
-				const [ox, oy] = Image.getOrigin()
-	
-				const sw = width * this.scale
-				const sw2 = width * scale
-				const dx = Math.abs(px - ox)
-				const fx = px - ox > 0 ? -1 : 1
-				const sx = ((dx * sw2) / sw) - dx
-				const x = fx * sx + ox
-	
-				const sh = height * this.scale
-				const sh2 = height * scale
-				const dy = Math.abs(py - oy)
-				const fy = py - oy > 0 ? -1 : 1
-				const sy = ((dy * sh2) / sh) - dy
-				const y = fy * sy + oy
-	
-				Image.setOrigin([x, y])
-				this.scale = scale;
-				this.render()
+				const direction = e.deltaY < 0 ? 1 : -1;
+				this.scale(direction, offset)
 			})
 		}
 		// 初始化标注事件
@@ -400,7 +356,7 @@ export class Platform extends EventReceiver {
 				// 判断当前点击是否在img上
 				if(!isOnImage) return
 				// 计算出当前点位在img的什么位置
-				let point = Image.toImagePoint(offset, this.scale)
+				let point = Image.toImagePoint(offset, this._scale)
 	
 				start = point
 				const cache = this.cache
@@ -458,7 +414,7 @@ export class Platform extends EventReceiver {
 	
 				if(shapeType === ShapeType.Rect){
 					const { offset } = e.ante
-					const end = Image.toImagePoint(offset, this.scale)
+					const end = Image.toImagePoint(offset, this._scale)
 					const positions: Points = getRectPoints(start, end)
 					cache.updatePositions(positions)
 					this.render()
@@ -548,7 +504,7 @@ export class Platform extends EventReceiver {
 				if(arcIndex === -1){
 					// shape move
 					rp = cp.map(([cx, cy]) => {
-						return [cx + diff[0] / this.scale, cy + diff[1] / this.scale]
+						return [cx + diff[0] / this._scale, cy + diff[1] / this._scale]
 					})
 					this.cursor("drag")
 				}else{
@@ -556,22 +512,23 @@ export class Platform extends EventReceiver {
 					rp = cp.slice()
 					const p = rp[arcIndex]
 					
+					const scale = this._scale
 					if(this.activeShape.type === "Rect"){
 						switch(arcIndex){
 							case 1:
-								rp[0] = [rp[0][0], rp[0][1] + diff[1] / this.scale]
-								rp[2] = [rp[2][0] + diff[0] / this.scale, rp[2][1]]
+								rp[0] = [rp[0][0], rp[0][1] + diff[1] / scale]
+								rp[2] = [rp[2][0] + diff[0] / scale, rp[2][1]]
 								break
 							case 3:
-								rp[0] = [rp[0][0] + diff[0] / this.scale, rp[0][1]]
-								rp[2] = [rp[2][0], rp[2][1] + diff[1] / this.scale]
+								rp[0] = [rp[0][0] + diff[0] / scale, rp[0][1]]
+								rp[2] = [rp[2][0], rp[2][1] + diff[1] / scale]
 								break
 							default:
-								rp[arcIndex] = [p[0] + diff[0] / this.scale, p[1] + diff[1] / this.scale]
+								rp[arcIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
 						}
 						rp = getRectPoints(rp[0], rp[2])
 					}else{
-						rp[arcIndex] = [p[0] + diff[0] / this.scale, p[1] + diff[1] / this.scale]
+						rp[arcIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
 					}
 				}
 				this.activeShape.updatePositions(rp)
@@ -589,6 +546,7 @@ export class Platform extends EventReceiver {
 		_initDrawEvent()
 		_initShapeEvent()
 		_initImageEvent()
+		_initScaler()
 	}
 	/**
 	 * 加载图片
@@ -598,8 +556,9 @@ export class Platform extends EventReceiver {
 		this.reset()
 		return new Promise((c, e) => {
 			this.Image.load(source).then((img) => {
-        this.scale = getAdaptImgScale(img, this.options())
+        this._scale = getAdaptImgScale(img, this.options())
 				this.render()
+				this.emitter.emit("imageReady")
 				c(img)
 			}, (err) => {
 				e(err)
@@ -790,6 +749,62 @@ export class Platform extends EventReceiver {
 	public cursor = _.throttle((cursor: ICursor) => {
 		this.canvas.cursor(displayCursor(cursor))
 	}, 100)
+	public scale = (direction?: -1 | 1, point?: Point) => {
+		if(_.isUndefined(direction)){
+			return Number(this._scale.toFixed(2))
+		}
+		const slmt = 0.25 // min scale limit
+		const step = 0.05;
+		// canvas width and height
+		const [cw, ch] = this.canvas.getSize()
+		// image width and height
+		const [iw, ih] = this.Image.getSize(this._scale)
+		let count = 0
+
+		// 判断缩小到1/4则不允许再缩小
+		if(direction === -1){
+			if(cw * slmt >= iw){
+				count++
+			}
+			if(ch * slmt >= ih){
+				count++
+			}
+			if(count === 2) return
+		}
+		const after = direction * step;
+		let scale = Number((after + this._scale).toFixed(2));
+
+		this.scaleTo(scale, point)
+	}
+	public scaleTo = (scale: number, point?: Point) => {
+		const Image = this.Image
+		const [px, py] = point ? point : Image.getCenter(this._scale)
+		
+		// 计算画布缩放(以鼠标位置为中心点)
+		const [width, height] = Image.getSize()
+		const [ox, oy] = Image.getOrigin()
+
+		const sw = width * this._scale
+		const sw2 = width * scale
+		const dx = Math.abs(px - ox)
+		const fx = px - ox > 0 ? -1 : 1
+		const sx = ((dx * sw2) / sw) - dx
+		const x = fx * sx + ox
+
+		const sh = height * this._scale
+		const sh2 = height * scale
+		const dy = Math.abs(py - oy)
+		const fy = py - oy > 0 ? -1 : 1
+		const sy = ((dy * sh2) / sh) - dy
+		const y = fy * sy + oy
+
+		Image.moveTo([x, y])
+		this._scale = scale;
+		this.render()
+	}
+	public moveTo = (origin: Point) => {
+		this.Image.moveTo(origin)
+	}
 	// 渲染相关
 	private _clearCanvas = () => {
 		this.canvas.clear()
@@ -806,8 +821,8 @@ export class Platform extends EventReceiver {
 		if(!Image || !Image.complate) return
 		const el = Image.getEl() as HTMLImageElement
     const [width, height] = Image.getSize()
-    const x = width * this.scale;
-    const y = height * this.scale;
+    const x = width * this._scale;
+    const y = height * this._scale;
     const [ox, oy] = Image.getOrigin()
 		ctx.drawImage(el, ox, oy, x, y)
   }
@@ -846,7 +861,7 @@ export class Platform extends EventReceiver {
 			shape.tagger.remove()
       return
     }
-    const scale = this.scale
+    const scale = this._scale
     const { positions } = shape
     const style = shape.getStyle()
 		
@@ -866,14 +881,21 @@ export class Platform extends EventReceiver {
 		}
 		
 		// 图形
-		this.canvas.polygon(points, {
+		const shapeStyle = {
 			lineColor: lineColor,
 			lineWidth: lineWidth * scale,
-			dotRadius: dotRadius * this.scale,
+			dotRadius: dotRadius * this._scale,
 			dotColor: dotColor,
 			fillColor: fillColor,
 			opacity: .7
-		})
+		}
+		if(shape.isClose()){
+			this.canvas.polygon(points, shapeStyle)
+		}else{
+			this.canvas.fill(points, shapeStyle)
+			this.canvas.line(points, shapeStyle)
+			this.canvas.dot(points[0], shapeStyle)
+		}
 
 		/**
 		 * 判断是否显示标签
@@ -882,7 +904,7 @@ export class Platform extends EventReceiver {
 		const isTagShow = this.isTagShow() && shape.isShowTag() && !this._isShapeMoving && !this.drawing
 		const tagger = shape.tagger
     if(isTagShow){
-			const scale = this.scale
+			const scale = this._scale
 			tagger.addTo(this.tagContainer)
 			tagger.move(points[0], scale)
     }else{

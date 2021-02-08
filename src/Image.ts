@@ -80,6 +80,19 @@ export class Image extends EventReceiver {
 		return this.origin.slice()
 	}
 	/**
+	 * 获取图片中心点
+	 * @return Point
+	 */
+	getCenter(scale = 1){
+		if(this.el){
+			const [x, y] = this.origin.slice()
+			const { width, height } = this.el
+			const [hx, hh] = [(width * scale) / 2, (height * scale) / 2]
+			return [x + hx, y + hh]
+		}
+		return dfOrigin
+	}
+	/**
 	 * 获取图片缩放后的坐标点
 	 * @param scale number 缩放大小
 	 */
@@ -131,7 +144,7 @@ export class Image extends EventReceiver {
 	 * 设置图片的原点坐标
 	 * @param origin Point 原点坐标
 	 */
-	setOrigin(origin: Point){
+	moveTo(origin: Point){
 		this.origin = origin
 	}
 }

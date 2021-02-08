@@ -67,6 +67,7 @@ export interface IShapeOptions {
   showTag?: boolean;
   closed?: boolean;
   visible?: boolean;
+  visible2?: boolean;
   active?: boolean;
   disabled?: boolean;
   insert?: boolean;
@@ -298,7 +299,7 @@ export class Shape extends EventReceiver {
     })
     return this
   }
-  hidden(){
+  hidden = () => {
     this.visible = false
     return this
   }
