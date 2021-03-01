@@ -131,14 +131,24 @@ export class Image extends EventReceiver {
 	 * @return Points
 	 */
 	getShape2CanvasPoints(positions: Points, scale: number){
-    const orgin = this.getOrigin()
-    const [ox, oy] = orgin
-    const rp: Points = positions.map(([sx, sy]) => {
-      const cx = ox + sx * scale
-      const cy = oy + sy * scale
-      return [cx, cy]
+    const rp: Points = positions.map((position) => {
+      return this.getShape2CanvasPoint(position, scale)
     })
     return rp
+	}
+	/**
+	 * 获取shape坐标点转换成画布的坐标
+	 * @param positions Points Shape的坐标点集合
+	 * @param scale 缩放大小
+	 * @return Points
+	 */
+	getShape2CanvasPoint(position: Point, scale: number){
+    const orgin = this.getOrigin()
+    const [ox, oy] = orgin
+    const [sx, sy] = position
+		const cx = ox + sx * scale
+    const cy = oy + sy * scale
+		return [cx, cy] as Point
 	}
 	/**
 	 * 设置图片的原点坐标

@@ -22,8 +22,6 @@ export type LabelImgOptions = typeof defaulOptions
 
 export class Platform extends EventReceiver {
   private container: HTMLDivElement
-  private canvas: Canvas
-	private Image: Image
 	private tagContainer: HTMLDivElement
   private _scale: number
 	private _options: LabelImgOptions
@@ -33,6 +31,8 @@ export class Platform extends EventReceiver {
 	private activeShape: Shape | null
 	private shapeList: Shape[]
 
+	public canvas: Canvas
+	public Image: Image
 	public emitter: EventEmitter
 	private continuity: boolean
 
@@ -807,13 +807,17 @@ export class Platform extends EventReceiver {
 	}
 	// 渲染相关
 	private _clearCanvas = () => {
+		this.emitter.emit("beforeClear")
 		this.canvas.clear()
+		this.emitter.emit("afterClear")
 	}
 	private _renderBackground = () => {
 		const { bgColor, width, height } = this.options()
+		this.emitter.emit("beforeRenderBackground")
 		this.canvas.fillReact([0, 0], [width, height], {
 			fillColor: bgColor
 		})
+		this.emitter.emit("afterRenderBackground")
 	}
 	private _renderImage = () => {
 		const ctx = this.canvas.ctx()
@@ -823,8 +827,10 @@ export class Platform extends EventReceiver {
     const [width, height] = Image.getSize()
     const x = width * this._scale;
     const y = height * this._scale;
-    const [ox, oy] = Image.getOrigin()
+		const [ox, oy] = Image.getOrigin()
+		this.emitter.emit("beforeRenderImage")
 		ctx.drawImage(el, ox, oy, x, y)
+		this.emitter.emit("afterRenderImage")
   }
 	private _renderGuideLine = () => {
 		const [x, y] = this._guideLineOrigin
@@ -913,13 +919,16 @@ export class Platform extends EventReceiver {
   }
 	private _renderCache = () => {
 		if(!this.cache) return
-    this._renderShape(this.cache)
+		this.emitter.emit("beforeRenderDrawing")
+		this._renderShape(this.cache)
+		this.emitter.emit("afterRenderDrawing")
 	}
 	private _renderShapeList = () => {
 		const Image = this.Image
 		if(!Image || !Image.complate) return
     const shapeList = this.shapeList
 		if(!shapeList.length) return
+		this.emitter.emit("beforeRenderShape")
 		let active: null | Shape = null
     shapeList.forEach((shape) => {
 			if(shape.isActive()){
@@ -931,8 +940,10 @@ export class Platform extends EventReceiver {
 		if(active){
 			this._renderShape(active)
 		}
+		this.emitter.emit("afterRenderShape")
 	}
 	public forceRender = () => {
+		this.emitter.emit("beforeRender")
 		this._clearCanvas()
 		this._renderBackground()
 		this._renderImage()
@@ -941,6 +952,7 @@ export class Platform extends EventReceiver {
 		if(this.options().guideLine){
 			this._renderGuideLine()
 		}
+		this.emitter.emit("afterRender")
 	}
 	public render = _.throttle(() => {
 		this.forceRender()
