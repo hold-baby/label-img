@@ -16,7 +16,8 @@ const defaulOptions = {
   height: 600,
 	bgColor: `#000`,
 	tagShow: true,
-	guideLine: false
+	guideLine: false,
+	shouldShapeStyleScale: true
 }
 export type LabelImgOptions = typeof defaulOptions
 
@@ -135,14 +136,15 @@ export class Platform extends EventReceiver {
 					const offset = [e.offsetX, e.offsetY] as Point
 					const isPropagation = true
 
+					const scale = this._scale
 					// 判断是否在image上
-					const isOnImage = isInSide(offset, Image.getPosition(this._scale))
+					const isOnImage = isInSide(offset, Image.getPosition(scale))
 
 					// 判断是否在shape上
 					const getTargetShape = () => {
 						let target = null
 						let arcIndex = -1
-						const shapeOffset = Image.toImagePoint(offset, this._scale)
+						const shapeOffset = Image.toImagePoint(offset, scale)
 
 						if(this.activeShape){
 							const shape = this.activeShape
@@ -462,10 +464,10 @@ export class Platform extends EventReceiver {
 				// this.orderShape(shape)
 	
 				if(this.activeShape !== shape){
-					// 选中则变为moving状态
-					this._isShapeMoving = true
 					select(shape)
 				}
+				// 选中则变为moving状态
+				this._isShapeMoving = true
 				// if(shape.isInsert() && shape.isClose()){
 				// 	console.log(offset);
 				// 	const isInLine = shape.isOnLine(offset)
@@ -859,10 +861,6 @@ export class Platform extends EventReceiver {
 	private _renderShape = (shape: Shape) => {
 		const Image = this.Image
     if(shape.isHidden()){
-			// const tagNode = shape.tagNode()
-			// if(this.tagContainer.contains(tagNode)){
-			// 	this.tagContainer.removeChild(tagNode)
-			// }
 			shape.tagger.remove()
       return
     }
@@ -887,11 +885,11 @@ export class Platform extends EventReceiver {
 		
 		// 图形
 		const shapeStyle = {
-			lineColor: lineColor,
+			lineColor,
 			lineWidth: lineWidth * scale,
-			dotRadius: dotRadius * this._scale,
-			dotColor: dotColor,
-			fillColor: fillColor,
+			dotRadius: dotRadius * scale,
+			dotColor,
+			fillColor,
 			opacity: .7
 		}
 		if(shape.isClose()){
