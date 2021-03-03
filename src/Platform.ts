@@ -17,7 +17,8 @@ const defaulOptions = {
 	bgColor: `#000`,
 	tagShow: true,
 	guideLine: false,
-	shouldShapeStyleScale: true
+	shouldShapeStyleScale: true,
+	shouldTagScale: true
 }
 export type LabelImgOptions = typeof defaulOptions
 
@@ -909,7 +910,7 @@ export class Platform extends EventReceiver {
     if(isTagShow){
 			const scale = this._scale
 			tagger.addTo(this.tagContainer)
-			tagger.move(points[0], scale)
+			tagger.move(points[0], this._options.shouldTagScale ? scale : 1)
     }else{
 			tagger.remove()
 		}		
