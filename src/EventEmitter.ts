@@ -13,6 +13,8 @@ interface EmitEventMap {
   "init": NotifyEvent; // 初始化
   "imageReady": NotifyEvent; // 图片加载成功
 
+  "shapeRegister": NotifyEvent; // 图形注册
+
   "beforeRender": NotifyEvent; // 渲染之前
   "afterRender": NotifyEvent; // 渲染之后
 

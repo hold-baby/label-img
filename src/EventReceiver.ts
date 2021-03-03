@@ -45,7 +45,7 @@ interface EventHandler {
   lv: IAntLv;
   callback: ICallback;
 }
-interface IAntEvent {
+export interface IAntEvent {
   lv: IAntLv;
   type: IAntMouseEvent;
   callback: ICallback;

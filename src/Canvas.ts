@@ -35,6 +35,16 @@ export class Canvas {
     this.el = () => el
     this.ctx = () => ctx
   }
+  public setPoints = (points: Points) => {
+    const ctx = this.ctx()
+    points.forEach(([x, y], i) => {
+      if(!i) {
+        ctx.moveTo(x, y)
+        return
+      }
+      ctx.lineTo(x, y)
+    })
+  }
   public line = (points: Points, lineStyle: Partial<ILineStyle>) => {
     if(points.length > 1){
       const ctx = this.ctx()
@@ -73,13 +83,7 @@ export class Canvas {
       ctx.beginPath()
       const _opacity = this.el().style.opacity || 1
       
-      points.forEach(([x, y], idx) => {
-        if(idx === 0){
-          ctx.moveTo(x, y)
-        }else{
-          ctx.lineTo(x, y)
-        }
-      })
+      this.setPoints(points)
       ctx.fillStyle = fillColor
       
       if(opacity){

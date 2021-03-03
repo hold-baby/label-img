@@ -1,4 +1,4 @@
-import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte } from "./EventReceiver"
+import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte, IAntEvent } from "./EventReceiver"
 import { Image, ImageLoadSource } from "./Image"
 import { Shape, ShapeType, QueryShapeInput } from "./Shape"
 import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegister"
@@ -48,7 +48,7 @@ export class Platform extends EventReceiver {
 			position: "relative",
 			overflow: "hidden"
 		})
-		this._options = Object.assign({}, LabelImgOptions, defaulOptions)
+		this._options = Object.assign({}, defaulOptions, LabelImgOptions)
 		this.emitter = new EventEmitter()
 
 		this.canvas = new Canvas()
@@ -211,6 +211,25 @@ export class Platform extends EventReceiver {
 							resetStatus()
 							break
 					}
+
+					const runEventQueue = (eventList: IAntEvent[], ante: IAnte, isTarget?: boolean) => {
+						let len = eventList.length
+						const { isPropagation, currentTarget } = ante
+						while(len){
+							if(!isPropagation){
+								len = 0;
+								break
+							}
+							const event = eventList[len - 1]
+							const { callback, ...other } = event
+							if(!isTarget){
+								callback(ev, other)
+							}else if(currentTarget === shape){
+								callback(ev, other)
+							}
+							len--
+						}
+					}
 	
 					const ev = e as AntMouseEvent
 					ev.ante = ante
@@ -218,74 +237,42 @@ export class Platform extends EventReceiver {
 						// shape event
 						if(isOnShape){
 							this.shapeList.forEach((shape) => {
-								const sEvList = shape.getEventsByType(type, lv)
-								let sLen = sEvList.length
-								while(sLen){
-									if(!ev.ante.isPropagation){
-										sLen = 0;
-										break
-									}
-									const event = sEvList[sLen - 1]
-									const { callback, ...other } = event
-									if(currentTarget === shape){
-										callback(ev, other)
-									}
-									sLen--
-								}
+								runEventQueue(shape.getEventsByType(type, lv), ante, true)
 							})
 						}
-						
 						// image event
 						if(isOnImage){
 							ev.ante.isPropagation = true
-							const iEvList = Image.getEventsByType(type, lv)
-							let iLen = iEvList.length
-							while(iLen){
-								if(!ev.ante.isPropagation){
-									iLen = 0;
-									break
-								}
-								const event = iEvList[iLen - 1]
-								const { callback, ...other } = event
-								callback(ev, other)
-								iLen--
-							}
+							runEventQueue(Image.getEventsByType(type, lv), ante)
 						}
-	
+						// platform event
 						if(Image.complate){
 							ev.ante.isPropagation = true
-							const pEvList = this.getEventsByType(type, lv)
-							let pLen = pEvList.length
-							while(pLen){
-								if(!ev.ante.isPropagation){
-									pLen = 0;
-									break
-								}
-								const event = pEvList[pLen - 1]
-								const { callback, ...other } = event
-								callback(ev, other)
-								pLen--
-							}
+							runEventQueue(this.getEventsByType(type, lv), ante)
 						}
 					})
 				})
 			})
+		}
+		// 初始化鼠标手势
+		const _initCursor = () => {
 			this.on("mousemove", ({ ante }) => {
 				if(!this.Image || this._isMouseDown) return
 				const { currentTarget: shape, offset, isOnShape } = ante
-				if(isOnShape && shape){
+				if(this.drawing){ // 当前正在标注
+					this.cursor("label")
+				}else if(isOnShape && shape){ // 鼠标在图形上
 					const shapeOffset = this.Image.toImagePoint(offset, this._scale)
+					// 判断是否在点上
 					const arcIndex = shape.isOnArc(shapeOffset)
-					if(arcIndex !== -1){
-						this.cursor("point")
-					}else{
+					if(arcIndex !== -1){ // 在点上
+						this.cursor("pointer")
+					}else{ // 没在点上
 						const isInShape = shape.isOnShape(shapeOffset)
 						if(isInShape){
-							this.cursor("pointer")
+							this.cursor("default")
 						}
 					}
-				}else if(this.drawing){
-					this.cursor("point")
 				}else{
 					this.cursor("default")
 				}
@@ -542,6 +529,7 @@ export class Platform extends EventReceiver {
 			})
 		}
 		_initMouseEvent()
+		_initCursor()
 		_initGuideLine()
 		_initDrawEvent()
 		_initShapeEvent()
@@ -571,7 +559,15 @@ export class Platform extends EventReceiver {
 	 * @param options IShapeCfg 图形配置
 	 */
 	public register = (rid: RegisterID, options: Omit<IShapeCfg, "registerID">) => {
+		if(this.isRegister(rid)) return
     this.shapeRegister.add(rid, options)
+		this.emitter.emit("shapeRegister")
+	}
+	/**
+	 * 获取已注册图形map
+	 */
+	public getRegisterMap = () => {
+		return this.shapeRegister.getMap()
 	}
 	/**
 	 * 以注册的图形模版创建图形
@@ -622,6 +618,8 @@ export class Platform extends EventReceiver {
 			this.shapeList.splice(idx, 0, shape)
 		}else{
 			this.shapeList.push(shape)
+			this.emitter.emit("create")
+			this.emitter.emit("update")
 		}
 		this.render()
 	}
@@ -635,6 +633,7 @@ export class Platform extends EventReceiver {
 		shape?.tagger.remove()
 		this.shapeList.splice(idx, 1)
 		this.render()
+		this.emitter.emit("delete")
 		this.emitter.emit("update")
 	}
 	/**
