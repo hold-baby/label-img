@@ -29,14 +29,14 @@ export type TShapeStyle = Partial<IShapeStyle>
 
 export const normal: IShapeStyle = {
   dotColor: "red",
-  dotRadius: 3,
+  dotRadius: 2,
   lineColor: "#c30",
   lineWidth: 2,
   fillColor: "pink",
 }
 export const active: IShapeStyle = {
   dotColor: "red",
-  dotRadius: 3,
+  dotRadius: 2,
   lineColor: "transparent",
   lineWidth: 0,
   fillColor: "#c30",
@@ -147,11 +147,11 @@ export class Shape extends EventReceiver {
    * 判断是否在点上
    * @param offset 相对图片的位置
    */
-  isOnArc(offset: Point){
+  isOnArc(offset: Point, scale = 1){
     const positions = this.getPositions()
     const style = this.getStyle()
     const { dotRadius } = style
-    const arcIndex = positions.findIndex((point) => isInCircle(offset, dotRadius, point))
+    const arcIndex = positions.findIndex((point) => isInCircle(offset, dotRadius * scale, point))
     return arcIndex
   }
   /**
@@ -328,5 +328,15 @@ export class Shape extends EventReceiver {
   updatePositions(positions: Points){
     this.positions = positions
     return this
+  }
+  public addPoint = _.throttle((point: Point) => {
+    const last = this.positions[this.positions.length - 1]
+    if(last.toString() !== point.toString()){ // 避免抖动重复添加
+      this.positions.push(point)
+    }
+  }, 150)
+  public rmDot = (index: number) => {
+    if(this.positions.length <= 3) return
+    this.positions.splice(index, 1)
   }
 }

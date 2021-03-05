@@ -34,8 +34,10 @@ export interface IAnte {
   isPropagation: boolean;
   getTargetShape: () => [Shape | null, number];
   currentTarget: Shape | null;
+  currentDotIndex: number;
   isOnImage: boolean;
   isOnShape: boolean;
+  isOnArc: boolean;
 }
 export interface AntMouseEvent extends MouseEvent, WheelEvent {
   ante: IAnte;

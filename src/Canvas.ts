@@ -31,7 +31,8 @@ export class Canvas {
   constructor(){
     const el = create("canvas")
     const ctx = el.getContext("2d") as CanvasRenderingContext2D
-    
+    el.tabIndex = -1
+    el.focus()
     this.el = () => el
     this.ctx = () => ctx
   }

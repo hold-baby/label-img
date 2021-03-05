@@ -6,6 +6,7 @@ import isObject from "lodash/isObject"
 import isArray from "lodash/isArray"
 import isFunction from "lodash/isFunction"
 import throttle from "lodash/throttle"
+import debounce from "lodash/debounce"
 import { ThrottleSettings } from "lodash"
  
 export default {
@@ -16,5 +17,6 @@ export default {
   isObject,
   isArray,
   isFunction,
+  debounce,
   throttle: throttle as <T extends (...args: any) => any>(func: T, wait?: number | undefined, options?: ThrottleSettings | undefined) => Function
 } 

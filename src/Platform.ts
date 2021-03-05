@@ -9,6 +9,7 @@ import { Point, Points } from "./structure"
 import { ICursor, displayCursor } from "./cursor"
 import _ from "./lodash"
 import { css, create } from "./element"
+import { MoveKeyCode, FuncKeyCode } from "./keycode"
 
 // 默认配置
 const defaulOptions = {
@@ -18,7 +19,7 @@ const defaulOptions = {
 	tagShow: true,
 	guideLine: false,
 	shouldShapeStyleScale: true,
-	shouldTagScale: true
+	shouldTagScale: false
 }
 export type LabelImgOptions = typeof defaulOptions
 
@@ -115,13 +116,17 @@ export class Platform extends EventReceiver {
 	private _init = () => {
 		if(this._isInit) return
 		this._isInit = true
+		const canvas = this.canvas.el()
+		const Image = this.Image
+		let keyDownCode: null | number = null
 
+		let position: Point | null = null
 		// 重置状态
 		const resetStatus = () => {
 			const isMoving = this._isShapeMoving
 			this._isMouseDown = false;
 			this._isShapeMoving = false;
-
+			position = null
 			// shape移动结束 重新render
 			if(isMoving){
 				this.render()
@@ -129,75 +134,35 @@ export class Platform extends EventReceiver {
 		}
 		// 初始化事件相关
 		const _initMouseEvent = () => {
-			const canvas = this.canvas.el()
 			antMouseEvents.forEach((type) => {
-				const Image = this.Image
 				canvas.addEventListener(type, (e) => {
 					e.preventDefault()
+					canvas.focus()
 					const offset = [e.offsetX, e.offsetY] as Point
 					const isPropagation = true
 
 					const scale = this._scale
 					// 判断是否在image上
 					const isOnImage = isInSide(offset, Image.getPosition(scale))
-
-					// 判断是否在shape上
-					const getTargetShape = () => {
-						let target = null
-						let arcIndex = -1
-						const shapeOffset = Image.toImagePoint(offset, scale)
-
-						if(this.activeShape){
-							const shape = this.activeShape
-							arcIndex = shape.isOnArc(shapeOffset)
-							if(arcIndex !== -1){
-								target = shape
-							}
-							const isInShape = shape.isOnShape(shapeOffset)
-							if(isInShape){
-								target = shape
-							}
-						}
-						if(!target){
-							let shapeLen = this.shapeList.filter((shape) => !shape.isHidden()).length
-							while(shapeLen > 0){
-								const shape = this.shapeList[shapeLen - 1]
-								if(shape.isHidden()) continue
-								if(shape.isDisabled()) break
-								arcIndex = shape.isOnArc(shapeOffset)
-								if(arcIndex !== -1){
-									target = shape
-									break
-								}
-								const isInShape = shape.isOnShape(shapeOffset)
-								if(isInShape){
-									target = shape
-									break
-								}
-								shapeLen--
-							}
-						}
-						if(target && target.isHidden()){
-							target = null
-							arcIndex = -1
-						}
-						return [target, arcIndex] as [Shape | null, number]
-					}
-					const [shape] = getTargetShape()
+					
+					const [shape, dotIndex] = this.getTargetShape(offset)
 					const isOnShape = this._isShapeMoving || !!shape
+					const isOnArc = this._isMouseDown || dotIndex !== -1
 
 					let currentTarget: null | Image | Shape = isOnShape ? shape : isOnImage ? Image : null
-
+					const currentDotIndex = dotIndex
+					position = offset
 					const ante = {
 						offset,
 						isOnImage,
 						isOnShape,
+						isOnArc,
 						isPropagation,
 						stopPropagation: () => {
 							ante.isPropagation = false
 						},
-						getTargetShape,
-						currentTarget
+						currentTarget,
+						currentDotIndex
 					} as IAnte
 
 					switch(type){
@@ -260,23 +225,16 @@ export class Platform extends EventReceiver {
 		// 初始化鼠标手势
 		const _initCursor = () => {
 			this.on("mousemove", ({ ante }) => {
+				position = ante.offset
 				if(!this.Image || this._isMouseDown) return
-				const { currentTarget: shape, offset, isOnShape } = ante
+				const { isOnShape, isOnArc } = ante
 				if(this.drawing){ // 当前正在标注
 					this.cursor("label")
-				}else if(isOnShape && shape){ // 鼠标在图形上
-					const shapeOffset = this.Image.toImagePoint(offset, this._scale)
-					// 判断是否在点上
-					const arcIndex = shape.isOnArc(shapeOffset)
-					if(arcIndex !== -1){ // 在点上
-						this.cursor("pointer")
-					}else{ // 没在点上
-						const isInShape = shape.isOnShape(shapeOffset)
-						if(isInShape){
-							this.cursor("default")
-						}
-					}
-				}else{
+				}else if(isOnArc){ // 判断是否在点上
+					this.cursor("pointer")
+				}else if(isOnShape){ // 鼠标在图形上
+					this.cursor("default")
+				} else{
 					this.cursor("default")
 				}
 			})
@@ -356,7 +314,7 @@ export class Platform extends EventReceiver {
 						if(cache.positions.length > 2){
 							const first = cache.positions[0]
 							const style = cache.getStyle()
-							isClose = isInCircle(point, style.dotRadius, first,)
+							isClose = isInCircle(point, style.dotRadius, first)
 						}
 						if(cache.max && cache.positions.length + 1 >= cache.max){
 							cache.positions.push(point)
@@ -375,7 +333,7 @@ export class Platform extends EventReceiver {
 								this.labelOff()
 							}
 						}else{
-							cache.positions.push(point)
+							cache.addPoint(point)
 						}
 					}
 				}else{
@@ -396,18 +354,26 @@ export class Platform extends EventReceiver {
 			})
 			this.on("mousemove", lv, (e) => {
 				const cache = this.cache
-				const Image = this.Image
 				if(!this.drawing || !Image.complate || !cache) return
+				const { offset } = e.ante
 				
 				this._isShapeMoving = true
 				const shapeType = this.drawing.type
-	
+				
 				if(shapeType === ShapeType.Rect){
 					const { offset } = e.ante
 					const end = Image.toImagePoint(offset, this._scale)
 					const positions: Points = getRectPoints(start, end)
 					cache.updatePositions(positions)
 					this.render()
+				}else if(keyDownCode === FuncKeyCode.E){
+					const point = Image.toImagePoint(offset, this._scale)
+					const beforeLen = cache.positions.length
+					cache.addPoint(point)
+					const afterLen = cache.positions.length
+					if(afterLen > beforeLen){
+						this.render()
+					}
 				}
 			})
 			this.on("mouseup", lv, () => {
@@ -437,7 +403,7 @@ export class Platform extends EventReceiver {
 			const lv = "top"
 			let start: Point = [0, 0]
 			let cp = [] as Points // cache postion
-			let arcIndex = -1
+			let dotIndex = -1
 	
 			const select = (shape: Shape) => {
 				this.loseActive()
@@ -448,11 +414,10 @@ export class Platform extends EventReceiver {
 			}
 	
 			this.on("mousedown", lv, (e) => {
-				const { getTargetShape, offset } = e.ante
+				const { offset, currentTarget: shape, currentDotIndex, isOnShape } = e.ante
 				start = offset
-				const [shape, index] = getTargetShape()
 				if(this.drawing) return
-				if(!shape) return
+				if(!isOnShape || !shape) return
 				if(shape.isDisabled()){
 					this.activeShape = null
 					return
@@ -460,7 +425,7 @@ export class Platform extends EventReceiver {
 				e.ante.stopPropagation()
 	
 				// 获取shape相对于画布的坐标
-				arcIndex = index
+				dotIndex = currentDotIndex
 				cp = shape.getPositions()
 				// this.orderShape(shape)
 	
@@ -491,7 +456,7 @@ export class Platform extends EventReceiver {
 				const diff: Point = [offsetX - start[0], offsetY - start[1]]
 				let rp: Points = []
 	
-				if(arcIndex === -1){
+				if(dotIndex === -1){
 					// shape move
 					rp = cp.map(([cx, cy]) => {
 						return [cx + diff[0] / this._scale, cy + diff[1] / this._scale]
@@ -500,11 +465,11 @@ export class Platform extends EventReceiver {
 				}else{
 					// shape point move
 					rp = cp.slice()
-					const p = rp[arcIndex]
+					const p = rp[dotIndex]
 					
 					const scale = this._scale
 					if(this.activeShape.type === "Rect"){
-						switch(arcIndex){
+						switch(dotIndex){
 							case 1:
 								rp[0] = [rp[0][0], rp[0][1] + diff[1] / scale]
 								rp[2] = [rp[2][0] + diff[0] / scale, rp[2][1]]
@@ -514,11 +479,11 @@ export class Platform extends EventReceiver {
 								rp[2] = [rp[2][0], rp[2][1] + diff[1] / scale]
 								break
 							default:
-								rp[arcIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
+								rp[dotIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
 						}
 						rp = getRectPoints(rp[0], rp[2])
 					}else{
-						rp[arcIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
+						rp[dotIndex] = [p[0] + diff[0] / scale, p[1] + diff[1] / scale]
 					}
 				}
 				this.activeShape.updatePositions(rp)
@@ -528,7 +493,51 @@ export class Platform extends EventReceiver {
 			})
 			this.on("mouseup", lv, (e) => {
 				start = [0, 0]
-				arcIndex = -1
+				dotIndex = -1
+			})
+		}
+		// 快捷键
+		const _initShortcutKey = () => {
+			canvas.addEventListener("keydown", (e) => {
+				const keyCode = e.keyCode
+				console.log(keyCode);
+				
+				if(Object.values(MoveKeyCode).some((v => keyCode === v))){
+					// 移动操作
+					const distance = 10
+					const [x, y] = Image.getOrigin()
+					switch(keyCode){
+						case MoveKeyCode.W: 
+							Image.moveTo([x, y + distance])
+							break
+						case MoveKeyCode.S: 
+							Image.moveTo([x, y - distance])
+							break
+						case MoveKeyCode.A: 
+							Image.moveTo([x + distance, y])
+							break
+						case MoveKeyCode.D: 
+							Image.moveTo([x - distance, y])
+							break
+					}
+					this.render()
+				}
+				if(Object.values(FuncKeyCode).some((v) => keyCode === v)){
+					switch(keyCode){
+						case FuncKeyCode.F:
+							if(!position) break
+							const [shape, dotIndex] = this.getTargetShape(position)
+							if(shape && dotIndex !== -1){
+								shape.rmDot(dotIndex)
+							}
+							this.render()
+							break
+					}
+				}
+				keyDownCode = keyCode
+			})
+			canvas.addEventListener("keyup", () => {
+				keyDownCode = null
 			})
 		}
 		_initMouseEvent()
@@ -538,6 +547,7 @@ export class Platform extends EventReceiver {
 		_initShapeEvent()
 		_initImageEvent()
 		_initScaler()
+		_initShortcutKey()
 	}
 	/**
 	 * 加载图片
@@ -638,6 +648,50 @@ export class Platform extends EventReceiver {
 		this.render()
 		this.emitter.emit("delete")
 		this.emitter.emit("update")
+	}
+	public getTargetShape = (offset: Point) => {
+		const Image = this.Image
+		const scale = this._scale
+		const styleScale = this.getShapeStyleScale() / scale // 应用到图形的坐标体系比例变更 除以scale以修正 
+
+		let target = null
+		let dotIndex = -1
+		const shapeOffset = Image.toImagePoint(offset, scale)
+		if(this.activeShape){
+			const shape = this.activeShape
+			dotIndex = shape.isOnArc(shapeOffset, styleScale)
+			if(dotIndex !== -1){
+				target = shape
+			}
+			const isInShape = shape.isOnShape(shapeOffset)
+			if(isInShape){
+				target = shape
+			}
+		}
+		if(!target){
+			let shapeLen = this.shapeList.filter((shape) => !shape.isHidden()).length
+			while(shapeLen > 0){
+				const shape = this.shapeList[shapeLen - 1]
+				if(shape.isHidden()) continue
+				if(shape.isDisabled()) break
+				dotIndex = shape.isOnArc(shapeOffset, styleScale)
+				if(dotIndex !== -1){
+					target = shape
+					break
+				}
+				const isInShape = shape.isOnShape(shapeOffset)
+				if(isInShape){
+					target = shape
+					break
+				}
+				shapeLen--
+			}
+		}
+		if(target && target.isHidden()){
+			target = null
+			dotIndex = -1
+		}
+		return [target, dotIndex] as [Shape | null, number]
 	}
 	/**
 	 * 设置选中的图形
@@ -753,7 +807,7 @@ export class Platform extends EventReceiver {
 	}, 100)
 	public scale = (direction?: -1 | 1, point?: Point) => {
 		if(_.isUndefined(direction)){
-			return Number(this._scale.toFixed(2))
+			return this._scale
 		}
 		const slmt = 0.25 // min scale limit
 		const step = 0.05;
@@ -779,6 +833,7 @@ export class Platform extends EventReceiver {
 		this.scaleTo(scale, point)
 	}
 	public scaleTo = (scale: number, point?: Point) => {
+		const _scale = Number(scale.toFixed(2))
 		const Image = this.Image
 		const [px, py] = point ? point : Image.getCenter(this._scale)
 		
@@ -787,22 +842,25 @@ export class Platform extends EventReceiver {
 		const [ox, oy] = Image.getOrigin()
 
 		const sw = width * this._scale
-		const sw2 = width * scale
+		const sw2 = width * _scale
 		const dx = Math.abs(px - ox)
 		const fx = px - ox > 0 ? -1 : 1
 		const sx = ((dx * sw2) / sw) - dx
 		const x = fx * sx + ox
 
 		const sh = height * this._scale
-		const sh2 = height * scale
+		const sh2 = height * _scale
 		const dy = Math.abs(py - oy)
 		const fy = py - oy > 0 ? -1 : 1
 		const sy = ((dy * sh2) / sh) - dy
 		const y = fy * sy + oy
 
 		Image.moveTo([x, y])
-		this._scale = scale;
+		this._scale = _scale;
 		this.render()
+	}
+	private getShapeStyleScale = () => {
+		return this._options.shouldShapeStyleScale ? this._scale : Number((1 + this._scale).toFixed(2))
 	}
 	public moveTo = (origin: Point) => {
 		this.Image.moveTo(origin)
@@ -883,12 +941,13 @@ export class Platform extends EventReceiver {
 		if((shape.isClose() || shape.type === ShapeType.Rect)){
 			points.push(points[0])
 		}
+		const styleScale = this.getShapeStyleScale()
 		
 		// 图形
 		const shapeStyle = {
 			lineColor,
 			lineWidth: lineWidth * scale,
-			dotRadius: dotRadius * scale,
+			dotRadius: dotRadius * styleScale,
 			dotColor,
 			fillColor,
 			opacity: .7
