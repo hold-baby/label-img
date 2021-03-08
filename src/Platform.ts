@@ -137,7 +137,6 @@ export class Platform extends EventReceiver {
 			antMouseEvents.forEach((type) => {
 				canvas.addEventListener(type, (e) => {
 					e.preventDefault()
-					canvas.focus()
 					const offset = [e.offsetX, e.offsetY] as Point
 					const isPropagation = true
 
@@ -177,6 +176,9 @@ export class Platform extends EventReceiver {
 							break
 						case "mouseleave":
 							resetStatus()
+							break
+						case "mouseenter":
+							canvas.focus()
 							break
 					}
 
@@ -500,8 +502,6 @@ export class Platform extends EventReceiver {
 		const _initShortcutKey = () => {
 			canvas.addEventListener("keydown", (e) => {
 				const keyCode = e.keyCode
-				console.log(keyCode);
-				
 				if(Object.values(MoveKeyCode).some((v => keyCode === v))){
 					// 移动操作
 					const distance = 10
@@ -657,7 +657,7 @@ export class Platform extends EventReceiver {
 		let target = null
 		let dotIndex = -1
 		const shapeOffset = Image.toImagePoint(offset, scale)
-		if(this.activeShape){
+		if(this.activeShape && this.activeShape.isEnable()){
 			const shape = this.activeShape
 			dotIndex = shape.isOnArc(shapeOffset, styleScale)
 			if(dotIndex !== -1){
@@ -669,11 +669,11 @@ export class Platform extends EventReceiver {
 			}
 		}
 		if(!target){
-			let shapeLen = this.shapeList.filter((shape) => !shape.isHidden()).length
+			// 过滤隐藏和禁用的shape
+			const shapeList = this.shapeList.filter((shape) => shape.isEnable())
+			let shapeLen = shapeList.length
 			while(shapeLen > 0){
-				const shape = this.shapeList[shapeLen - 1]
-				if(shape.isHidden()) continue
-				if(shape.isDisabled()) break
+				const shape = shapeList[shapeLen - 1]
 				dotIndex = shape.isOnArc(shapeOffset, styleScale)
 				if(dotIndex !== -1){
 					target = shape
@@ -686,10 +686,6 @@ export class Platform extends EventReceiver {
 				}
 				shapeLen--
 			}
-		}
-		if(target && target.isHidden()){
-			target = null
-			dotIndex = -1
 		}
 		return [target, dotIndex] as [Shape | null, number]
 	}

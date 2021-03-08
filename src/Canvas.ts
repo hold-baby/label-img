@@ -1,5 +1,6 @@
 import { create } from "./element"
 import { Point, Points } from "./structure"
+import { hexToRgba } from "./utils"
 
 type StrokeStyle = string | CanvasPattern | CanvasGradient;
 type FillStyle = string | CanvasGradient | CanvasPattern;
@@ -99,13 +100,13 @@ export class Canvas {
     const ctx = this.ctx()
     const { 
       fillColor = "",
-      opacity
+      opacity = 1
     } = style
     
     // 填充
     ctx.beginPath()
     const _opacity = this.el().style.opacity || 1
-    ctx.fillStyle = fillColor
+    ctx.fillStyle = hexToRgba(fillColor.toString(), opacity)
     if(opacity){
       this.opacity(opacity)
     }
@@ -123,6 +124,7 @@ export class Canvas {
   public dot = (point: Point, pointStyle: Partial<IBasePoint>) => {
     const ctx = this.ctx()
     const { dotColor = "", dotRadius = 1 } = pointStyle
+    if(dotRadius <= 0) return this
     const [x, y] = point
     ctx.beginPath()
     ctx.fillStyle = dotColor
@@ -132,9 +134,12 @@ export class Canvas {
     return this
   }
   public dots = (points: Points, pointStyle: Partial<IBasePoint>) => {
+    const { dotRadius = 1 } = pointStyle
+    if(dotRadius <= 0) return this
     points.forEach((point) => {
       this.dot(point, pointStyle)
     })
+    return this
   }
   public opacity = (alpha: number) => {
     this.ctx().globalAlpha = alpha
@@ -151,9 +156,11 @@ export class Canvas {
   }
   public cursor = (cursor: string) => {
     this.el().style.cursor = cursor
+    return this
   }
   public clear = () => {
     const { width, height } = this.el()
     this.ctx().clearRect(0, 0, width, height)
+    return this
   }
 }

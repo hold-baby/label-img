@@ -1,7 +1,6 @@
 import { EventReceiver } from "./EventReceiver"
 import { Points, TColor, Point } from "./structure"
 import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
-import { css, create } from "./element"
 import _ from "./lodash"
 import { IDG } from "./IDGenerator"
 import { Popover, PopoverContent } from "./Popover"
@@ -313,6 +312,9 @@ export class Shape extends EventReceiver {
   isInsert(){
     return this.insert
   }
+  isEnable(){
+    return !this.isDisabled() && !this.isHidden()
+  }
   isShowTag(){
     return this.showTag && !!this.tagger.content && this.isClose()
   }
@@ -329,13 +331,14 @@ export class Shape extends EventReceiver {
     this.positions = positions
     return this
   }
-  public addPoint = _.throttle((point: Point) => {
+  public addPoint = _.throttle((point: Point) => { // 避免抖动重复添加
     const last = this.positions[this.positions.length - 1]
-    if(last.toString() !== point.toString()){ // 避免抖动重复添加
+    if(last.toString() !== point.toString()){
       this.positions.push(point)
     }
-  }, 150)
+  }, 100)
   public rmDot = (index: number) => {
+    if(this.type === "Rect") return
     if(this.positions.length <= 3) return
     this.positions.splice(index, 1)
   }

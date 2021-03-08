@@ -79,3 +79,16 @@ export const getAdaptImgScale = (img: HTMLImageElement, options: { width: number
   }
   return scale
 }
+/**
+ * 颜色值16进制转rgba
+ * @param {String} hex 16进制
+ * @param {Float} opacity 透明度
+ */
+export const hexToRgba = (hex: string, opacity = 1) => {
+  let hexNumbs = hex.slice(1).split("")
+  if(hexNumbs.length === 3){
+    hexNumbs = hexNumbs.map(v => v + v)
+  }
+  return `rgba(${hexNumbs.map(v => Number.parseInt(v, 16)).join(",")}, ${opacity})`
+  
+}

@@ -37,7 +37,7 @@ lb.register("polygon", {
   style: {
     normal: {
       lineColor: "black",
-      opacity: .2
+      opacity: .05
     }
   },
   tag: "多边形",
@@ -116,8 +116,7 @@ btn.tag.on("click", () => {
 })
 btn.shape.on("click", () => {
   lb.getShapeList().forEach((shape) => {
-    console.log(shape.isHidden());
-    shape.hidden()
+    shape.isHidden() ? shape.show() : shape.hidden()
   })
   lb.render()
 })
