@@ -1,6 +1,10 @@
 import { EventReceiver } from "./EventReceiver"
 import { Point, Points } from "./structure"
 
+export enum ImagePlacement {
+	default = "default",
+	center = "center"
+}
 export type ImageLoadSource = File | string;
 
 const dfOrigin: Point = [0, 0]

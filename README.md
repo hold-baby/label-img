@@ -23,7 +23,8 @@ or
 const labeler = new LabelImg(element, {
   width: 800,
   height: 600,
-	bgColor: `#000`, // 背景色
+  bgColor: `#000`, // 背景色
+  imagePlacement: "default", // default | center
 })
 // 注册图形
 labeler.register("polygon", {
@@ -73,7 +74,6 @@ const shape = new Shape(shapeOptions)
 /**
  * @id      图形注册ID
  * @options 配置  Partial<Omit<IShapeOptions, "type">>
- * 
  */
 const shape = LabelImg.createShape(id, options)
 // 添加到画布中

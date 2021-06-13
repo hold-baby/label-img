@@ -1,5 +1,5 @@
 import { EventReceiver, antMouseEvents, antLvs, AntMouseEvent, IAnte, IAntEvent } from "./EventReceiver"
-import { Image, ImageLoadSource } from "./Image"
+import { Image, ImageLoadSource, ImagePlacement } from "./Image"
 import { Shape, ShapeType, QueryShapeInput } from "./Shape"
 import { ShapeRegister, IShapeCfg, IShapeContent, RegisterID } from "./ShapeRegister"
 import { EventEmitter } from "./EventEmitter"
@@ -19,7 +19,8 @@ const defaulOptions = {
 	tagShow: true,
 	guideLine: false,
 	shouldShapeStyleScale: true,
-	shouldTagScale: false
+	shouldTagScale: false,
+	imagePlacement: ImagePlacement.default
 }
 export type LabelImgOptions = typeof defaulOptions
 
@@ -107,7 +108,13 @@ export class Platform extends EventReceiver {
 	public resize = () => {
 		if(!this.Image || !this.Image.el) return
 		this._scale = getAdaptImgScale(this.Image.el, this.options())
-		this.Image.moveTo([0, 0])
+		if(this.options().imagePlacement === ImagePlacement.center){
+			const { width: cw, height: ch } = this.canvas.el()
+			const { width: iw, height: ih } = this.Image.el
+			this.Image.moveTo([(cw - iw) / 2, (ch - ih) / 2])
+		}else{
+			this.Image.moveTo([0, 0])
+		}
 		this.render()
 	}
 	/**
@@ -557,7 +564,7 @@ export class Platform extends EventReceiver {
 		this.reset()
 		return new Promise((c, e) => {
 			this.Image.load(source).then((img) => {
-        this._scale = getAdaptImgScale(img, this.options())
+				this.resize()
 				this.render()
 				this.emitter.emit("imageReady")
 				c(img)

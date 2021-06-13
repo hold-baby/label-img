@@ -1,5 +1,4 @@
 import { Point, Points } from "./structure"
-import { Shape } from "./Shape"
 
 /**
  * 判断点位是否在图形内部
@@ -82,13 +81,17 @@ export const getAdaptImgScale = (img: HTMLImageElement, options: { width: number
 /**
  * 颜色值16进制转rgba
  * @param {String} hex 16进制
- * @param {Float} opacity 透明度
+ * @param {Float} opacity 透明度(16进制有效)
  */
 export const hexToRgba = (hex: string, opacity = 1) => {
-  let hexNumbs = hex.slice(1).split("")
-  if(hexNumbs.length === 3){
-    hexNumbs = hexNumbs.map(v => v + v)
+  const start = hex.slice(1)
+  if(start === "#"){
+    let hexNumbs = hex.slice(1).split("")
+    if(hexNumbs.length === 3){
+      hexNumbs = hexNumbs.map(v => v + v)
+    }
+    return `rgba(${hexNumbs.map(v => Number.parseInt(v, 16)).join(",")}, ${opacity})`
+  }else{
+    return hex
   }
-  return `rgba(${hexNumbs.map(v => Number.parseInt(v, 16)).join(",")}, ${opacity})`
-  
 }

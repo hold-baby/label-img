@@ -102,7 +102,6 @@ export class Canvas {
       fillColor = "",
       opacity = 1
     } = style
-    
     // 填充
     ctx.beginPath()
     const _opacity = this.el().style.opacity || 1
