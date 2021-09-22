@@ -45,6 +45,8 @@ export class Platform extends EventReceiver {
 	private _isShapeMoving: boolean
   private _guideLineOrigin: Point // 记录坐标点位用于画辅助线中心点
 
+	public isExport?: boolean
+
   constructor(container: HTMLDivElement, LabelImgOptions?: Partial<LabelImgOptions>){
 		super()
 		this.container = container
@@ -83,6 +85,8 @@ export class Platform extends EventReceiver {
 		this._isInit = false
 		this._isMouseDown = false
 		this._isShapeMoving = false
+
+		this.isExport = false
 
 		this.render()
 		this._init()
@@ -134,7 +138,7 @@ export class Platform extends EventReceiver {
 			this._isMouseDown = false;
 			this._isShapeMoving = false;
 			position = null
-			// shape移动结束 重新render
+			// shape 移动结束 重新 render
 			if(isMoving){
 				this.render()
 			}
@@ -148,7 +152,7 @@ export class Platform extends EventReceiver {
 					const isPropagation = true
 
 					const scale = this._scale
-					// 判断是否在image上
+					// 判断是否在 image 上
 					const isOnImage = isInSide(offset, Image.getPosition(scale))
 					
 					const [shape, dotIndex] = this.getTargetShape(offset)
@@ -310,9 +314,9 @@ export class Platform extends EventReceiver {
 			this.on("mousedown", lv, (e) => {
 				const { offset, isOnImage } = e.ante
 				if(!this.drawing || !Image.el) return
-				// 判断当前点击是否在img上
+				// 判断当前点击是否在 img 上
 				if(!isOnImage) return
-				// 计算出当前点位在img的什么位置
+				// 计算出当前点位在 img 的什么位置
 				let point = Image.toImagePoint(offset, this._scale)
 	
 				start = point
@@ -433,7 +437,7 @@ export class Platform extends EventReceiver {
 				} 
 				e.ante.stopPropagation()
 	
-				// 获取shape相对于画布的坐标
+				// 获取 shape 相对于画布的坐标
 				dotIndex = currentDotIndex
 				cp = shape.getPositions()
 				// this.orderShape(shape)
@@ -441,7 +445,7 @@ export class Platform extends EventReceiver {
 				if(this.activeShape !== shape){
 					select(shape)
 				}
-				// 选中则变为moving状态
+				// 选中则变为 moving 状态
 				this._isShapeMoving = true
 				// if(shape.isInsert() && shape.isClose()){
 				// 	console.log(offset);
@@ -573,9 +577,16 @@ export class Platform extends EventReceiver {
 			})
 		})
 	}
+	public loadFormImg = (img: HTMLImageElement) => {
+		this.reset()
+		this.Image.loadFromImg(img)
+		this.resize()
+		this.render()
+		this.emitter.emit("imageReady")
+	}
 	/**
 	 * 注册图形
-	 * @param rid RegisterID 图形注册ID
+	 * @param rid RegisterID 图形注册 ID
 	 * @param options IShapeCfg 图形配置
 	 */
 	public register = (rid: RegisterID, options: Omit<IShapeCfg, "registerID">) => {
@@ -584,14 +595,14 @@ export class Platform extends EventReceiver {
 		this.emitter.emit("shapeRegister")
 	}
 	/**
-	 * 获取已注册图形map
+	 * 获取已注册图形 map
 	 */
 	public getRegisterMap = () => {
 		return this.shapeRegister.getMap()
 	}
 	/**
 	 * 以注册的图形模版创建图形
-	 * @param rid RegisterID 图形注册ID
+	 * @param rid RegisterID 图形注册 ID
 	 * @param options IShapeCfg 图形配置
 	 * @returns Shape
 	 */
@@ -600,7 +611,7 @@ export class Platform extends EventReceiver {
 		return new Shape(Object.assign(opts, options))
 	}/**
 	 * 判断图形是否注册
-	 * @param rid RegisterID 图形注册ID
+	 * @param rid RegisterID 图形注册 ID
 	 * @returns boolean
 	 */
 	public isRegister = (rid: RegisterID) => {
@@ -608,7 +619,7 @@ export class Platform extends EventReceiver {
 	}
 	/**
 	 * 设置标注图形
-	 * @param rid RegisterID 图形注册ID
+	 * @param rid RegisterID 图形注册 ID
 	 * @param continuity boolean 是否连续标注
 	 */
 	public label = (rid: RegisterID, continuity?: boolean) => {
@@ -645,7 +656,7 @@ export class Platform extends EventReceiver {
 	}
   /**
 	 * 删除图形
-	 * @param input QueryShapeInput 待删除的图形或ID
+	 * @param input QueryShapeInput 待删除的图形或 ID
 	 */
 	public remove = (input: QueryShapeInput) => {
 		const [idx, shape] = this.findShapeIndex(input)
@@ -676,7 +687,7 @@ export class Platform extends EventReceiver {
 			}
 		}
 		if(!target){
-			// 过滤隐藏和禁用的shape
+			// 过滤隐藏和禁用的 shape
 			const shapeList = this.shapeList.filter((shape) => shape.isEnable())
 			let shapeLen = shapeList.length
 			while(shapeLen > 0){
@@ -719,7 +730,7 @@ export class Platform extends EventReceiver {
 	}
 	/**
 	 * 改变图形排序
-	 * @param input QueryShapeInput 图形对象或ID
+	 * @param input QueryShapeInput 图形对象或 ID
 	 * @param flag boolean true: 添加到列表最前 false: 添加到列表最后
 	 */
   public orderShape = (input: QueryShapeInput, flag?: boolean) => {
@@ -733,8 +744,8 @@ export class Platform extends EventReceiver {
 		}
 	}
 	/**
-	 * 查询index与Shape对象
-	 * @param input QueryShapeInput 图形对象或ID
+	 * 查询 index 与 Shape 对象
+	 * @param input QueryShapeInput 图形对象或 ID
 	 * @returns [number | null, Shape | null]
 	 */
 	private findShapeIndex = (input: QueryShapeInput): [null | number, null | Shape] => {
@@ -820,7 +831,7 @@ export class Platform extends EventReceiver {
 		const [iw, ih] = this.Image.getSize(this._scale)
 		let count = 0
 
-		// 判断缩小到1/4则不允许再缩小
+		// 判断缩小到 1/4 则不允许再缩小
 		if(direction === -1){
 			if(cw * slmt >= iw){
 				count++
@@ -840,7 +851,7 @@ export class Platform extends EventReceiver {
 		const Image = this.Image
 		const [px, py] = point ? point : Image.getCenter(this._scale)
 		
-		// 计算画布缩放(以鼠标位置为中心点)
+		// 计算画布缩放 (以鼠标位置为中心点)
 		const [width, height] = Image.getSize()
 		const [ox, oy] = Image.getOrigin()
 
@@ -867,6 +878,32 @@ export class Platform extends EventReceiver {
 	}
 	public moveTo = (origin: Point) => {
 		this.Image.moveTo(origin)
+	}
+	public toDataURL = () => {
+		const Image = this.Image
+		if(!Image || !Image.complate || !Image.el) return
+    const [width, height] = Image.getSize()
+    const shapeList = this.shapeList.slice()
+		const wrap = document.createElement("div")
+		const lb = new Platform(wrap, {
+			width,
+			height
+		})
+		lb.isExport = true
+		const map = this.getRegisterMap()
+		Object.keys(map).forEach((key) => {
+			lb.register(key, map[key])
+		})
+		lb.loadFormImg(Image.el)
+		lb.scaleTo(1)
+		shapeList.forEach((shape) => {
+			shape.setActive(false)
+			lb.addShape(shape)
+		})
+		lb.forceRender()
+		const canvas = lb.canvas.el()
+		const dataURL = canvas.toDataURL()
+		return dataURL
 	}
 	// 渲染相关
 	private _clearCanvas = () => {
@@ -965,14 +1002,21 @@ export class Platform extends EventReceiver {
 
 		/**
 		 * 判断是否显示标签
-		 * shape移动和标注状态不显示标签
+		 * shape 移动和标注状态不显示标签
 		 */
 		const isTagShow = this.isTagShow() && shape.isShowTag() && !this._isShapeMoving && !this.drawing
 		const tagger = shape.tagger
     if(isTagShow){
-			const scale = this._scale
-			tagger.addTo(this.tagContainer)
-			tagger.move(points[0], this._options.shouldTagScale ? scale : 1)
+			if(this.isExport){
+				this.canvas.text(shape.tagContent, points[0], {
+					bgColor: dotColor,
+					color: "#fff"
+				})
+			}else {
+				const scale = this._scale
+				tagger.addTo(this.tagContainer)
+				tagger.move(points[0], this._options.shouldTagScale ? scale : 1)
+			}
     }else{
 			tagger.remove()
 		}		

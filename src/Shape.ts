@@ -89,6 +89,7 @@ export class Shape extends EventReceiver {
   public visible: boolean
   private insert: boolean
   private showTag: boolean
+  public tagContent: string
   public tagger: Popover
   public max: number | undefined
   public data: any
@@ -124,6 +125,7 @@ export class Shape extends EventReceiver {
     this.visible = visible
     this.insert = insert
     this.showTag = showTag
+    this.tagContent = tag.toString()
     this.tagger = new Popover({
       content: tag,
       style: {

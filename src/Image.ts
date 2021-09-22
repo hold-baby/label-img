@@ -57,6 +57,11 @@ export class Image extends EventReceiver {
 			})
     })
 	}
+	loadFromImg(img: HTMLImageElement){
+    this.origin = dfOrigin
+    this.complate = true
+		this.el = img
+	}
 	/**
 	 * 获取图片对象
 	 * @return {HTMLImageElement | null}
@@ -129,8 +134,8 @@ export class Image extends EventReceiver {
 		return point
 	}
 	/**
-	 * 获取shape坐标点转换成画布的坐标
-	 * @param positions Points Shape的坐标点集合
+	 * 获取 shape 坐标点转换成画布的坐标
+	 * @param positions Points Shape 的坐标点集合
 	 * @param scale 缩放大小
 	 * @return Points
 	 */
@@ -141,8 +146,8 @@ export class Image extends EventReceiver {
     return rp
 	}
 	/**
-	 * 获取shape坐标点转换成画布的坐标
-	 * @param positions Points Shape的坐标点集合
+	 * 获取 shape 坐标点转换成画布的坐标
+	 * @param positions Points Shape 的坐标点集合
 	 * @param scale 缩放大小
 	 * @return Points
 	 */
