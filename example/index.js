@@ -11,12 +11,15 @@ const btn = {
   addr: $("#addr"),
   load: $("#load"),
   source: $("#source"),
+  export: $("#export"),
 }
 const dom = {
   list: $("#list"),
   file: $("#file"),
   addr: $("#addr"),
-  continuity: $("#continuity")
+  continuity: $("#continuity"),
+  mask: $("#mask"),
+  maskImg: $("#mask-img")
 }
 
 const lb = new LabelImg(ele[0])
@@ -134,6 +137,12 @@ btn.data.on("click", () => {
   console.log(list);
   alert(JSON.stringify(list))
 })
+btn.export.on("click", () => {
+  const base64 = lb.toDataURL()
+  if(!base64) return
+  dom.maskImg[0].src = base64
+  dom.mask.show()
+})
 const className = {
   item: "shape-item",
   rm: "rm",
@@ -170,6 +179,9 @@ dom.list.on("click", (e) => {
   const list = lb.getShapeList()
   renderList(list, idx)
   lb.render()
+})
+dom.mask.on("click", () => {
+  dom.mask.hide()
 })
 console.log(lb)
 function renderCtrl(shape){

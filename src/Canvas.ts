@@ -26,6 +26,13 @@ interface IPolygonStyle {
   fillColor: FillStyle;
   opacity: number;
 }
+interface ITextStyle {
+  fontSize: number
+  color: FillStyle
+  bgColor: FillStyle
+  offset: Point
+  padding: Point
+}
 export class Canvas {
   public el: () => HTMLCanvasElement;
   public ctx: () => CanvasRenderingContext2D;
@@ -138,6 +145,41 @@ export class Canvas {
     points.forEach((point) => {
       this.dot(point, pointStyle)
     })
+    return this
+  }
+  public text = (content: string, point: Point, style?: Partial<ITextStyle>) => {
+    const { fontSize = 16, color, bgColor, offset = [], padding = [] } = style || {}
+    const ctx = this.ctx()
+    const [x, y] = point
+    const [px = 4, py = 0] = padding
+    const [ox = 0, oy = 5] = offset
+
+    ctx.font = `${fontSize}px`
+    const text = ctx.measureText(content)
+    // tag 的总长度
+    const w = text.width + px * 2
+    // tag 的总高度
+    const h = fontSize + py * 2
+    // tag 左上坐标
+    const [lx, ly] = [x + ox, y - h - oy]
+
+    // 绘制背景
+    ctx.beginPath()
+    ctx.rect(lx, ly, w, h)
+    if(bgColor){
+      ctx.fillStyle = bgColor
+    }
+    ctx.fill()
+    ctx.closePath()
+
+    // 绘制文字
+    ctx.beginPath()
+    if(color) {
+      ctx.fillStyle = color
+    }
+    ctx.textBaseline = "middle"
+    ctx.fillText(content, lx + px, ly + h * 0.5)
+    ctx.closePath()
     return this
   }
   public opacity = (alpha: number) => {

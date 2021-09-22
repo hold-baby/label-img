@@ -3730,10 +3730,10 @@ rimraf@^3.0.0:
   dependencies:
     glob "^7.1.3"
 
-rollup-plugin-banner2@1.0.1:
-  version "1.0.1"
-  resolved "https://registry.npmjs.org/rollup-plugin-banner2/-/rollup-plugin-banner2-1.0.1.tgz#f14a49e216c5483a5d237c0c918079def6a1e79a"
-  integrity sha512-xRkYfEWWQtGa3LwNdNbb7MWvtv/gkGC7ct/SyoKjmq8GoSt+cNVaGTfsR9ZcmTZmYt4OGSIns07tLgGKWw9DRQ==
+rollup-plugin-banner2@^1.2.2:
+  version "1.2.2"
+  resolved "https://registry.nlark.com/rollup-plugin-banner2/download/rollup-plugin-banner2-1.2.2.tgz#a73323035800c7af11c34514f1a55298684bff47"
+  integrity sha1-pzMjA1gAx68Rw0UU8aVSmGhL/0c=
   dependencies:
     magic-string "^0.25.7"
 
