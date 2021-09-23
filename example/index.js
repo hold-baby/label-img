@@ -46,7 +46,8 @@ lb.register("polygon", {
   tag: "多边形",
 })
 lb.register("rect", {
-  type: "Rect"
+  type: "Rect",
+  tag: "矩形"
 })
 lb.register("black-dog", {
   type: "Rect",

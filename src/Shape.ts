@@ -125,7 +125,7 @@ export class Shape extends EventReceiver {
     this.visible = visible
     this.insert = insert
     this.showTag = showTag
-    this.tagContent = tag.toString()
+    this.tagContent = tag ? tag.toString() : ""
     this.tagger = new Popover({
       content: tag,
       style: {
