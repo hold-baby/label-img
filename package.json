@@ -1,6 +1,6 @@
 {
   "name": "label-img",
-  "version": "0.0.65",
+  "version": "0.0.66",
   "description": "image annotation tool with javascript",
   "main": "dist/labelImg.js",
   "build": "dist/labelImg.min.js",
