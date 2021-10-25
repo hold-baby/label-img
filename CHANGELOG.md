@@ -1,3 +1,7 @@
+## [0.0.67](https://github.com/hold-baby/label-img/compare/v0.0.66...v0.0.67) (2021-10-25)
+
+
+
 ## 0.0.66 (2021-10-25)
 
 
