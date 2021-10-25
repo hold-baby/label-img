@@ -1,0 +1,34 @@
+on:
+  push:
+    tags:
+    - 'v*'
+name: Publish
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: egordm/gha-yarn-node-cache@v1
+    - run: yarn install
+    - run: yarn test
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: egordm/gha-yarn-node-cache@v1
+    - name: Build
+      run: yarn build
+    - run: npm config set registry https://registry.npmjs.org/https://registry.npmjs.org/
+    - name: Publish
+      run: yarn version
+      env:
+        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@master
+      env:
+        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
+        BRANCH: v*
+        FOLDER: dist
+
