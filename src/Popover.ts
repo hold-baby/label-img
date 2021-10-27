@@ -1,6 +1,6 @@
 import { Point, TColor } from "./structure"
 import { create, css } from "./element"
-import { isString } from "lodash-es"
+import _ from "./lodash"
 
 interface IPopoverStyleMap {
   width: number;
@@ -89,7 +89,7 @@ export class Popover{
       color,
       padding
     })
-    if(isString(this.content)){
+    if(_.isString(this.content)){
       this.body.innerHTML = this.content
     }else{
       if(!this.body.contains(this.content)){

@@ -1,4 +1,4 @@
-import { padStart } from "lodash-es"
+import _ from "./lodash"
 
 interface IIDGProps {
   len?: number;
@@ -16,7 +16,7 @@ export class IDGenerator {
     this.len = len
   }
   getID(){
-    const id = padStart(String(this.count), this.len, "0")
+    const id = _.padStart(String(this.count), this.len, "0")
     this.count++
     return id
   }

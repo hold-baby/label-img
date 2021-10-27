@@ -1,7 +1,7 @@
 import { EventReceiver } from "./EventReceiver"
 import { Points, TColor, Point } from "./structure"
 import { isInCircle, isInSide, getDistance, getRectPoints } from "./utils"
-import { merge, isUndefined, throttle } from "lodash-es"
+import _ from "./lodash"
 import { IDG } from "./IDGenerator"
 import { Popover, PopoverContent } from "./Popover"
 
@@ -120,7 +120,7 @@ export class Shape extends EventReceiver {
     this.status = disabled ? "disabled" : active ? "active" : "normal"
     this.positions = positions
     this.data = data || null
-    this.style = merge({}, defaultStyle, style)
+    this.style = _.merge({}, defaultStyle, style)
     this.closed = closed
     this.visible = visible
     this.insert = insert
@@ -321,7 +321,7 @@ export class Shape extends EventReceiver {
     return this.showTag && !!this.tagger.content && this.isClose()
   }
   tagShow(status?: boolean){
-    this.showTag = isUndefined(status) ? !this.showTag : !!status
+    this.showTag = _.isUndefined(status) ? !this.showTag : !!status
     this.tagger.css({
       bgColor: this.getStyle().dotColor
     })
@@ -333,7 +333,7 @@ export class Shape extends EventReceiver {
     this.positions = positions
     return this
   }
-  public addPoint = throttle((point: Point) => { // 避免抖动重复添加
+  public addPoint = _.throttle((point: Point) => { // 避免抖动重复添加
     const last = this.positions[this.positions.length - 1]
     if(last.toString() !== point.toString()){
       this.positions.push(point)

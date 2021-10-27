@@ -1,7 +1,7 @@
 import { Shape } from "./Shape"
 import { Image } from "./Image"
 import { Map, Point } from "./structure"
-import { isFunction } from "lodash-es"
+import _ from "./lodash"
 
 export enum EAntMouseEvents {
   "mousedown" = "mousedown",
@@ -70,8 +70,8 @@ export class EventReceiver {
     }
   } 
   on(type: IAntMouseEvent, level: IAntLv | ICallback, handler?: ICallback){
-    let callback = isFunction(level) ? level : handler as ICallback
-    let lv = isFunction(level) ? "mid" : level
+    let callback = _.isFunction(level) ? level : handler as ICallback
+    let lv = _.isFunction(level) ? "mid" : level
 
     const kType = `${type}.${lv}`
     const antEvent = {
