@@ -1,3 +1,12 @@
+## [0.0.68](https://github.com/hold-baby/label-img/compare/v0.0.67...v0.0.68) (2021-10-27)
+
+
+### Features
+
+* 使用 lodash-es 替换 lodash ([30ced13](https://github.com/hold-baby/label-img/commit/30ced13f5cba6786ec9f776cccb8998a96cf2eaa))
+
+
+
 ## [0.0.67](https://github.com/hold-baby/label-img/compare/v0.0.66...v0.0.67) (2021-10-25)
 
 
