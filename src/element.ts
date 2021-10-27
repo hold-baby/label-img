@@ -1,4 +1,4 @@
-import _ from "./lodash"
+import { merge, isString, isObject } from "lodash-es"
 
 export const create = <K extends keyof HTMLElementTagNameMap>(tagName: K): HTMLElementTagNameMap[K] => document.createElement(tagName)
 
@@ -6,16 +6,16 @@ const style = (ele: HTMLElement, name: keyof CSSStyleDeclaration, value: any) =>
   ele.style[name as any] = value
 }
 const styles = (ele: HTMLElement, attrs: Partial<CSSStyleDeclaration>) => {
-  _.merge(ele.style, attrs)
+  merge(ele.style, attrs)
 }
 export const css = (ele: HTMLElement, name: keyof CSSStyleDeclaration | Partial<CSSStyleDeclaration>, attr?: string | number) => {
-  if(_.isString(name)){
+  if(isString(name)){
     if(attr){
       style(ele, name, attr)
     }else{
       return ele.style[name]
     }
-  }else if(_.isObject(name)){
+  }else if(isObject(name)){
     styles(ele, name)
   }
 }

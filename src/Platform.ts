@@ -7,7 +7,8 @@ import { Canvas } from "./Canvas"
 import { isInSide, isInCircle, getRectPoints, getAdaptImgScale } from "./utils"
 import { Point, Points } from "./structure"
 import { ICursor, displayCursor } from "./cursor"
-import _ from "./lodash"
+// import _ from "./lodash"
+import { merge, isUndefined, throttle } from "lodash-es"
 import { css, create } from "./element"
 import { MoveKeyCode, FuncKeyCode } from "./keycode"
 
@@ -95,7 +96,7 @@ export class Platform extends EventReceiver {
 		return Object.assign({}, this._options)
 	}
 	public setOptions = (options: Partial<LabelImgOptions>) =>{
-		this._options = _.merge(this._options, options)
+		this._options = merge(this._options, options)
 		this.render()
 	}
 	public reset = () => {
@@ -628,7 +629,7 @@ export class Platform extends EventReceiver {
 			this.drawing = drawing
 			this.emitter.emit("labelType")
 		}
-		if(!_.isUndefined(continuity)){
+		if(!isUndefined(continuity)){
 			this.continuity = !!continuity
 		}
 	}
@@ -784,7 +785,7 @@ export class Platform extends EventReceiver {
 	 */
 	public setGuideLine = (status?: boolean) => {
 		this.setOptions({
-			guideLine: _.isUndefined(status) ? !this.options().guideLine : !!status
+			guideLine: isUndefined(status) ? !this.options().guideLine : !!status
 		})
 		this.render()
 	}
@@ -801,7 +802,7 @@ export class Platform extends EventReceiver {
 	 */
 	public setTagShow = (status?: boolean) => {
 		this.setOptions({
-			tagShow: _.isUndefined(status) ? !this.isTagShow : !!status
+			tagShow: isUndefined(status) ? !this.isTagShow : !!status
 		})
 		this.render()
 	}
@@ -816,11 +817,11 @@ export class Platform extends EventReceiver {
 	 * 设置手势
 	 * @param cursor ICursor 
 	 */
-	public cursor = _.throttle((cursor: ICursor) => {
+	public cursor = throttle((cursor: ICursor) => {
 		this.canvas.cursor(displayCursor(cursor))
 	}, 100)
 	public scale = (direction?: -1 | 1, point?: Point) => {
-		if(_.isUndefined(direction)){
+		if(isUndefined(direction)){
 			return this._scale
 		}
 		const slmt = 0.25 // min scale limit
@@ -1058,7 +1059,7 @@ export class Platform extends EventReceiver {
 		}
 		this.emitter.emit("afterRender")
 	}
-	public render = _.throttle(() => {
+	public render = throttle(() => {
 		this.forceRender()
 	}, 17)
 }
