@@ -1,3 +1,12 @@
+## [0.0.69](https://github.com/hold-baby/label-img/compare/v0.0.68...v0.0.69) (2021-10-27)
+
+
+### Reverts
+
+* Revert "feat: 使用 lodash-es 替换 lodash" ([0958008](https://github.com/hold-baby/label-img/commit/09580081202d20dee56e0edc67ec96a5d1114cde))
+
+
+
 ## [0.0.68](https://github.com/hold-baby/label-img/compare/v0.0.67...v0.0.68) (2021-10-27)
 
 
