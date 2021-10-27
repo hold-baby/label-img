@@ -22,13 +22,13 @@ jobs:
       run: yarn build
     - run: npm config set registry https://registry.npmjs.org/https://registry.npmjs.org/
     - name: Publish
-      run: yarn version
+      run: npm publish
       env:
         NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.5
       env:
         ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: v*
+        BRANCH: gh-pages
         FOLDER: example
 
