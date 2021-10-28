@@ -1,3 +1,12 @@
+## [0.0.72](https://github.com/hold-baby/label-img/compare/v0.0.71...v0.0.72) (2021-10-28)
+
+
+### Bug Fixes
+
+* 更新 Demo 地址 ([f350d0e](https://github.com/hold-baby/label-img/commit/f350d0ef12cbaa71aaa8f33b6c00024239eaac83))
+
+
+
 ## [0.0.71](https://github.com/hold-baby/label-img/compare/v0.0.70...v0.0.71) (2021-10-27)
 
 
