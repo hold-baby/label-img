@@ -17,17 +17,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - uses: egordm/gha-yarn-node-cache@v1
-    - name: Build
-      run: yarn build
-    - name: Publish
-      run: npm publish
+    - uses: actions/setup-node@v2
+      with:
+        node-version: '14.x'
+        registry-url: 'https://registry.npmjs.org'
+    - run: |
+        yarn install
+        yarn build
+    - run: npm publish
       env:
-        NODE_AUTH_TOKEN: ${{secrets.NPM_TOKEN}}
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.5
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: example
+      with:
+        branch: gh-pages
+        folder: example
 
