@@ -21,15 +21,15 @@ jobs:
       with:
         node-version: '14.x'
         registry-url: 'https://registry.npmjs.org'
-    - run: npm install
-    - run: npm build
-    - run: npm publish
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+    - run: |
+        yarn install
+        yarn build
+    # - run: npm publish
+    #   env:
+    #     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     - name: Deploy
       uses: JamesIves/github-pages-deploy-action@4.1.5
-      env:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: example
+      with:
+        branch: gh-pages
+        folder: example
 
