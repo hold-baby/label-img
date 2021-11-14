@@ -589,7 +589,7 @@ export class Platform extends EventReceiver {
 	 * @param rid RegisterID 图形注册 ID
 	 * @param options IShapeCfg 图形配置
 	 */
-	public register = (rid: RegisterID, options: Omit<IShapeCfg, "registerID">) => {
+	public register = (rid: RegisterID, options: Omit<IShapeCfg, "registerID" | "name">) => {
 		if(this.isRegister(rid)) return
     this.shapeRegister.add(rid, options)
 		this.emitter.emit("shapeRegister")
@@ -631,6 +631,19 @@ export class Platform extends EventReceiver {
 		if(!_.isUndefined(continuity)){
 			this.continuity = !!continuity
 		}
+	}
+	public getLabels = (): { key: string; name: string; type: string[] }[] => {
+		const labelMaps = this.shapeRegister.getMap()
+		return Object.keys(labelMaps).map((key) => {
+			const label = labelMaps[key]
+			const { tag, type } = label
+			return {
+				key,
+				name: tag || key,
+				type
+			}
+		})
+		
 	}
 	/**
 	 * 获取当前标注的图形配置

@@ -26,4 +26,4 @@ node_modules/
 sw-config.js
 test/
 dist/
-
+example/app.*
