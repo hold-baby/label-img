@@ -8,7 +8,7 @@ export type RegisterID = string;
  * 图形样式注册
  */
 export class ShapeRegister {
-  public add: (rid: RegisterID, shapeCfg: Omit<IShapeCfg, "registerID">) => void;
+  public add: (rid: RegisterID, shapeCfg: Omit<IShapeCfg, "registerID" | "name">) => void;
   public get: (rid: RegisterID) => any
   public is: (rid: RegisterID) => boolean
   public getMap: () => Map<any>

@@ -22,8 +22,9 @@ export interface IShapeStyle {
   lineColor: TColor;
   lineWidth: number;
   fillColor: TColor;
+  opacity?: number;
 }
-export type IShapeOptionsStyle = Record<TShapeStatus, IShapeStyle>
+export type IShapeOptionsStyle = Record<TShapeStatus, Partial<IShapeStyle>>
 export type TShapeStyle = Partial<IShapeStyle>
 
 export const normal: IShapeStyle = {
@@ -266,7 +267,7 @@ export class Shape extends EventReceiver {
     }
   }
   getStyle(){
-    return this.style[this.status]
+    return this.style[this.status] as IShapeStyle
   }
   setActive(status: boolean){
     if(this.isDisabled()) return this

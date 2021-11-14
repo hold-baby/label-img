@@ -49,11 +49,6 @@ export default [
         file: pkg.build,
         format: 'umd',
       },
-      {
-        name,
-        file: pkg.eg,
-        format: 'umd',
-      }
     ],
     plugins: [
       json(),
