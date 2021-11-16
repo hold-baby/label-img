@@ -1,7 +1,7 @@
 on:
   push:
-    tags:
-    - 'v*'
+    branches:
+    - 'release'
 name: Publish
 jobs:
   test:
@@ -31,5 +31,5 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@4.1.5
       with:
         branch: gh-pages
-        folder: example
+        folder: public
 

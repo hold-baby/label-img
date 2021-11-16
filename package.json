@@ -14,8 +14,8 @@
     "dev": "rollup -c build/rollup.config.js -w",
     "test": "jest __tests__/**",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "postversion": "git push --follow-tags",
-    "prepublishOnly": "npm run build"
+    "postversion": "git push",
+    "prepublishOnly": "yarn build"
   },
   "repository": {
     "type": "git",

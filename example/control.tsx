@@ -4,7 +4,7 @@ import SourceModal from "./source-modal"
 
 import { useLabelImg } from "./label-img-provider"
 import { useStore } from "./store-provider"
-import { Shape } from "src/Shape"
+import { Shape } from "../src/Shape"
 import "./control.less"
 
 const ShapeItem = ({ shape, render }: { shape: Shape; render: Function }) => {

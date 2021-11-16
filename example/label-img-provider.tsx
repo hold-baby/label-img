@@ -1,5 +1,5 @@
 import { createContext, useContext, FC, useState, useEffect } from "react"
-import LabelImg from "src/main";
+import LabelImg from "../src/main";
 
 const LabelImgCtx = createContext([null, (lb: LabelImg) => {}] as [null | LabelImg, (lb: LabelImg) => void])
 
