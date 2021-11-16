@@ -1,54 +1,19 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="renderer" content="webkit" />
   <meta http-equiv="X-UA-Compatible" content="ie=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.bootcdn.net/ajax/libs/antd/4.16.9/antd.min.css" rel="stylesheet">
   <title>label image</title>
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./app.css">
 </head>
 <body style="margin: 0;">
-  <div class="pw">
-    <div id="container"></div>
-    <div id="menu">
-      <div class="ctrl-line">
-        <a href="https://github.com/hold-baby/label-img">go to github</a>
-      </div>
-      <div class="ctrl-line">
-        <input type="file" id="file">
-        <input type="text" id="addr">
-        <button id="load">URL 加载图片</button>
-        <button id="source">加载示例数据</button>
-      </div>
-      <div class="ctrl-line">
-        <label for="continuity">
-          <input type="checkbox" id="continuity">
-          连续标注
-        </label>
-      </div>
-      <div class="ctrl-line">
-        <button id="polygon">多边形 (首位相连完成标注)</button>
-        <button id="rect">矩形</button>
-        <button id="cancel">取消标注</button>
-      </div>
-      <div class="ctrl-line">
-        <button id="tag">显示标签</button>
-        <button id="shape">隐藏图形</button>
-        <button id="guide">辅助线</button>
-        <button id="resize">重置大小</button>
-        <button id="data">获取数据</button>
-        <button id="export">导出图片</button>
-      </div>
-      <div id="list">
-      </div>
-    </div>
-    <div id="mask" hidden>
-      <img id="mask-img" alt="">
-    </div>
-  </div>
-  <script src="https://libs.baidu.com/jquery/2.0.0/jquery.min.js"></script>
-  <script src="./labelImg.js"></script>
-  <script src="./index.js"></script>
+  <div id="app"></div>
+  <script src="https://cdn.bootcdn.net/ajax/libs/react/17.0.2/umd/react.production.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/react-dom/17.0.2/umd/react-dom.production.min.js"></script>
+  <script src="https://cdn.bootcdn.net/ajax/libs/antd/4.16.9/antd.min.js"></script>
+  <script src="./app.js"></script>
 </body>
 </html>
