@@ -8,6 +8,7 @@ import { terser } from "rollup-plugin-terser";
 import dayjs from "dayjs"
 import dts from "rollup-plugin-dts";
 import { name, input } from "./config"
+import demoConfig from './rollup.config.demo';
 
 export default [
   // type
@@ -61,6 +62,7 @@ export default [
       banner(getBanner)
     ]
   },
+  demoConfig
 ]
 
 function getBanner (){

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from "react"
 import { render } from "react-dom"
-import LabelImg from "src/main"
+import LabelImg from "../src/main"
 import { LabelImgProvider, useLabelImg } from "./label-img-provider"
 import Control from "./control"
 import { StoreProvider } from "./store-provider"
