@@ -94,6 +94,7 @@ const SourceModal = () => {
       visible={visible}
       footer={false}
       closable={false}
+      centered
     >
       <div>
         <Upload accept="image/*" style={{

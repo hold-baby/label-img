@@ -106,3 +106,15 @@ export const hexToRgba = (hex: string, opacity = 1) => {
     return hex
   }
 }
+
+export const dataURIToBlob = (dataURI: string) => {
+  const binStr = atob(dataURI.split(',')[1]),
+    len = binStr.length,
+    arr = new Uint8Array(len);
+
+  for (var i = 0; i < len; i++) {
+    arr[i] = binStr.charCodeAt(i);
+  }
+
+  return new Blob([arr])
+}

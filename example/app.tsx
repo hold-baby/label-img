@@ -1,25 +1,12 @@
-import React, { useEffect, useRef } from "react"
+import React from "react"
 import { render } from "react-dom"
-import LabelImg from "../src/main"
-import { LabelImgProvider, useLabelImg } from "./label-img-provider"
+import { LabelImgProvider } from "./label-img-provider"
 import Control from "./control"
 import { StoreProvider } from "./store-provider"
 import Listener from "./listener"
+import { CreateInstance } from "./instance"
+import { Row } from "antd"
 import "./app.less"
-
-const CreateInstance = () => {
-  const [lb, setLb] = useLabelImg()
-  const ref = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const lb = new LabelImg(ref.current as HTMLDivElement, {})
-    setLb(lb)
-  }, [])
-
-  return (
-    <div ref={ref}></div>
-  )
-}
 
 const Main = () => {
 
@@ -27,11 +14,11 @@ const Main = () => {
     <StoreProvider>
       <LabelImgProvider>
         <div className="pw">
-          <div className="container">
+          <Row justify="center">
             <CreateInstance />
             <Control />
             <Listener />
-          </div>
+          </Row>
         </div>
       </LabelImgProvider>
     </StoreProvider>
