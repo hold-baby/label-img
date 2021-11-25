@@ -10,7 +10,7 @@ export enum ShapeType {
   "Rect" = "Rect"
 }
 export type TShapeType = keyof typeof ShapeType
-enum ShapeStatus {
+export enum ShapeStatus {
   "normal" = "normal",
   "active" = "active",
   "disabled" = "disabled"
