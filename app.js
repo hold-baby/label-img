@@ -8,6 +8,14 @@
 
     var React__default = /*#__PURE__*/_interopDefaultLegacy(React$1);
 
+    var LabelImgCtx = React$1.createContext([null, function (lb) { }]);
+    var useLabelImg = function () { return React$1.useContext(LabelImgCtx); };
+    var LabelImgProvider = function (_a) {
+        var children = _a.children;
+        var _b = React$1.useState(null), lb = _b[0], setLb = _b[1];
+        return (React.createElement(LabelImgCtx.Provider, { value: [lb, setLb] }, children));
+    };
+
     /*! *****************************************************************************
     Copyright (c) Microsoft Corporation.
 
@@ -37,6 +45,17 @@
         d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
     }
 
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+
     function __rest(s, e) {
         var t = {};
         for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
@@ -56,6 +75,257 @@
                 r[k] = a[j];
         return r;
     }
+
+    var initStore = {
+        list: [],
+        labelTypes: []
+    };
+    var StoreCtx = React$1.createContext([initStore, function (store) { }]);
+    var useStore = function () { return React$1.useContext(StoreCtx); };
+    var StoreProvider = function (_a) {
+        var children = _a.children;
+        var _b = React$1.useState(initStore), store = _b[0], setStore = _b[1];
+        var update = function (newStore) {
+            setStore(function (data) { return Object.assign({}, data, newStore); });
+        };
+        return (React.createElement(StoreCtx.Provider, { value: [store, update] }, children));
+    };
+
+    var blackDogs = [
+        [[620, 244], [799, 244], [799, 441], [620, 441]],
+        [[265, 26], [420, 26], [420, 436], [265, 436]]
+    ];
+    var dogEar = [
+        [[559, 116], [554, 125], [547, 135], [542, 151], [532, 166], [535, 180], [539, 189], [546, 189], [558, 183], [566, 175], [574, 170], [579, 166], [582, 159], [581, 152], [576, 146], [570, 134], [567, 126], [563, 118]]
+    ];
+    var SourceModal = function () {
+        var _a = React$1.useState(true), visible = _a[0], setVisible = _a[1];
+        var _b = React$1.useState(""), url = _b[0], setUrl = _b[1];
+        var lb = useLabelImg()[0];
+        var _c = useStore(), _ = _c[0], setStore = _c[1];
+        React$1.useEffect(function () {
+            if (!lb)
+                return;
+            lb.register("polygon", {
+                type: "Polygon",
+                style: {
+                    normal: {
+                        lineColor: "black",
+                        opacity: .05
+                    }
+                },
+                tag: "多边形",
+            });
+            lb.register("rect", {
+                type: "Rect",
+                tag: "矩形"
+            });
+        }, [lb]);
+        var close = function () {
+            if (!lb)
+                return;
+            var list = lb.getShapeList();
+            var labelTypes = lb.getLabels();
+            setStore({
+                list: list,
+                labelTypes: labelTypes
+            });
+            setVisible(false);
+        };
+        var loadData = function () {
+            if (!lb)
+                return;
+            lb.register("black-dog", {
+                type: "Rect",
+                tag: "black dog"
+            });
+            lb.register("dog-ear", {
+                type: "Polygon",
+                tag: "狗耳朵",
+                style: {
+                    normal: {
+                        lineColor: "aqua",
+                        fillColor: "blueviolet",
+                        dotColor: "burlywood"
+                    }
+                }
+            });
+            lb.load("./dog.jpg").then(function () {
+                blackDogs.forEach(function (positions) {
+                    var shape = lb.createShape("black-dog", {
+                        positions: positions
+                    });
+                    lb.addShape(shape);
+                });
+                dogEar.forEach(function (positions) {
+                    var shape = lb.createShape("dog-ear", {
+                        positions: positions
+                    });
+                    lb.addShape(shape);
+                });
+                close();
+            });
+        };
+        var lodaByUrl = function () {
+            if (!url || !lb)
+                return;
+            lb.load(url).then(function () {
+                close();
+            });
+        };
+        return (React__default['default'].createElement(antd.Modal, { title: "\u9009\u62E9\u6570\u636E\u6E90", visible: visible, footer: false, closable: false, centered: true },
+            React__default['default'].createElement("div", null,
+                React__default['default'].createElement(antd.Upload, { accept: "image/*", style: {
+                        width: "100%"
+                    }, className: "w-full block", onChange: function (_a) {
+                        var file = _a.file;
+                        lb === null || lb === void 0 ? void 0 : lb.load(file.originFileObj);
+                        close();
+                    }, action: "" },
+                    React__default['default'].createElement(antd.Button, { type: "primary", block: true }, "\u4E0A\u4F20\u672C\u5730\u56FE\u7247"))),
+            React__default['default'].createElement(antd.Divider, null),
+            React__default['default'].createElement("div", null,
+                React__default['default'].createElement(antd.Input, { value: url, onChange: function (e) {
+                        setUrl(e.target.value);
+                    }, style: {
+                        marginBottom: 8
+                    }, placeholder: "\u8BF7\u8F93\u5165\u56FE\u7247\u5730\u5740" }),
+                React__default['default'].createElement(antd.Button, { type: "primary", block: true, onClick: lodaByUrl }, "\u52A0\u8F7D\u7EBF\u4E0A\u56FE\u7247")),
+            React__default['default'].createElement(antd.Divider, null),
+            React__default['default'].createElement("div", null,
+                React__default['default'].createElement(antd.Button, { type: "primary", block: true, onClick: loadData }, "\u52A0\u8F7D\u793A\u4F8B\u6570\u636E"))));
+    };
+
+    /**
+     * 判断点位是否在图形内部
+     * @param point Point 待检测点位
+     * @param vs Points 图形点位集合
+     * @return boolean
+     */
+    var isInSide = function (point, vs) {
+        var x = point[0], y = point[1];
+        var inside = false;
+        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
+            var xi = vs[i][0], yi = vs[i][1];
+            var xj = vs[j][0], yj = vs[j][1];
+            var intersect = ((yi > y) != (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect)
+                inside = !inside;
+        }
+        return inside;
+    };
+    /**
+     * 获取矩形完整的4个点位
+     * @param start Point 矩形起始点位
+     * @param end Point 矩形结束点位
+     * @return ps Points 矩形完整的4个点位
+     */
+    var getRectPoints = function (start, end) {
+        var p0 = start;
+        var p1 = [end[0], start[1]];
+        var p2 = end;
+        var p3 = [start[0], end[1]];
+        var ps = [p0, p1, p2, p3];
+        return ps;
+    };
+    /**
+     * 获取两点之间的距离
+     * @param p1 Point 点位坐标
+     * @param p2 Point 点位坐标
+     * @return distance number 距离长度
+     */
+    var getDistance = function (p1, p2) {
+        var x = p2[0] - p1[0];
+        var y = p2[1] - p1[1];
+        var x2 = Math.pow(x, 2);
+        var y2 = Math.pow(y, 2);
+        var distance = Math.abs(Math.sqrt(x2 + y2));
+        return distance;
+    };
+    /**
+     * 判断点是否在圆内
+     * @param origin Point 圆心坐标
+     * @param r number 圆的半径
+     * @param target 待检测坐标点
+     * @return boolean
+     */
+    var isInCircle = function (origin, r, target) {
+        return getDistance(origin, target) < r;
+    };
+    /**
+     * 获取图像适应容器的缩放大小
+     * @param img HTMLImageElement 图片节点对象
+     * @param options {width: number, height: number} 容器宽高
+     * @reutrn scale number 适应容器的缩放大小
+     */
+    var getAdaptImgScale = function (img, options) {
+        var width = img.width, height = img.height;
+        var scale = 1;
+        // 初始化图片缩放
+        if (options.width < width || options.height < height) {
+            if (width > height) {
+                // 长大于高
+                scale = options.width / width;
+            }
+            else {
+                // 高大于长
+                scale = options.height / height;
+            }
+        }
+        return scale;
+    };
+    /**
+     * 颜色值16进制转rgba
+     * @param {String} hex 16进制
+     * @param {Float} opacity 透明度(16进制有效)
+     */
+    var hexToRgba = function (hex, opacity) {
+        if (opacity === void 0) { opacity = 1; }
+        var start = hex.slice(0, 1);
+        if (start === "#") {
+            var hexNumbs = hex.slice(1).split("");
+            if (hexNumbs.length === 3) {
+                hexNumbs = hexNumbs.map(function (v) { return v + v; });
+            }
+            else if (hexNumbs.length === 6) {
+                hexNumbs = hexNumbs.reduce(function (arr, item, index) {
+                    if (index % 2 === 0) {
+                        arr.unshift(item);
+                    }
+                    else {
+                        arr[0] = arr[0] + item;
+                    }
+                    return arr;
+                }, []).reverse();
+            }
+            else {
+                throw "请输入正确的16进制颜色";
+            }
+            return "rgba(" + hexNumbs.map(function (v) { return Number.parseInt(v, 16); }).join(",") + ", " + opacity + ")";
+        }
+        else {
+            return hex;
+        }
+    };
+    var dataURIToBlob = function (dataURI) {
+        var binStr = atob(dataURI.split(',')[1]), len = binStr.length, arr = new Uint8Array(len);
+        for (var i = 0; i < len; i++) {
+            arr[i] = binStr.charCodeAt(i);
+        }
+        return new Blob([arr]);
+    };
+
+    var utils = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        isInSide: isInSide,
+        getRectPoints: getRectPoints,
+        getDistance: getDistance,
+        isInCircle: isInCircle,
+        getAdaptImgScale: getAdaptImgScale,
+        hexToRgba: hexToRgba,
+        dataURIToBlob: dataURIToBlob
+    });
 
     /** Used as references for various `Number` constants. */
     var MAX_SAFE_INTEGER = 9007199254740991;
@@ -1291,9 +1561,9 @@
     var _getNative = getNative;
 
     /* Built-in method references that are verified to be native. */
-    var Map = _getNative(_root, 'Map');
+    var Map$1 = _getNative(_root, 'Map');
 
-    var _Map = Map;
+    var _Map = Map$1;
 
     /* Built-in method references that are verified to be native. */
     var nativeCreate = _getNative(Object, 'create');
@@ -1760,9 +2030,9 @@
     });
 
     /** Built-in value references. */
-    var Uint8Array = _root.Uint8Array;
+    var Uint8Array$1 = _root.Uint8Array;
 
-    var _Uint8Array = Uint8Array;
+    var _Uint8Array = Uint8Array$1;
 
     /**
      * Creates a clone of `arrayBuffer`.
@@ -3374,301 +3644,6 @@
         return EventReceiver;
     }());
 
-    var ImagePlacement;
-    (function (ImagePlacement) {
-        ImagePlacement["default"] = "default";
-        ImagePlacement["center"] = "center";
-    })(ImagePlacement || (ImagePlacement = {}));
-    var dfOrigin = [0, 0];
-    var Image = /** @class */ (function (_super) {
-        __extends(Image, _super);
-        function Image(origin) {
-            var _this = _super.call(this) || this;
-            _this.origin = origin || dfOrigin;
-            _this.complate = false;
-            _this.el = null;
-            return _this;
-        }
-        /**
-         * 加载图片
-         * @param source ImageLoadSource 图片对象或图片路径
-         */
-        Image.prototype.load = function (source) {
-            var _this = this;
-            this.origin = dfOrigin;
-            return new Promise(function (resolve, reject) {
-                _this.complate = false;
-                var img = document.createElement("img");
-                new Promise(function (resolve, reject) {
-                    var src = source;
-                    if (source instanceof File) {
-                        var reader = new FileReader();
-                        reader.readAsDataURL(source);
-                        reader.onload = function (e) {
-                            var _a;
-                            src = (_a = e.target) === null || _a === void 0 ? void 0 : _a.result;
-                            resolve(src);
-                        };
-                        reader.onerror = function () {
-                            reject();
-                            throw "图片加载错误";
-                        };
-                    }
-                    else if (typeof source === "string") {
-                        resolve(src);
-                    }
-                }).then(function (src) {
-                    img.src = src;
-                    img.onload = function () {
-                        _this.complate = true;
-                        _this.el = img;
-                        resolve(img);
-                    };
-                    img.onerror = function () {
-                        reject();
-                        throw "图片加载错误";
-                    };
-                });
-            });
-        };
-        Image.prototype.loadFromImg = function (img) {
-            this.origin = dfOrigin;
-            this.complate = true;
-            this.el = img;
-        };
-        /**
-         * 获取图片对象
-         * @return {HTMLImageElement | null}
-         */
-        Image.prototype.getEl = function () {
-            return this.el;
-        };
-        /**
-         * 获取图片宽高
-         * @param scale number 缩放大小
-         * @return [width: number, width: number]
-         */
-        Image.prototype.getSize = function (scale) {
-            if (this.el) {
-                var _a = this.el, width = _a.width, height = _a.height;
-                return [width * (scale || 1), height * (scale || 1)];
-            }
-            return dfOrigin;
-        };
-        /**
-         * 获取图片原点
-         * @return Point
-         */
-        Image.prototype.getOrigin = function () {
-            return this.origin.slice();
-        };
-        /**
-         * 获取图片中心点
-         * @return Point
-         */
-        Image.prototype.getCenter = function (scale) {
-            if (scale === void 0) { scale = 1; }
-            if (this.el) {
-                var _a = this.origin.slice(), x = _a[0], y = _a[1];
-                var _b = this.el, width = _b.width, height = _b.height;
-                var _c = [(width * scale) / 2, (height * scale) / 2], hx = _c[0], hh = _c[1];
-                return [x + hx, y + hh];
-            }
-            return dfOrigin;
-        };
-        /**
-         * 获取图片缩放后的坐标点
-         * @param scale number 缩放大小
-         */
-        Image.prototype.getPosition = function (scale) {
-            if (scale === void 0) { scale = 1; }
-            var _a = this.getSize(), w = _a[0], h = _a[1];
-            var sw = w * scale;
-            var sh = h * scale;
-            var _b = this.origin, x = _b[0], y = _b[1];
-            var postion = [
-                this.origin,
-                [x + sw, y],
-                [x + sw, y + sh],
-                [x, y + sh]
-            ];
-            return postion;
-        };
-        /**
-         * 获取容器点位在图片上的坐标点位
-         * @param offset Point 容器的坐标点位
-         * @param scale 缩放大小
-         * @return Point
-         */
-        Image.prototype.toImagePoint = function (offset, scale) {
-            var px = offset[0], py = offset[1];
-            var _a = this.origin, ox = _a[0], oy = _a[1];
-            var point = [
-                (px - ox) / scale,
-                (py - oy) / scale
-            ];
-            return point;
-        };
-        /**
-         * 获取 shape 坐标点转换成画布的坐标
-         * @param positions Points Shape 的坐标点集合
-         * @param scale 缩放大小
-         * @return Points
-         */
-        Image.prototype.getShape2CanvasPoints = function (positions, scale) {
-            var _this = this;
-            var rp = positions.map(function (position) {
-                return _this.getShape2CanvasPoint(position, scale);
-            });
-            return rp;
-        };
-        /**
-         * 获取 shape 坐标点转换成画布的坐标
-         * @param positions Points Shape 的坐标点集合
-         * @param scale 缩放大小
-         * @return Points
-         */
-        Image.prototype.getShape2CanvasPoint = function (position, scale) {
-            var orgin = this.getOrigin();
-            var ox = orgin[0], oy = orgin[1];
-            var sx = position[0], sy = position[1];
-            var cx = ox + sx * scale;
-            var cy = oy + sy * scale;
-            return [cx, cy];
-        };
-        /**
-         * 设置图片的原点坐标
-         * @param origin Point 原点坐标
-         */
-        Image.prototype.moveTo = function (origin) {
-            this.origin = origin;
-        };
-        return Image;
-    }(EventReceiver));
-
-    /**
-     * 判断点位是否在图形内部
-     * @param point Point 待检测点位
-     * @param vs Points 图形点位集合
-     * @return boolean
-     */
-    var isInSide = function (point, vs) {
-        var x = point[0], y = point[1];
-        var inside = false;
-        for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
-            var xi = vs[i][0], yi = vs[i][1];
-            var xj = vs[j][0], yj = vs[j][1];
-            var intersect = ((yi > y) != (yj > y))
-                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
-            if (intersect)
-                inside = !inside;
-        }
-        return inside;
-    };
-    /**
-     * 获取矩形完整的4个点位
-     * @param start Point 矩形起始点位
-     * @param end Point 矩形结束点位
-     * @return ps Points 矩形完整的4个点位
-     */
-    var getRectPoints = function (start, end) {
-        var p0 = start;
-        var p1 = [end[0], start[1]];
-        var p2 = end;
-        var p3 = [start[0], end[1]];
-        var ps = [p0, p1, p2, p3];
-        return ps;
-    };
-    /**
-     * 获取两点之间的距离
-     * @param p1 Point 点位坐标
-     * @param p2 Point 点位坐标
-     * @return distance number 距离长度
-     */
-    var getDistance = function (p1, p2) {
-        var x = p2[0] - p1[0];
-        var y = p2[1] - p1[1];
-        var x2 = Math.pow(x, 2);
-        var y2 = Math.pow(y, 2);
-        var distance = Math.abs(Math.sqrt(x2 + y2));
-        return distance;
-    };
-    /**
-     * 判断点是否在圆内
-     * @param origin Point 圆心坐标
-     * @param r number 圆的半径
-     * @param target 待检测坐标点
-     * @return boolean
-     */
-    var isInCircle = function (origin, r, target) {
-        return getDistance(origin, target) < r;
-    };
-    /**
-     * 获取图像适应容器的缩放大小
-     * @param img HTMLImageElement 图片节点对象
-     * @param options {width: number, height: number} 容器宽高
-     * @reutrn scale number 适应容器的缩放大小
-     */
-    var getAdaptImgScale = function (img, options) {
-        var width = img.width, height = img.height;
-        var scale = 1;
-        // 初始化图片缩放
-        if (options.width < width || options.height < height) {
-            if (width > height) {
-                // 长大于高
-                scale = options.width / width;
-            }
-            else {
-                // 高大于长
-                scale = options.height / height;
-            }
-        }
-        return scale;
-    };
-    /**
-     * 颜色值16进制转rgba
-     * @param {String} hex 16进制
-     * @param {Float} opacity 透明度(16进制有效)
-     */
-    var hexToRgba = function (hex, opacity) {
-        if (opacity === void 0) { opacity = 1; }
-        var start = hex.slice(0, 1);
-        if (start === "#") {
-            var hexNumbs = hex.slice(1).split("");
-            if (hexNumbs.length === 3) {
-                hexNumbs = hexNumbs.map(function (v) { return v + v; });
-            }
-            else if (hexNumbs.length === 6) {
-                hexNumbs = hexNumbs.reduce(function (arr, item, index) {
-                    if (index % 2 === 0) {
-                        arr.unshift(item);
-                    }
-                    else {
-                        arr[0] = arr[0] + item;
-                    }
-                    return arr;
-                }, []).reverse();
-            }
-            else {
-                throw "请输入正确的16进制颜色";
-            }
-            return "rgba(" + hexNumbs.map(function (v) { return Number.parseInt(v, 16); }).join(",") + ", " + opacity + ")";
-        }
-        else {
-            return hex;
-        }
-    };
-
-    var utils = /*#__PURE__*/Object.freeze({
-        __proto__: null,
-        isInSide: isInSide,
-        getRectPoints: getRectPoints,
-        getDistance: getDistance,
-        isInCircle: isInCircle,
-        getAdaptImgScale: getAdaptImgScale,
-        hexToRgba: hexToRgba
-    });
-
     var IDGenerator = /** @class */ (function () {
         function IDGenerator(props) {
             var _a = props || {}, _b = _a.len, len = _b === void 0 ? 8 : _b, _c = _a.start, start = _c === void 0 ? 1 : _c;
@@ -4057,6 +4032,438 @@
             return this;
         };
         return Shape;
+    }(EventReceiver));
+
+    function u(){return (u=Object.assign||function(e){for(var r=1;r<arguments.length;r++){var t=arguments[r];for(var n in t)Object.prototype.hasOwnProperty.call(t,n)&&(e[n]=t[n]);}return e}).apply(this,arguments)}function c(e,r){if(null==e)return {};var t,n,o={},a=Object.keys(e);for(n=0;n<a.length;n++)r.indexOf(t=a[n])>=0||(o[t]=e[t]);return o}function i(e){var t=React$1.useRef(e),n=React$1.useRef(function(e){t.current&&t.current(e);});return t.current=e,n.current}var s=function(e,r,t){return void 0===r&&(r=0),void 0===t&&(t=1),e>t?t:e<r?r:e},f=function(e){return "touches"in e},v=function(e){return e&&e.ownerDocument.defaultView||self},d=function(e,r,t){var n=e.getBoundingClientRect(),o=f(r)?function(e,r){for(var t=0;t<e.length;t++)if(e[t].identifier===r)return e[t];return e[0]}(r.touches,t):r;return {left:s((o.pageX-(n.left+v(e).pageXOffset))/n.width),top:s((o.pageY-(n.top+v(e).pageYOffset))/n.height)}},h=function(e){!f(e)&&e.preventDefault();},m=React__default['default'].memo(function(o){var a=o.onMove,l=o.onKey,s=c(o,["onMove","onKey"]),m=React$1.useRef(null),g=i(a),p=i(l),b=React$1.useRef(null),_=React$1.useRef(!1),x=React$1.useMemo(function(){var e=function(e){h(e),(f(e)?e.touches.length>0:e.buttons>0)&&m.current?g(d(m.current,e,b.current)):t(!1);},r=function(){return t(!1)};function t(t){var n=_.current,o=v(m.current),a=t?o.addEventListener:o.removeEventListener;a(n?"touchmove":"mousemove",e),a(n?"touchend":"mouseup",r);}return [function(e){var r=e.nativeEvent,n=m.current;if(n&&(h(r),!function(e,r){return r&&!f(e)}(r,_.current)&&n)){if(f(r)){_.current=!0;var o=r.changedTouches||[];o.length&&(b.current=o[0].identifier);}n.focus(),g(d(n,r,b.current)),t(!0);}},function(e){var r=e.which||e.keyCode;r<37||r>40||(e.preventDefault(),p({left:39===r?.05:37===r?-.05:0,top:40===r?.05:38===r?-.05:0}));},t]},[p,g]),C=x[0],E=x[1],H=x[2];return React$1.useEffect(function(){return H},[H]),React__default['default'].createElement("div",u({},s,{onTouchStart:C,onMouseDown:C,className:"react-colorful__interactive",ref:m,onKeyDown:E,tabIndex:0,role:"slider"}))}),g=function(e){return e.filter(Boolean).join(" ")},p=function(r){var t=r.color,n=r.left,o=r.top,a=void 0===o?.5:o,l=g(["react-colorful__pointer",r.className]);return React__default['default'].createElement("div",{className:l,style:{top:100*a+"%",left:100*n+"%"}},React__default['default'].createElement("div",{className:"react-colorful__pointer-fill",style:{backgroundColor:t}}))},b=function(e,r,t){return void 0===r&&(r=0),void 0===t&&(t=Math.pow(10,r)),Math.round(t*e)/t},x=function(e){return "#"===e[0]&&(e=e.substr(1)),e.length<6?{r:parseInt(e[0]+e[0],16),g:parseInt(e[1]+e[1],16),b:parseInt(e[2]+e[2],16),a:1}:{r:parseInt(e.substr(0,2),16),g:parseInt(e.substr(2,2),16),b:parseInt(e.substr(4,2),16),a:1}},N=function(e){var r=e.s,t=e.v,n=e.a,o=(200-r)*t/100;return {h:b(e.h),s:b(o>0&&o<200?r*t/100/(o<=100?o:200-o)*100:0),l:b(o/2),a:b(n,2)}},w=function(e){var r=N(e);return "hsl("+r.h+", "+r.s+"%, "+r.l+"%)"},q=function(e){var r=e.h,t=e.s,n=e.v,o=e.a;r=r/360*6,t/=100,n/=100;var a=Math.floor(r),l=n*(1-t),u=n*(1-(r-a)*t),c=n*(1-(1-r+a)*t),i=a%6;return {r:b(255*[n,u,l,l,c,n][i]),g:b(255*[c,n,n,u,l,l][i]),b:b(255*[l,l,c,n,n,u][i]),a:b(o,2)}},z=function(e){var r=e.toString(16);return r.length<2?"0"+r:r},B=function(e){var r=e.r,t=e.g,n=e.b,o=e.a,a=Math.max(r,t,n),l=a-Math.min(r,t,n),u=l?a===r?(t-n)/l:a===t?2+(n-r)/l:4+(r-t)/l:0;return {h:b(60*(u<0?u+6:u)),s:b(a?l/a*100:0),v:b(a/255*100),a:o}},K=React__default['default'].memo(function(r){var t=r.hue,n=r.onChange,o=g(["react-colorful__hue",r.className]);return React__default['default'].createElement("div",{className:o},React__default['default'].createElement(m,{onMove:function(e){n({h:360*e.left});},onKey:function(e){n({h:s(t+360*e.left,0,360)});},"aria-label":"Hue","aria-valuetext":b(t)},React__default['default'].createElement(p,{className:"react-colorful__hue-pointer",left:t/360,color:w({h:t,s:100,v:100,a:1})})))}),L=React__default['default'].memo(function(r){var t=r.hsva,n=r.onChange,o={backgroundColor:w({h:t.h,s:100,v:100,a:1})};return React__default['default'].createElement("div",{className:"react-colorful__saturation",style:o},React__default['default'].createElement(m,{onMove:function(e){n({s:100*e.left,v:100-100*e.top});},onKey:function(e){n({s:s(t.s+100*e.left,0,100),v:s(t.v-100*e.top,0,100)});},"aria-label":"Color","aria-valuetext":"Saturation "+b(t.s)+"%, Brightness "+b(t.v)+"%"},React__default['default'].createElement(p,{className:"react-colorful__saturation-pointer",top:1-t.v/100,left:t.s/100,color:w(t)})))}),A=function(e,r){if(e===r)return !0;for(var t in e)if(e[t]!==r[t])return !1;return !0};function T(e,t,l){var u=i(l),c=React$1.useState(function(){return e.toHsva(t)}),s=c[0],f=c[1],v=React$1.useRef({color:t,hsva:s});React$1.useEffect(function(){if(!e.equal(t,v.current.color)){var r=e.toHsva(t);v.current={hsva:r,color:t},f(r);}},[t,e]),React$1.useEffect(function(){var r;A(s,v.current.hsva)||e.equal(r=e.fromHsva(s),v.current.color)||(v.current={hsva:s,color:r},u(r));},[s,e,u]);var d=React$1.useCallback(function(e){f(function(r){return Object.assign({},r,e)});},[]);return [s,d]}var P="undefined"!=typeof window?React$1.useLayoutEffect:React$1.useEffect,X=function(){return ("undefined"!=typeof __webpack_nonce__?__webpack_nonce__:void 0)},R=new Map,V=function(e){P(function(){var r=e.current?e.current.ownerDocument:document;if(void 0!==r&&!R.has(r)){var t=r.createElement("style");t.innerHTML='.react-colorful{position:relative;display:flex;flex-direction:column;width:200px;height:200px;-webkit-user-select:none;-moz-user-select:none;-ms-user-select:none;user-select:none;cursor:default}.react-colorful__saturation{position:relative;flex-grow:1;border-color:transparent;border-bottom:12px solid #000;border-radius:8px 8px 0 0;background-image:linear-gradient(0deg,#000,transparent),linear-gradient(90deg,#fff,hsla(0,0%,100%,0))}.react-colorful__alpha-gradient,.react-colorful__pointer-fill{content:"";position:absolute;left:0;top:0;right:0;bottom:0;pointer-events:none;border-radius:inherit}.react-colorful__alpha-gradient,.react-colorful__saturation{box-shadow:inset 0 0 0 1px rgba(0,0,0,.05)}.react-colorful__alpha,.react-colorful__hue{position:relative;height:24px}.react-colorful__hue{background:linear-gradient(90deg,red 0,#ff0 17%,#0f0 33%,#0ff 50%,#00f 67%,#f0f 83%,red)}.react-colorful__last-control{border-radius:0 0 8px 8px}.react-colorful__interactive{position:absolute;left:0;top:0;right:0;bottom:0;border-radius:inherit;outline:none;touch-action:none}.react-colorful__pointer{position:absolute;z-index:1;box-sizing:border-box;width:28px;height:28px;transform:translate(-50%,-50%);background-color:#fff;border:2px solid #fff;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,.2)}.react-colorful__interactive:focus .react-colorful__pointer{transform:translate(-50%,-50%) scale(1.1)}.react-colorful__alpha,.react-colorful__alpha-pointer{background-color:#fff;background-image:url(\'data:image/svg+xml;charset=utf-8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill-opacity=".05"><path d="M8 0h8v8H8zM0 8h8v8H0z"/></svg>\')}.react-colorful__saturation-pointer{z-index:3}.react-colorful__hue-pointer{z-index:2}',R.set(r,t);var n=X();n&&t.setAttribute("nonce",n),r.head.appendChild(t);}},[]);},$=function(t){var n=t.className,o=t.colorModel,a=t.color,l=void 0===a?o.defaultColor:a,i=t.onChange,s=c(t,["className","colorModel","color","onChange"]),f=React$1.useRef(null);V(f);var v=T(o,l,i),d=v[0],h=v[1],m=g(["react-colorful",n]);return React__default['default'].createElement("div",u({},s,{ref:f,className:m}),React__default['default'].createElement(L,{hsva:d,onChange:h}),React__default['default'].createElement(K,{hue:d.h,onChange:h,className:"react-colorful__last-control"}))},G={defaultColor:"000",toHsva:function(e){return B(x(e))},fromHsva:function(e){return t=(r=q(e)).g,n=r.b,"#"+z(r.r)+z(t)+z(n);var r,t,n;},equal:function(e,r){return e.toLowerCase()===r.toLowerCase()||A(x(e),x(r))}},J=function(r){return React__default['default'].createElement($,u({},r,{colorModel:G}))};
+
+    var ColorPicker = function (_a) {
+        var value = _a.value, onChange = _a.onChange;
+        var _b = React$1.useState(false), visible = _b[0], setVisible = _b[1];
+        var _c = React$1.useState(value || ''), color = _c[0], setColor = _c[1];
+        return (React__default['default'].createElement("div", null,
+            React__default['default'].createElement(antd.Button, { onClick: function () {
+                    setVisible(true);
+                } },
+                React__default['default'].createElement("span", { style: {
+                        color: color
+                    } }, color || '选择颜色')),
+            React__default['default'].createElement(antd.Modal, { visible: visible, onCancel: function () {
+                    setVisible(false);
+                }, onOk: function () {
+                    onChange && onChange(color);
+                    setVisible(false);
+                } },
+                React__default['default'].createElement(J, { color: color, onChange: function (color) {
+                        setColor(color);
+                    } }),
+                React__default['default'].createElement(antd.Input, { value: color, onChange: function (e) {
+                        var value = e.target.value;
+                        setColor(value);
+                    } }))));
+    };
+
+    var Item = antd.Form.Item;
+    var Group = antd.Radio.Group;
+    var Panel = antd.Collapse.Panel;
+    var TabPane = antd.Tabs.TabPane;
+    var displayStyleStatus = function (status) {
+        var _a;
+        return (_a = {},
+            _a[ShapeStatus.normal] = '常规',
+            _a[ShapeStatus.active] = '高亮',
+            _a[ShapeStatus.disabled] = '禁用',
+            _a)[status];
+    };
+    var EntityModal = function (_a) {
+        var cb = _a.cb, props = __rest(_a, ["cb"]);
+        return (React__default['default'].createElement(antd.Modal, __assign({ title: "\u65B0\u5EFA\u5B9E\u4F53\u7C7B\u578B", closable: false, centered: true, footer: false }, props),
+            React__default['default'].createElement(antd.Form, { onFinish: function (values) {
+                    var id = values.id, tag = values.tag, type = values.type, other = __rest(values, ["id", "tag", "type"]);
+                    var style = {};
+                    Object.keys(other).forEach(function (key) {
+                        if (/\-/.test(key)) {
+                            var _a = key.split('-'), status_1 = _a[0], property = _a[1];
+                            if (!style[status_1]) {
+                                style[status_1] = {};
+                            }
+                            style[status_1][property] = other[key];
+                        }
+                    });
+                    cb({
+                        id: id, tag: tag, type: type,
+                        style: style
+                    });
+                } },
+                React__default['default'].createElement(Item, { label: "\u5B9E\u4F53 ID", name: "id", required: true, rules: [{ required: true, message: "请输入「实体 ID」" }] },
+                    React__default['default'].createElement(antd.Input, null)),
+                React__default['default'].createElement(Item, { label: "\u5B9E\u4F53\u6807\u7B7E\u540D\u79F0", name: "tag", required: true, rules: [{ required: true, message: "请输入「实体标签名称」" }] },
+                    React__default['default'].createElement(antd.Input, null)),
+                React__default['default'].createElement(Item, { label: "\u6807\u6CE8\u7C7B\u578B", name: "type", required: true, rules: [{ required: true, message: "请选择「标注类型」" }] },
+                    React__default['default'].createElement(Group, null,
+                        React__default['default'].createElement(antd.Radio, { value: ShapeType.Rect }, "\u77E9\u5F62"),
+                        React__default['default'].createElement(antd.Radio, { value: ShapeType.Polygon }, "\u591A\u8FB9\u5F62"))),
+                React__default['default'].createElement(antd.Tabs, { type: "card" }, Object.keys(ShapeStatus).map(function (status) { return (React__default['default'].createElement(TabPane, { tab: displayStyleStatus(status) + "\u6837\u5F0F", key: status },
+                    React__default['default'].createElement(Item, { label: "\u6807\u6CE8\u70B9\u989C\u8272", name: status + "-dotColor" },
+                        React__default['default'].createElement(ColorPicker, null)),
+                    React__default['default'].createElement(Item, { label: "\u6807\u6CE8\u70B9\u5927\u5C0F", name: status + "-dotRadius" },
+                        React__default['default'].createElement(antd.Slider, { min: 1, max: 5 })),
+                    React__default['default'].createElement(Item, { label: "\u7EBF\u6846\u989C\u8272", name: status + "-lineColor" },
+                        React__default['default'].createElement(ColorPicker, null)),
+                    React__default['default'].createElement(Item, { label: "\u7EBF\u6846\u5927\u5C0F", name: status + "-lineWidth" },
+                        React__default['default'].createElement(antd.Slider, { min: 1, max: 5 })),
+                    React__default['default'].createElement(Item, { label: "\u586B\u5145\u989C\u8272", name: status + "-fillColor" },
+                        React__default['default'].createElement(ColorPicker, null)),
+                    React__default['default'].createElement(Item, { label: "\u900F\u660E\u5EA6", name: status + "-opacity" },
+                        React__default['default'].createElement(antd.Slider, { min: 0, max: 1, step: 0.1 })))); })),
+                React__default['default'].createElement(antd.Row, { justify: "center", align: "middle" },
+                    React__default['default'].createElement(antd.Button, { type: "primary", htmlType: "submit", style: {
+                            width: 200
+                        } }, "\u786E\u8BA4")))));
+    };
+
+    var TabPane$1 = antd.Tabs.TabPane;
+    var ShapeItem = function (_a) {
+        var shape = _a.shape, render = _a.render;
+        var registerID = shape.registerID, id = shape.id, type = shape.type;
+        var lb = useLabelImg()[0];
+        var isHidden = shape.isHidden();
+        var isDisabled = shape.isDisabled();
+        return (React__default['default'].createElement("div", { className: "shape-item" },
+            React__default['default'].createElement("div", null, registerID + "-" + id),
+            React__default['default'].createElement("div", { className: "shape-ctrl" },
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        if (isHidden) {
+                            shape.show();
+                        }
+                        else {
+                            shape.hidden();
+                        }
+                        render();
+                    } }, isHidden ? '显示' : '隐藏'),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        if (isDisabled) {
+                            shape.normal();
+                        }
+                        else {
+                            shape.disabled();
+                        }
+                        render();
+                    } }, isDisabled ? '正常' : '禁用'),
+                React__default['default'].createElement(antd.Button, { size: "small", danger: true, onClick: function () {
+                        lb === null || lb === void 0 ? void 0 : lb.remove(shape);
+                        render();
+                    } }, "\u5220\u9664"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        shape.tagShow();
+                        render();
+                    } }, "\u6807\u7B7E")),
+            React__default['default'].createElement("div", null,
+                React__default['default'].createElement(antd.Tag, { color: "blue" }, type))));
+    };
+    var Control = function () {
+        var lb = useLabelImg()[0];
+        var _a = useStore(), _b = _a[0], list = _b.list, labelTypes = _b.labelTypes, setStore = _a[1];
+        var _c = React$1.useState(false), continuity = _c[0], setContinuity = _c[1];
+        var _d = React$1.useState(false), isCreate = _d[0], setIsCreate = _d[1];
+        var _e = React$1.useState(""), base64 = _e[0], setBase64 = _e[1];
+        var render = function () {
+            var list = lb === null || lb === void 0 ? void 0 : lb.getShapeList();
+            if (!list)
+                return;
+            setStore({
+                list: list
+            });
+            lb === null || lb === void 0 ? void 0 : lb.render();
+        };
+        var cb = function (v) {
+            if (!lb)
+                return;
+            var id = v.id, options = __rest(v, ["id"]);
+            lb.register(id, options);
+            var labelTypes = lb.getLabels();
+            setStore({
+                labelTypes: labelTypes
+            });
+            setIsCreate(false);
+        };
+        return (React__default['default'].createElement("div", { className: "control" },
+            React__default['default'].createElement(antd.Divider, null),
+            React__default['default'].createElement(antd.Row, { justify: "space-between", align: "middle" },
+                React__default['default'].createElement(antd.Col, { className: "gutter-row", span: 8 },
+                    React__default['default'].createElement("a", { href: "https://github.com/hold-baby/label-img" }, "go to github")),
+                React__default['default'].createElement(antd.Col, { span: 8 },
+                    React__default['default'].createElement(antd.Button, { onClick: function () {
+                            setIsCreate(true);
+                        } }, "\u65B0\u5EFA\u5B9E\u4F53\u7C7B\u578B")),
+                React__default['default'].createElement(EntityModal, { visible: isCreate, onCancel: function () {
+                        setIsCreate(false);
+                    }, cb: cb })),
+            React__default['default'].createElement(antd.Divider, { orientation: "left" }, "\u5B9E\u4F53\u7C7B\u578B\u5217\u8868"),
+            React__default['default'].createElement(antd.Row, { justify: "start" }, labelTypes.map(function (_a) {
+                var key = _a.key, name = _a.name;
+                return (React__default['default'].createElement(antd.Col, { style: {
+                        marginRight: 8
+                    } },
+                    React__default['default'].createElement(antd.Button, { key: key, size: "small", onClick: function () {
+                            lb === null || lb === void 0 ? void 0 : lb.label(key);
+                        } }, name)));
+            })),
+            React__default['default'].createElement(antd.Divider, { orientation: "left" }, "\u63A7\u5236"),
+            React__default['default'].createElement("div", { className: "continuity" },
+                React__default['default'].createElement(antd.Switch, { onChange: function (continuity) {
+                        setContinuity(continuity);
+                        lb === null || lb === void 0 ? void 0 : lb.setContinuity(continuity);
+                    } }),
+                continuity ? '连续标注' : '单次标注'),
+            React__default['default'].createElement(antd.Row, { justify: "start", align: "middle" },
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        lb === null || lb === void 0 ? void 0 : lb.setTagShow(!lb.isTagShow());
+                    } }, "\u663E\u793A/\u9690\u85CF\u6807\u7B7E"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        lb === null || lb === void 0 ? void 0 : lb.getShapeList().forEach(function (shape) {
+                            shape.isHidden() ? shape.show() : shape.hidden();
+                        });
+                        lb === null || lb === void 0 ? void 0 : lb.render();
+                    } }, "\u663E\u793A/\u9690\u85CF\u56FE\u5F62"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        lb === null || lb === void 0 ? void 0 : lb.resize();
+                    } }, "\u91CD\u7F6E\u5927\u5C0F"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        lb === null || lb === void 0 ? void 0 : lb.setGuideLine();
+                    } }, "\u8F85\u52A9\u7EBF"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        var list = lb === null || lb === void 0 ? void 0 : lb.getShapeList().map(function (_a) {
+                            var id = _a.id, tagContent = _a.tagContent, positions = _a.positions;
+                            return {
+                                id: id,
+                                tag: tagContent,
+                                positions: positions
+                            };
+                        });
+                        console.log(list);
+                        alert(JSON.stringify(list));
+                    } }, "\u83B7\u53D6\u6570\u636E"),
+                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
+                        var base64 = lb === null || lb === void 0 ? void 0 : lb.toDataURL();
+                        if (!base64)
+                            return;
+                        setBase64(base64);
+                    } }, "\u5BFC\u51FA\u56FE\u7247"),
+                React__default['default'].createElement(antd.Modal, { visible: !!base64, onCancel: function () {
+                        setBase64("");
+                    }, cancelText: "\u5173\u95ED", onOk: function () {
+                        var blob = dataURIToBlob(base64);
+                        var a = document.createElement("a");
+                        a.download = 'labelImage.jpg';
+                        a.href = URL.createObjectURL(blob);
+                        a.click();
+                    }, okText: "\u4E0B\u8F7D" },
+                    React__default['default'].createElement(antd.Image, { src: base64, preview: false }))),
+            React__default['default'].createElement(antd.Divider, { orientation: "left" }, "\u5B9E\u4F53\u5217\u8868"),
+            React__default['default'].createElement(antd.Tabs, { type: "card" },
+                React__default['default'].createElement(TabPane$1, { tab: "\u5168\u90E8", key: "all" },
+                    React__default['default'].createElement("div", { className: "shape-list" }, list.map(function (shape) {
+                        return (React__default['default'].createElement(ShapeItem, { shape: shape, render: render, key: shape.id }));
+                    }))),
+                labelTypes.map(function (_a) {
+                    var key = _a.key, name = _a.name;
+                    return (React__default['default'].createElement(TabPane$1, { tab: name, key: key },
+                        React__default['default'].createElement("div", { className: "shape-list" }, list.filter(function (_a) {
+                            var registerID = _a.registerID;
+                            return registerID === key;
+                        }).map(function (shape) {
+                            return (React__default['default'].createElement(ShapeItem, { shape: shape, render: render, key: shape.id }));
+                        }))));
+                })),
+            React__default['default'].createElement(SourceModal, null)));
+    };
+
+    var Listener = function () {
+        var lb = useLabelImg()[0];
+        var _a = useStore(), _ = _a[0], setStore = _a[1];
+        React$1.useEffect(function () {
+            if (!lb)
+                return;
+            lb.emitter.on("create", function () {
+                var list = lb.getShapeList();
+                setStore({
+                    list: list
+                });
+            });
+        }, [lb]);
+        return null;
+    };
+
+    var ImagePlacement;
+    (function (ImagePlacement) {
+        ImagePlacement["default"] = "default";
+        ImagePlacement["center"] = "center";
+    })(ImagePlacement || (ImagePlacement = {}));
+    var dfOrigin = [0, 0];
+    var Image = /** @class */ (function (_super) {
+        __extends(Image, _super);
+        function Image(origin) {
+            var _this = _super.call(this) || this;
+            _this.origin = origin || dfOrigin;
+            _this.complate = false;
+            _this.el = null;
+            return _this;
+        }
+        /**
+         * 加载图片
+         * @param source ImageLoadSource 图片对象或图片路径
+         */
+        Image.prototype.load = function (source) {
+            var _this = this;
+            this.origin = dfOrigin;
+            return new Promise(function (resolve, reject) {
+                _this.complate = false;
+                var img = document.createElement("img");
+                new Promise(function (resolve, reject) {
+                    var src = source;
+                    if (source instanceof File) {
+                        var reader = new FileReader();
+                        reader.readAsDataURL(source);
+                        reader.onload = function (e) {
+                            var _a;
+                            src = (_a = e.target) === null || _a === void 0 ? void 0 : _a.result;
+                            resolve(src);
+                        };
+                        reader.onerror = function () {
+                            reject();
+                            throw "图片加载错误";
+                        };
+                    }
+                    else if (typeof source === "string") {
+                        resolve(src);
+                    }
+                }).then(function (src) {
+                    img.src = src;
+                    img.onload = function () {
+                        _this.complate = true;
+                        _this.el = img;
+                        resolve(img);
+                    };
+                    img.onerror = function () {
+                        reject();
+                        throw "图片加载错误";
+                    };
+                });
+            });
+        };
+        Image.prototype.loadFromImg = function (img) {
+            this.origin = dfOrigin;
+            this.complate = true;
+            this.el = img;
+        };
+        /**
+         * 获取图片对象
+         * @return {HTMLImageElement | null}
+         */
+        Image.prototype.getEl = function () {
+            return this.el;
+        };
+        /**
+         * 获取图片宽高
+         * @param scale number 缩放大小
+         * @return [width: number, width: number]
+         */
+        Image.prototype.getSize = function (scale) {
+            if (this.el) {
+                var _a = this.el, width = _a.width, height = _a.height;
+                return [width * (scale || 1), height * (scale || 1)];
+            }
+            return dfOrigin;
+        };
+        /**
+         * 获取图片原点
+         * @return Point
+         */
+        Image.prototype.getOrigin = function () {
+            return this.origin.slice();
+        };
+        /**
+         * 获取图片中心点
+         * @return Point
+         */
+        Image.prototype.getCenter = function (scale) {
+            if (scale === void 0) { scale = 1; }
+            if (this.el) {
+                var _a = this.origin.slice(), x = _a[0], y = _a[1];
+                var _b = this.el, width = _b.width, height = _b.height;
+                var _c = [(width * scale) / 2, (height * scale) / 2], hx = _c[0], hh = _c[1];
+                return [x + hx, y + hh];
+            }
+            return dfOrigin;
+        };
+        /**
+         * 获取图片缩放后的坐标点
+         * @param scale number 缩放大小
+         */
+        Image.prototype.getPosition = function (scale) {
+            if (scale === void 0) { scale = 1; }
+            var _a = this.getSize(), w = _a[0], h = _a[1];
+            var sw = w * scale;
+            var sh = h * scale;
+            var _b = this.origin, x = _b[0], y = _b[1];
+            var postion = [
+                this.origin,
+                [x + sw, y],
+                [x + sw, y + sh],
+                [x, y + sh]
+            ];
+            return postion;
+        };
+        /**
+         * 获取容器点位在图片上的坐标点位
+         * @param offset Point 容器的坐标点位
+         * @param scale 缩放大小
+         * @return Point
+         */
+        Image.prototype.toImagePoint = function (offset, scale) {
+            var px = offset[0], py = offset[1];
+            var _a = this.origin, ox = _a[0], oy = _a[1];
+            var point = [
+                (px - ox) / scale,
+                (py - oy) / scale
+            ];
+            return point;
+        };
+        /**
+         * 获取 shape 坐标点转换成画布的坐标
+         * @param positions Points Shape 的坐标点集合
+         * @param scale 缩放大小
+         * @return Points
+         */
+        Image.prototype.getShape2CanvasPoints = function (positions, scale) {
+            var _this = this;
+            var rp = positions.map(function (position) {
+                return _this.getShape2CanvasPoint(position, scale);
+            });
+            return rp;
+        };
+        /**
+         * 获取 shape 坐标点转换成画布的坐标
+         * @param positions Points Shape 的坐标点集合
+         * @param scale 缩放大小
+         * @return Points
+         */
+        Image.prototype.getShape2CanvasPoint = function (position, scale) {
+            var orgin = this.getOrigin();
+            var ox = orgin[0], oy = orgin[1];
+            var sx = position[0], sy = position[1];
+            var cx = ox + sx * scale;
+            var cy = oy + sy * scale;
+            return [cx, cy];
+        };
+        /**
+         * 设置图片的原点坐标
+         * @param origin Point 原点坐标
+         */
+        Image.prototype.moveTo = function (origin) {
+            this.origin = origin;
+        };
+        return Image;
     }(EventReceiver));
 
     /**
@@ -5381,265 +5788,8 @@
         return LabelImg;
     }(Platform));
 
-    var LabelImgCtx = React$1.createContext([null, function (lb) { }]);
-    var useLabelImg = function () { return React$1.useContext(LabelImgCtx); };
-    var LabelImgProvider = function (_a) {
-        var children = _a.children;
-        var _b = React$1.useState(null), lb = _b[0], setLb = _b[1];
-        return (React.createElement(LabelImgCtx.Provider, { value: [lb, setLb] }, children));
-    };
-
-    var initStore = {
-        list: [],
-        labelTypes: []
-    };
-    var StoreCtx = React$1.createContext([initStore, function (store) { }]);
-    var useStore = function () { return React$1.useContext(StoreCtx); };
-    var StoreProvider = function (_a) {
-        var children = _a.children;
-        var _b = React$1.useState(initStore), store = _b[0], setStore = _b[1];
-        var update = function (newStore) {
-            setStore(function (data) { return Object.assign({}, data, newStore); });
-        };
-        return (React.createElement(StoreCtx.Provider, { value: [store, update] }, children));
-    };
-
-    var blackDogs = [
-        [[620, 244], [799, 244], [799, 441], [620, 441]],
-        [[265, 26], [420, 26], [420, 436], [265, 436]]
-    ];
-    var dogEar = [
-        [[559, 116], [554, 125], [547, 135], [542, 151], [532, 166], [535, 180], [539, 189], [546, 189], [558, 183], [566, 175], [574, 170], [579, 166], [582, 159], [581, 152], [576, 146], [570, 134], [567, 126], [563, 118]]
-    ];
-    var SourceModal = function () {
-        var _a = React$1.useState(true), visible = _a[0], setVisible = _a[1];
-        var _b = React$1.useState(""), url = _b[0], setUrl = _b[1];
-        var lb = useLabelImg()[0];
-        var _c = useStore(), _ = _c[0], setStore = _c[1];
-        React$1.useEffect(function () {
-            if (!lb)
-                return;
-            lb.register("polygon", {
-                type: "Polygon",
-                style: {
-                    normal: {
-                        lineColor: "black",
-                        opacity: .05
-                    }
-                },
-                tag: "多边形",
-            });
-            lb.register("rect", {
-                type: "Rect",
-                tag: "矩形"
-            });
-        }, [lb]);
-        var close = function () {
-            if (!lb)
-                return;
-            var list = lb.getShapeList();
-            var labelTypes = lb.getLabels();
-            setStore({
-                list: list,
-                labelTypes: labelTypes
-            });
-            setVisible(false);
-        };
-        var loadData = function () {
-            if (!lb)
-                return;
-            lb.register("black-dog", {
-                type: "Rect",
-                tag: "black dog"
-            });
-            lb.register("dog-ear", {
-                type: "Polygon",
-                tag: "狗耳朵",
-                style: {
-                    normal: {
-                        lineColor: "aqua",
-                        fillColor: "blueviolet",
-                        dotColor: "burlywood"
-                    }
-                }
-            });
-            lb.load("./dog.jpg").then(function () {
-                blackDogs.forEach(function (positions) {
-                    var shape = lb.createShape("black-dog", {
-                        positions: positions
-                    });
-                    lb.addShape(shape);
-                });
-                dogEar.forEach(function (positions) {
-                    var shape = lb.createShape("dog-ear", {
-                        positions: positions
-                    });
-                    lb.addShape(shape);
-                });
-                close();
-            });
-        };
-        var lodaByUrl = function () {
-            if (!url || !lb)
-                return;
-            lb.load(url).then(function () {
-                close();
-            });
-        };
-        return (React__default['default'].createElement(antd.Modal, { title: "\u9009\u62E9\u6570\u636E\u6E90", visible: visible, footer: false, closable: false },
-            React__default['default'].createElement("div", null,
-                React__default['default'].createElement(antd.Upload, { accept: "image/*", style: {
-                        width: "100%"
-                    }, className: "w-full block", onChange: function (_a) {
-                        var file = _a.file;
-                        lb === null || lb === void 0 ? void 0 : lb.load(file.originFileObj);
-                        close();
-                    }, action: "" },
-                    React__default['default'].createElement(antd.Button, { type: "primary", block: true }, "\u4E0A\u4F20\u672C\u5730\u56FE\u7247"))),
-            React__default['default'].createElement(antd.Divider, null),
-            React__default['default'].createElement("div", null,
-                React__default['default'].createElement(antd.Input, { value: url, onChange: function (e) {
-                        setUrl(e.target.value);
-                    }, style: {
-                        marginBottom: 8
-                    }, placeholder: "\u8BF7\u8F93\u5165\u56FE\u7247\u5730\u5740" }),
-                React__default['default'].createElement(antd.Button, { type: "primary", block: true, onClick: lodaByUrl }, "\u52A0\u8F7D\u7EBF\u4E0A\u56FE\u7247")),
-            React__default['default'].createElement(antd.Divider, null),
-            React__default['default'].createElement("div", null,
-                React__default['default'].createElement(antd.Button, { type: "primary", block: true, onClick: loadData }, "\u52A0\u8F7D\u793A\u4F8B\u6570\u636E"))));
-    };
-
-    var ShapeItem = function (_a) {
-        var shape = _a.shape, render = _a.render;
-        var registerID = shape.registerID, id = shape.id, type = shape.type;
-        var lb = useLabelImg()[0];
-        var isHidden = shape.isHidden();
-        var isDisabled = shape.isDisabled();
-        return (React__default['default'].createElement("div", { className: "shape-item" },
-            React__default['default'].createElement("div", null, registerID + "-" + id),
-            React__default['default'].createElement("div", { className: "shape-ctrl" },
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        if (isHidden) {
-                            shape.show();
-                        }
-                        else {
-                            shape.hidden();
-                        }
-                        render();
-                    } }, isHidden ? '显示' : '隐藏'),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        if (isDisabled) {
-                            shape.normal();
-                        }
-                        else {
-                            shape.disabled();
-                        }
-                        render();
-                    } }, isDisabled ? '正常' : '禁用'),
-                React__default['default'].createElement(antd.Button, { size: "small", danger: true, onClick: function () {
-                        lb === null || lb === void 0 ? void 0 : lb.remove(shape);
-                        render();
-                    } }, "\u5220\u9664"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        shape.tagShow();
-                        render();
-                    } }, "\u6807\u7B7E")),
-            React__default['default'].createElement("div", null,
-                React__default['default'].createElement(antd.Tag, { color: "blue" }, type))));
-    };
-    var Control = function () {
-        var lb = useLabelImg()[0];
-        var _a = useStore(), _b = _a[0], list = _b.list, labelTypes = _b.labelTypes, setStore = _a[1];
-        var _c = React$1.useState(false), continuity = _c[0], setContinuity = _c[1];
-        var imgRef = React$1.useRef("");
-        var _d = React$1.useState(""), base64 = _d[0], setBase64 = _d[1];
-        var render = function () {
-            var list = lb === null || lb === void 0 ? void 0 : lb.getShapeList();
-            if (!list)
-                return;
-            setStore({
-                list: list
-            });
-            lb === null || lb === void 0 ? void 0 : lb.render();
-        };
-        return (React__default['default'].createElement("div", { className: "control" },
-            React__default['default'].createElement("div", { className: "link" },
-                React__default['default'].createElement("a", { href: "https://github.com/hold-baby/label-img" }, "go to github")),
-            React__default['default'].createElement("div", null,
-                labelTypes.map(function (_a) {
-                    var key = _a.key, name = _a.name;
-                    return (React__default['default'].createElement(antd.Button, { key: key, size: "small", onClick: function () {
-                            lb === null || lb === void 0 ? void 0 : lb.label(key);
-                        } }, name));
-                }),
-                React__default['default'].createElement("div", { className: "continuity" },
-                    React__default['default'].createElement(antd.Switch, { onChange: function (continuity) {
-                            setContinuity(continuity);
-                            lb === null || lb === void 0 ? void 0 : lb.setContinuity(continuity);
-                        } }),
-                    continuity ? '连续标注' : '单次标注')),
-            React__default['default'].createElement("div", { className: "global-ctrl" },
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        lb === null || lb === void 0 ? void 0 : lb.setTagShow(!lb.isTagShow());
-                    } }, "\u663E\u793A/\u9690\u85CF\u6807\u7B7E"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        lb === null || lb === void 0 ? void 0 : lb.getShapeList().forEach(function (shape) {
-                            shape.isHidden() ? shape.show() : shape.hidden();
-                        });
-                        lb === null || lb === void 0 ? void 0 : lb.render();
-                    } }, "\u663E\u793A/\u9690\u85CF\u56FE\u5F62"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        lb === null || lb === void 0 ? void 0 : lb.resize();
-                    } }, "\u91CD\u7F6E\u5927\u5C0F"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        lb === null || lb === void 0 ? void 0 : lb.setGuideLine();
-                    } }, "\u8F85\u52A9\u7EBF"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        var list = lb === null || lb === void 0 ? void 0 : lb.getShapeList().map(function (_a) {
-                            var id = _a.id, tagContent = _a.tagContent, positions = _a.positions;
-                            return {
-                                id: id,
-                                tag: tagContent,
-                                positions: positions
-                            };
-                        });
-                        console.log(list);
-                        alert(JSON.stringify(list));
-                    } }, "\u83B7\u53D6\u6570\u636E"),
-                React__default['default'].createElement(antd.Button, { size: "small", onClick: function () {
-                        var base64 = lb === null || lb === void 0 ? void 0 : lb.toDataURL();
-                        if (!base64)
-                            return;
-                        setBase64(base64);
-                    } }, "\u5BFC\u51FA\u56FE\u7247"),
-                React__default['default'].createElement(antd.Modal, { visible: !!base64, onCancel: function () {
-                        setBase64("");
-                    } },
-                    React__default['default'].createElement(antd.Image, { src: base64 }))),
-            React__default['default'].createElement("div", { className: "shape-list" }, list.map(function (shape) {
-                return (React__default['default'].createElement(ShapeItem, { shape: shape, render: render, key: shape.id }));
-            })),
-            React__default['default'].createElement(SourceModal, null)));
-    };
-
-    var Listener = function () {
-        var lb = useLabelImg()[0];
-        var _a = useStore(), _ = _a[0], setStore = _a[1];
-        React$1.useEffect(function () {
-            if (!lb)
-                return;
-            lb.emitter.on("create", function () {
-                var list = lb.getShapeList();
-                setStore({
-                    list: list
-                });
-            });
-        }, [lb]);
-        return null;
-    };
-
     var CreateInstance = function () {
-        var _a = useLabelImg(), lb = _a[0], setLb = _a[1];
+        var _a = useLabelImg(), _ = _a[0], setLb = _a[1];
         var ref = React$1.useRef(null);
         React$1.useEffect(function () {
             var lb = new LabelImg(ref.current, {});
@@ -5647,11 +5797,12 @@
         }, []);
         return (React__default['default'].createElement("div", { ref: ref }));
     };
+
     var Main = function () {
         return (React__default['default'].createElement(StoreProvider, null,
             React__default['default'].createElement(LabelImgProvider, null,
                 React__default['default'].createElement("div", { className: "pw" },
-                    React__default['default'].createElement("div", { className: "container" },
+                    React__default['default'].createElement(antd.Row, { justify: "center" },
                         React__default['default'].createElement(CreateInstance, null),
                         React__default['default'].createElement(Control, null),
                         React__default['default'].createElement(Listener, null))))));
