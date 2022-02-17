@@ -1,6 +1,6 @@
 # 图片标注工具
 image annotation tool with javascript
->本工具专注图形标注,不局限某种方式与格式,只输出关键点位信息,不与业务逻辑耦合,并提供方法自定义展示方式与实体属性填写的实现（持续开发当中,文档更新可能滞后）
+>本工具专注图形标注，不局限某种方式与格式，只输出关键点位信息，不与业务逻辑耦合，并提供方法自定义展示方式与实体属性填写的实现（持续开发当中，文档更新可能滞后）
 
 ### 示例
 [demo for react](https://hold-baby.github.io/label-img/)
@@ -44,7 +44,7 @@ const Shape = LabelImg.Shape
 
 // IShapeOptions
 const shapeOptions = {
-  id, // 图形唯一id 可自动生成
+  id, // 图形唯一 id 可自动生成
   type, // 图形类型 必填 Polygon | Ract
   name, // 图形名称
   positions, // 坐标集合 ex: [[0, 0], [100, 100]]
@@ -72,7 +72,7 @@ const shapeOptions = {
 const shape = new Shape(shapeOptions)
 // or
 /**
- * @id      图形注册ID
+ * @id      图形注册 ID
  * @options 配置  Partial<Omit<IShapeOptions, "type">>
  */
 const shape = LabelImg.createShape(id, options)
@@ -82,7 +82,7 @@ labeler.addShape(shape)
 ### 注册图形
 ```js
 /**
- * @id        图形ID   Polygon: 多边形, Ract: 矩形
+ * @id        图形 ID   Polygon: 多边形，Ract: 矩形
  * @options   图形配置  Omit<IShapeCfg, "registerID">
  */
 labeler.register(id, options)
@@ -107,7 +107,7 @@ getShapeList()  // 获取图形列表
 setGuideLine(status?: boolean)  // 是否启用参照线
 setTagShow(status?: boolean)  // 是否启用标签
 isTagShow()  // 获取是否启用标签
-toDataURL()  // 导出标注图片的base64格式
+toDataURL()  // 导出标注图片的 base64 格式
 setContinuity(status: boolean)  // 设置是否连续标注
 render()  // 渲染画面
 forceRender()  // 强制渲染

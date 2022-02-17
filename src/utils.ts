@@ -79,9 +79,9 @@ export const getAdaptImgScale = (img: HTMLImageElement, options: { width: number
   return scale
 }
 /**
- * 颜色值16进制转rgba
- * @param {String} hex 16进制
- * @param {Float} opacity 透明度(16进制有效)
+ * 颜色值 16 进制转 rgba
+ * @param {String} hex 16 进制
+ * @param {Float} opacity 透明度 (16 进制有效)
  */
 export const hexToRgba = (hex: string, opacity = 1) => {
   const start = hex.slice(0, 1)
@@ -99,7 +99,7 @@ export const hexToRgba = (hex: string, opacity = 1) => {
         return arr
       }, []).reverse()
     }else{
-      throw "请输入正确的16进制颜色"
+      throw "请输入正确的 16 进制颜色"
     }
     return `rgba(${hexNumbs.map(v => Number.parseInt(v, 16)).join(",")}, ${opacity})`
   }else{

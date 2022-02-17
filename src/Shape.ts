@@ -260,7 +260,7 @@ export class Shape extends EventReceiver {
     }).sort((sp1, sp2) => sp1.distance - sp2.distance)
     const min = sort[0] // 获取最小的距离点
     if(min){
-      // 如果最小点距离小于5 在返回此点位
+      // 如果最小点距离小于 5 在返回此点位
       return min.distance < 5 ? min : false
     }else{
       return false

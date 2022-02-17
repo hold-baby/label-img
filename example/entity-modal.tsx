@@ -1,11 +1,10 @@
 import React from 'react'
-import { Form, Input, Radio, Modal, ModalProps, Button, Collapse, Slider, Tabs, Row } from "antd"
+import { Form, Input, Radio, Modal, ModalProps, Button, Slider, Tabs, Row } from "antd"
 import { ShapeType, ShapeStatus } from "../src/Shape"
 import ColorPicker from "./color-picker"
 
 const { Item } = Form
 const { Group } = Radio
-const { Panel } = Collapse
 const { TabPane } = Tabs
 
 const displayStyleStatus = (status: ShapeStatus) => {

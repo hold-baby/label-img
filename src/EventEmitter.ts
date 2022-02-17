@@ -1,13 +1,13 @@
 import { Shape } from "./Shape"
 
-type ShapeEvent = (shape: Shape) => void; // 特定shape事件
+type ShapeEvent = (shape: Shape) => void; // 特定 shape 事件
 type NotifyEvent = (props: any) => void; // 通知事件
 
 // 内置事件
 interface EmitEventMap {
-  "select": ShapeEvent; // shape被选中
-  "create": ShapeEvent; // shape创建
-  "delete": ShapeEvent; // shape删除
+  "select": ShapeEvent; // shape 被选中
+  "create": ShapeEvent; // shape 创建
+  "delete": ShapeEvent; // shape 删除
   "update": NotifyEvent; // 更新
   "labelType": NotifyEvent; // 标注类型修改
   "init": NotifyEvent; // 初始化
