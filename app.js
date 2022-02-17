@@ -276,9 +276,9 @@
         return scale;
     };
     /**
-     * 颜色值16进制转rgba
-     * @param {String} hex 16进制
-     * @param {Float} opacity 透明度(16进制有效)
+     * 颜色值 16 进制转 rgba
+     * @param {String} hex 16 进制
+     * @param {Float} opacity 透明度 (16 进制有效)
      */
     var hexToRgba = function (hex, opacity) {
         if (opacity === void 0) { opacity = 1; }
@@ -300,7 +300,7 @@
                 }, []).reverse();
             }
             else {
-                throw "请输入正确的16进制颜色";
+                throw "请输入正确的 16 进制颜色";
             }
             return "rgba(" + hexNumbs.map(function (v) { return Number.parseInt(v, 16); }).join(",") + ", " + opacity + ")";
         }
@@ -3959,7 +3959,7 @@
             }).sort(function (sp1, sp2) { return sp1.distance - sp2.distance; });
             var min = sort[0]; // 获取最小的距离点
             if (min) {
-                // 如果最小点距离小于5 在返回此点位
+                // 如果最小点距离小于 5 在返回此点位
                 return min.distance < 5 ? min : false;
             }
             else {
@@ -4064,7 +4064,6 @@
 
     var Item = antd.Form.Item;
     var Group = antd.Radio.Group;
-    var Panel = antd.Collapse.Panel;
     var TabPane = antd.Tabs.TabPane;
     var displayStyleStatus = function (status) {
         var _a;
