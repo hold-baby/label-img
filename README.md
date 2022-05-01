@@ -1,19 +1,27 @@
 # 图片标注工具
+
 image annotation tool with javascript
->本工具专注图形标注，不局限某种方式与格式，只输出关键点位信息，不与业务逻辑耦合，并提供方法自定义展示方式与实体属性填写的实现（持续开发当中，文档更新可能滞后）
+
+> 本工具专注图形标注，不局限某种方式与格式，只输出关键点位信息，不与业务逻辑耦合，并提供方法自定义展示方式与实体属性填写的实现（持续开发当中，文档更新可能滞后，请使用固定版本）
 
 ### 示例
+
 [demo for react](https://hold-baby.github.io/label-img/)
 
 ### 安装
+
 ```
 npm install label-img
 ```
+
 or
+
 ```html
-  <script src="./labelImg.js"></script>
+<script src="./labelImg.js"></script>
 ```
+
 ### 使用
+
 ```javascript
 /**
  * 生成实例
@@ -25,18 +33,20 @@ const labeler = new LabelImg(element, {
   height: 600,
   bgColor: `#000`, // 背景色
   imagePlacement: "default", // default | center
-})
+});
 // 注册图形
 labeler.register("polygon", {
   type: "Polygon",
   tag: "多边形",
-})
+});
 // 加载图片
-labeler.load(url)
+labeler.load(url);
 // 选择标注多边形
-labeler.label("polygon")
+labeler.label("polygon");
 ```
+
 ### 图形
+
 ```js
 const { Shape } from "label-img"
 // or
@@ -79,23 +89,29 @@ const shape = LabelImg.createShape(id, options)
 // 添加到画布中
 labeler.addShape(shape)
 ```
+
 ### 注册图形
+
 ```js
 /**
  * @id        图形 ID   Polygon: 多边形，Ract: 矩形
  * @options   图形配置  Omit<IShapeCfg, "registerID">
  */
-labeler.register(id, options)
+labeler.register(id, options);
 ```
+
 ### 加载图片
+
 ```js
 /**
  * @param   url || file
  * return   Promise
  */
-labeler.load(param)
+labeler.load(param);
 ```
+
 ### labeler API
+
 ```js
 isRegister(id)  // 判断是否注册
 label(id, continuity)  // 选择标注类型
@@ -112,7 +128,9 @@ setContinuity(status: boolean)  // 设置是否连续标注
 render()  // 渲染画面
 forceRender()  // 强制渲染
 ```
+
 ### Shape API
+
 ```js
 getPositions()  // 获取坐标点集合
 updatePositions(positions) // 更新坐标信息

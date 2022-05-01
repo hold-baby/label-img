@@ -10,7 +10,7 @@
     "dist/"
   ],
   "scripts": {
-    "build": "rollup -c build/rollup.config.build.js",
+    "build": "rollup -c build/rollup.config.build.js && ls -l ./dist",
     "dev": "rollup -c build/rollup.config.js -w",
     "test": "jest __tests__/**",
     "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
@@ -43,10 +43,7 @@
     ]
   },
   "lint-staged": {
-    "*.{ts,ts}": [
-      "eslint --quiet",
-      "git add"
-    ]
+    "**/*": "prettier --write ./src"
   },
   "devDependencies": {
     "@babel/core": "^7.14.6",
