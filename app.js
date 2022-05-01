@@ -208,8 +208,7 @@
         for (var i = 0, j = vs.length - 1; i < vs.length; j = i++) {
             var xi = vs[i][0], yi = vs[i][1];
             var xj = vs[j][0], yj = vs[j][1];
-            var intersect = ((yi > y) != (yj > y))
-                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            var intersect = yi > y != yj > y && x < ((xj - xi) * (y - yi)) / (yj - yi) + xi;
             if (intersect)
                 inside = !inside;
         }
@@ -289,7 +288,8 @@
                 hexNumbs = hexNumbs.map(function (v) { return v + v; });
             }
             else if (hexNumbs.length === 6) {
-                hexNumbs = hexNumbs.reduce(function (arr, item, index) {
+                hexNumbs = hexNumbs
+                    .reduce(function (arr, item, index) {
                     if (index % 2 === 0) {
                         arr.unshift(item);
                     }
@@ -297,19 +297,22 @@
                         arr[0] = arr[0] + item;
                     }
                     return arr;
-                }, []).reverse();
+                }, [])
+                    .reverse();
             }
             else {
                 throw "请输入正确的 16 进制颜色";
             }
-            return "rgba(" + hexNumbs.map(function (v) { return Number.parseInt(v, 16); }).join(",") + ", " + opacity + ")";
+            return "rgba(" + hexNumbs
+                .map(function (v) { return Number.parseInt(v, 16); })
+                .join(",") + ", " + opacity + ")";
         }
         else {
             return hex;
         }
     };
     var dataURIToBlob = function (dataURI) {
-        var binStr = atob(dataURI.split(',')[1]), len = binStr.length, arr = new Uint8Array(len);
+        var binStr = atob(dataURI.split(",")[1]), len = binStr.length, arr = new Uint8Array(len);
         for (var i = 0; i < len; i++) {
             arr[i] = binStr.charCodeAt(i);
         }
@@ -3583,7 +3586,7 @@
         isArray: isArray_1,
         isFunction: isFunction_1,
         debounce: debounce_1,
-        throttle: throttle_1
+        throttle: throttle_1,
     };
 
     var EAntMouseEvents;
@@ -3637,7 +3640,7 @@
                 lv: lv,
                 type: type,
                 callback: callback,
-                target: this
+                target: this,
             };
             this.addEvent(kType, antEvent);
         };
@@ -3686,7 +3689,7 @@
         padding: "0 4px",
         color: "#000",
         bgColor: "#fff",
-        scale: 1
+        scale: 1,
     };
     var Popover = /** @class */ (function () {
         function Popover(props) {
@@ -3722,7 +3725,7 @@
                 transformOrigin: "left",
                 left: x + "px",
                 top: y + "px",
-                transform: "scale(" + scale + ")"
+                transform: "scale(" + scale + ")",
             });
             css(this.body, {
                 background: "" + bgColor,
@@ -3730,7 +3733,7 @@
                 bottom: offset + "px",
                 display: "inline-block",
                 color: color,
-                padding: padding
+                padding: padding,
             });
             if (_.isString(this.content)) {
                 this.body.innerHTML = this.content;
@@ -3791,7 +3794,7 @@
     var defaultStyle$1 = {
         normal: normal,
         active: active,
-        disabled: disabled
+        disabled: disabled,
     };
     var Shape = /** @class */ (function (_super) {
         __extends(Shape, _super);
@@ -3802,6 +3805,7 @@
                 return _this;
             };
             _this.addPoint = _.throttle(function (point) {
+                // 避免抖动重复添加
                 var last = _this.positions[_this.positions.length - 1];
                 if (last.toString() !== point.toString()) {
                     _this.positions.push(point);
@@ -3832,8 +3836,8 @@
                 content: tag,
                 style: {
                     color: "#fff",
-                    bgColor: _this.getStyle().dotColor
-                }
+                    bgColor: _this.getStyle().dotColor,
+                },
             });
             _this.max = max;
             if (_this.type === ShapeType.Rect) {
@@ -3856,7 +3860,9 @@
             var positions = this.getPositions();
             var style = this.getStyle();
             var dotRadius = style.dotRadius;
-            var arcIndex = positions.findIndex(function (point) { return isInCircle(offset, dotRadius * scale, point); });
+            var arcIndex = positions.findIndex(function (point) {
+                return isInCircle(offset, dotRadius * scale, point);
+            });
             return arcIndex;
         };
         /**
@@ -3880,7 +3886,7 @@
             positions.forEach(function (point, idx) {
                 var lp = {
                     idx: idx,
-                    position: point
+                    position: point,
                 };
                 if (!pre) {
                     pre = lp;
@@ -3891,7 +3897,8 @@
             });
             // 1.filter 筛选出在两个坐标点范围内的点
             // 2.map 计算出边上的点位
-            var linePoints = ps.filter(function (_a) {
+            var linePoints = ps
+                .filter(function (_a) {
                 var lp1 = _a[0], lp2 = _a[1];
                 var _b = lp1.position, x1 = _b[0], y1 = _b[1];
                 var _c = lp2.position, x2 = _c[0], y2 = _c[1];
@@ -3916,7 +3923,8 @@
                     isInY = y2 < oy1 && oy1 < y1;
                 }
                 return isInX && isInY;
-            }).map(function (_a) {
+            })
+                .map(function (_a) {
                 var lp1 = _a[0], lp2 = _a[1];
                 var _b = lp1.position, x1 = _b[0], y1 = _b[1];
                 var _c = lp2.position, x2 = _c[0], y2 = _c[1];
@@ -3933,30 +3941,32 @@
                 }
                 else {
                     var k1 = (y2 - y1) / (x2 - x1);
-                    var b1 = y1 - (k1 * x1);
+                    var b1 = y1 - k1 * x1;
                     var k2 = -k1;
-                    var b2 = oy1 - (k2 * ox1);
+                    var b2 = oy1 - k2 * ox1;
                     ox2 = (b2 - b1) / (k1 - k2);
                     oy2 = k2 * ox2 + b2;
                 }
                 linePoint = {
                     idx: lp1.idx,
-                    position: [ox2, oy2]
+                    position: [ox2, oy2],
                 };
                 return linePoint;
             });
             // 1.map 计算出鼠标点到边上的距离
             // 2.sort 距离升序排序
-            var sort = linePoints.map(function (lp) {
+            var sort = linePoints
+                .map(function (lp) {
                 var position = lp.position, idx = lp.idx;
                 var distance = getDistance(position, offset);
                 var sp = {
                     idx: idx,
                     position: position,
-                    distance: distance
+                    distance: distance,
                 };
                 return sp;
-            }).sort(function (sp1, sp2) { return sp1.distance - sp2.distance; });
+            })
+                .sort(function (sp1, sp2) { return sp1.distance - sp2.distance; });
             var min = sort[0]; // 获取最小的距离点
             if (min) {
                 // 如果最小点距离小于 5 在返回此点位
@@ -3988,7 +3998,7 @@
         Shape.prototype.disabled = function () {
             this.status = "disabled";
             this.tagger.css({
-                bgColor: this.getStyle().dotColor
+                bgColor: this.getStyle().dotColor,
             });
             return this;
         };
@@ -3998,7 +4008,7 @@
         Shape.prototype.normal = function () {
             this.status = "normal";
             this.tagger.css({
-                bgColor: this.getStyle().dotColor
+                bgColor: this.getStyle().dotColor,
             });
             return this;
         };
@@ -4021,7 +4031,7 @@
         Shape.prototype.tagShow = function (status) {
             this.showTag = _.isUndefined(status) ? !this.showTag : !!status;
             this.tagger.css({
-                bgColor: this.getStyle().dotColor
+                bgColor: this.getStyle().dotColor,
             });
         };
         Shape.prototype.setTag = function (tag) {
@@ -4409,7 +4419,7 @@
                 this.origin,
                 [x + sw, y],
                 [x + sw, y + sh],
-                [x, y + sh]
+                [x, y + sh],
             ];
             return postion;
         };
@@ -4422,10 +4432,7 @@
         Image.prototype.toImagePoint = function (offset, scale) {
             var px = offset[0], py = offset[1];
             var _a = this.origin, ox = _a[0], oy = _a[1];
-            var point = [
-                (px - ox) / scale,
-                (py - oy) / scale
-            ];
+            var point = [(px - ox) / scale, (py - oy) / scale];
             return point;
         };
         /**
@@ -4528,7 +4535,7 @@
             var _this = this;
             this.createEvent(type, {
                 fn: cb,
-                type: "on"
+                type: "on",
             });
             return function () {
                 var events = _this.getEvents(type);
@@ -4542,7 +4549,7 @@
         EventEmitter.prototype.once = function (type, cb) {
             this.createEvent(type, {
                 fn: cb,
-                type: "once"
+                type: "once",
             });
         };
         return EventEmitter;
@@ -4718,23 +4725,23 @@
         Cursor["label"] = "copy";
         Cursor["drag"] = "grabbing";
         Cursor["pointer"] = "pointer";
-        Cursor["disabled"] = "disabled"; // 禁用
+        Cursor["disabled"] = "disabled";
     })(Cursor || (Cursor = {}));
     var displayCursor = function (cursor) {
         return Cursor[cursor];
     };
 
     var MoveKeyCode = {
-        "W": 87,
-        "S": 83,
-        "A": 65,
-        "D": 68
+        W: 87,
+        S: 83,
+        A: 65,
+        D: 68,
     };
     var FuncKeyCode = {
-        "Q": 81,
-        "E": 69,
-        "F": 70,
-        "DELETE": 8
+        Q: 81,
+        E: 69,
+        F: 70,
+        DELETE: 8,
     };
 
     // 默认配置
@@ -4746,7 +4753,7 @@
         guideLine: false,
         shouldShapeStyleScale: true,
         shouldTagScale: false,
-        imagePlacement: ImagePlacement.default
+        imagePlacement: ImagePlacement.default,
     };
     var Platform = /** @class */ (function (_super) {
         __extends(Platform, _super);
@@ -4819,7 +4826,11 @@
                             var _a = _this.getTargetShape(offset), shape = _a[0], dotIndex = _a[1];
                             var isOnShape = _this._isShapeMoving || !!shape;
                             var isOnArc = _this._isMouseDown || dotIndex !== -1;
-                            var currentTarget = isOnShape ? shape : isOnImage ? Image : null;
+                            var currentTarget = isOnShape
+                                ? shape
+                                : isOnImage
+                                    ? Image
+                                    : null;
                             var currentDotIndex = dotIndex;
                             position = offset;
                             var ante = {
@@ -4832,7 +4843,7 @@
                                     ante.isPropagation = false;
                                 },
                                 currentTarget: currentTarget,
-                                currentDotIndex: currentDotIndex
+                                currentDotIndex: currentDotIndex,
                             };
                             switch (type) {
                                 case "mousedown":
@@ -4901,13 +4912,16 @@
                         if (!_this.Image || _this._isMouseDown)
                             return;
                         var isOnShape = ante.isOnShape, isOnArc = ante.isOnArc;
-                        if (_this.drawing) { // 当前正在标注
+                        if (_this.drawing) {
+                            // 当前正在标注
                             _this.cursor("label");
                         }
-                        else if (isOnArc) { // 判断是否在点上
+                        else if (isOnArc) {
+                            // 判断是否在点上
                             _this.cursor("pointer");
                         }
-                        else if (isOnShape) { // 鼠标在图形上
+                        else if (isOnShape) {
+                            // 鼠标在图形上
                             _this.cursor("default");
                         }
                         else {
@@ -5030,7 +5044,7 @@
                             var shape = _this.createShape(_this.drawing.registerID, {
                                 positions: positions,
                                 closed: false,
-                                id: "cache"
+                                id: "cache",
                             });
                             _this.cache = shape;
                         }
@@ -5068,7 +5082,7 @@
                         if (shapeType === ShapeType.Rect && cache && _this.drawing) {
                             var positions = cache.getPositions();
                             var shape = _this.createShape(_this.drawing.registerID, {
-                                positions: positions
+                                positions: positions,
                             });
                             shape.close();
                             _this.shapeList.push(shape);
@@ -5080,8 +5094,7 @@
                             _this.render();
                         }
                     });
-                    _this.on("mouseout", lv, function () {
-                    });
+                    _this.on("mouseout", lv, function () { });
                 };
                 // 初始化图形事件
                 var _initShapeEvent = function () {
@@ -5132,7 +5145,10 @@
                     _this.on("mousemove", lv, function (e) {
                         var offsetX = e.offsetX, offsetY = e.offsetY, ante = e.ante;
                         var isOnShape = ante.isOnShape;
-                        if (!isOnShape || !_this.activeShape || _this.drawing || !_this._isMouseDown)
+                        if (!isOnShape ||
+                            !_this.activeShape ||
+                            _this.drawing ||
+                            !_this._isMouseDown)
                             return;
                         _this._isShapeMoving = true;
                         var diff = [offsetX - start[0], offsetY - start[1]];
@@ -5183,7 +5199,7 @@
                 var _initShortcutKey = function () {
                     canvas.addEventListener("keydown", function (e) {
                         var keyCode = e.keyCode;
-                        if (Object.values(MoveKeyCode).some((function (v) { return keyCode === v; }))) {
+                        if (Object.values(MoveKeyCode).some(function (v) { return keyCode === v; })) {
                             // 移动操作
                             var distance = 10;
                             var _a = Image.getOrigin(), x = _a[0], y = _a[1];
@@ -5281,7 +5297,8 @@
             _this.createShape = function (rid, options) {
                 var opts = _this.shapeRegister.get(rid);
                 return new Shape(Object.assign(opts, options));
-            }; /**
+            };
+            /**
              * 判断图形是否注册
              * @param rid RegisterID 图形注册 ID
              * @returns boolean
@@ -5296,7 +5313,8 @@
              */
             _this.label = function (rid, continuity) {
                 var drawing = _this.shapeRegister.get(rid);
-                if ((_this.drawing && drawing && rid !== _this.drawing.id) || (!_this.drawing && drawing)) {
+                if ((_this.drawing && drawing && rid !== _this.drawing.id) ||
+                    (!_this.drawing && drawing)) {
                     _this.drawing = drawing;
                     _this.emitter.emit("labelType");
                 }
@@ -5312,7 +5330,7 @@
                     return {
                         key: key,
                         name: tag || key,
-                        type: type
+                        type: type,
                     };
                 });
             };
@@ -5340,9 +5358,9 @@
                 _this.render();
             };
             /**
-               * 删除图形
-               * @param input QueryShapeInput 待删除的图形或 ID
-               */
+             * 删除图形
+             * @param input QueryShapeInput 待删除的图形或 ID
+             */
             _this.remove = function (input) {
                 var _a = _this.findShapeIndex(input), idx = _a[0], shape = _a[1];
                 if (idx === null)
@@ -5356,7 +5374,7 @@
             _this.getTargetShape = function (offset) {
                 var Image = _this.Image;
                 var scale = _this._scale;
-                var styleScale = _this.getShapeStyleScale() / scale; // 应用到图形的坐标体系比例变更 除以scale以修正 
+                var styleScale = _this.getShapeStyleScale() / scale; // 应用到图形的坐标体系比例变更 除以scale以修正
                 var target = null;
                 var dotIndex = -1;
                 var shapeOffset = Image.toImagePoint(offset, scale);
@@ -5472,7 +5490,7 @@
              */
             _this.setGuideLine = function (status) {
                 _this.setOptions({
-                    guideLine: _.isUndefined(status) ? !_this.options().guideLine : !!status
+                    guideLine: _.isUndefined(status) ? !_this.options().guideLine : !!status,
                 });
                 _this.render();
             };
@@ -5489,7 +5507,7 @@
              */
             _this.setTagShow = function (status) {
                 _this.setOptions({
-                    tagShow: _.isUndefined(status) ? !_this.isTagShow : !!status
+                    tagShow: _.isUndefined(status) ? !_this.isTagShow : !!status,
                 });
                 _this.render();
             };
@@ -5544,20 +5562,22 @@
                 var sw2 = width * _scale;
                 var dx = Math.abs(px - ox);
                 var fx = px - ox > 0 ? -1 : 1;
-                var sx = ((dx * sw2) / sw) - dx;
+                var sx = (dx * sw2) / sw - dx;
                 var x = fx * sx + ox;
                 var sh = height * _this._scale;
                 var sh2 = height * _scale;
                 var dy = Math.abs(py - oy);
                 var fy = py - oy > 0 ? -1 : 1;
-                var sy = ((dy * sh2) / sh) - dy;
+                var sy = (dy * sh2) / sh - dy;
                 var y = fy * sy + oy;
                 Image.moveTo([x, y]);
                 _this._scale = _scale;
                 _this.render();
             };
             _this.getShapeStyleScale = function () {
-                return _this._options.shouldShapeStyleScale ? _this._scale : Number((1 + _this._scale).toFixed(2));
+                return _this._options.shouldShapeStyleScale
+                    ? _this._scale
+                    : Number((1 + _this._scale).toFixed(2));
             };
             _this.moveTo = function (origin) {
                 _this.Image.moveTo(origin);
@@ -5571,7 +5591,7 @@
                 var wrap = document.createElement("div");
                 var lb = new Platform(wrap, {
                     width: width,
-                    height: height
+                    height: height,
                 });
                 lb.isExport = true;
                 var map = _this.getRegisterMap();
@@ -5599,7 +5619,7 @@
                 var _a = _this.options(), bgColor = _a.bgColor, width = _a.width, height = _a.height;
                 _this.emitter.emit("beforeRenderBackground");
                 _this.canvas.fillReact([0, 0], [width, height], {
-                    fillColor: bgColor
+                    fillColor: bgColor,
                 });
                 _this.emitter.emit("afterRenderBackground");
             };
@@ -5625,21 +5645,21 @@
                 var lineDash = [5];
                 var row = [
                     [0, y],
-                    [options.width, y]
+                    [options.width, y],
                 ];
                 _this.canvas.line(row, {
                     lineColor: lineColor,
                     lineWidth: lineWidth,
-                    lineDash: lineDash
+                    lineDash: lineDash,
                 });
                 var col = [
                     [x, 0],
-                    [x, options.height]
+                    [x, options.height],
                 ];
                 _this.canvas.line(col, {
                     lineColor: lineColor,
                     lineWidth: lineWidth,
-                    lineDash: lineDash
+                    lineDash: lineDash,
                 });
             };
             _this._renderShape = function (shape) {
@@ -5654,7 +5674,7 @@
                 var dotColor = style.dotColor, dotRadius = style.dotRadius, lineColor = style.lineColor, lineWidth = style.lineWidth, fillColor = style.fillColor;
                 var points = Image.getShape2CanvasPoints(positions, scale);
                 // 判断是否闭合
-                if ((shape.isClose() || shape.type === ShapeType.Rect)) {
+                if (shape.isClose() || shape.type === ShapeType.Rect) {
                     points.push(points[0]);
                 }
                 var styleScale = _this.getShapeStyleScale();
@@ -5665,7 +5685,7 @@
                     dotRadius: dotRadius * styleScale,
                     dotColor: dotColor,
                     fillColor: fillColor,
-                    opacity: .7
+                    opacity: 0.7,
                 };
                 if (shape.isClose()) {
                     _this.canvas.polygon(points, shapeStyle);
@@ -5679,13 +5699,16 @@
                  * 判断是否显示标签
                  * shape 移动和标注状态不显示标签
                  */
-                var isTagShow = _this.isTagShow() && shape.isShowTag() && !_this._isShapeMoving && !_this.drawing;
+                var isTagShow = _this.isTagShow() &&
+                    shape.isShowTag() &&
+                    !_this._isShapeMoving &&
+                    !_this.drawing;
                 var tagger = shape.tagger;
                 if (isTagShow) {
                     if (_this.isExport) {
                         _this.canvas.text(shape.tagContent, points[0], {
                             bgColor: dotColor,
-                            color: "#fff"
+                            color: "#fff",
                         });
                     }
                     else {
@@ -5744,7 +5767,7 @@
             _this.container = container;
             css(_this.container, {
                 position: "relative",
-                overflow: "hidden"
+                overflow: "hidden",
             });
             _this._options = Object.assign({}, defaulOptions, LabelImgOptions);
             _this.emitter = new EventEmitter();
