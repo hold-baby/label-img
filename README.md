@@ -55,7 +55,7 @@ const Shape = LabelImg.Shape
 // IShapeOptions
 const shapeOptions = {
   id, // 图形唯一 id 可自动生成
-  type, // 图形类型 必填 Polygon | Ract
+  type, // 图形类型 必填 Polygon | Rect
   name, // 图形名称
   positions, // 坐标集合 ex: [[0, 0], [100, 100]]
   data, // 自定义数据 可用于存储实体属性等内容
@@ -94,7 +94,7 @@ labeler.addShape(shape)
 
 ```js
 /**
- * @id        图形 ID   Polygon: 多边形，Ract: 矩形
+ * @id        图形 ID   Polygon: 多边形，Rect: 矩形
  * @options   图形配置  Omit<IShapeCfg, "registerID">
  */
 labeler.register(id, options);
