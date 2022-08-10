@@ -1,19 +1,19 @@
-import resolve from '@rollup/plugin-node-resolve';
-import commonjs from '@rollup/plugin-commonjs';
-import banner from "rollup-plugin-banner2"
-import json from '@rollup/plugin-json';
-import pkg from '../package.json';
-import typescript from '@rollup/plugin-typescript'
+import resolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import banner from "rollup-plugin-banner2";
+import json from "@rollup/plugin-json";
+import pkg from "../package.json";
+import typescript from "@rollup/plugin-typescript";
 import { terser } from "rollup-plugin-terser";
-import dayjs from "dayjs"
+import dayjs from "dayjs";
 import dts from "rollup-plugin-dts";
-import { name, input } from "./config"
-import demoConfig from './rollup.config.demo';
+import { optimizeLodashImports } from "@optimize-lodash/rollup-plugin";
+import { name, input } from "./config";
+// import demoConfig from "./rollup.config.demo";
 
 export default [
-  // type
   {
-    input: input.type,
+    input: input.main,
     output: {
       file: pkg.types,
       format: "es",
@@ -21,61 +21,76 @@ export default [
     plugins: [
       dts({
         respectExternal: true,
-      })
-    ]
+      }),
+    ],
   },
-  // browser-friendly UMD build
+  // {
+  //   input: input.main,
+  //   output: {
+  //     name,
+  //     file: pkg.main,
+  //     format: "umd",
+  //   },
+  //   plugins: [
+  //     json(),
+  //     resolve(),
+  //     commonjs({
+  //       extensions: [".js", ".ts"],
+  //     }),
+  //     typescript(),
+  //     banner(getBanner),
+  //   ],
+  // },
   {
     input: input.main,
     output: {
       name,
-      file: pkg.main,
-      format: 'umd',
+      file: pkg.main.replace(".js", ".es.js"),
+      format: "es",
     },
     plugins: [
       json(),
       resolve(),
-      commonjs({ 
-        extensions: ['.js', '.ts'],
+      optimizeLodashImports(),
+      commonjs({
+        extensions: [".js", ".ts"],
       }),
       typescript(),
-      banner(getBanner)
-    ]
-  },
-  {
-    input: input.main,
-    output: [
-      {
-        name,
-        file: pkg.build,
-        format: 'umd',
-      },
+      banner(getBanner),
     ],
-    plugins: [
-      json(),
-      resolve(),
-      commonjs({ 
-        extensions: ['.js', '.ts'],
-      }),
-      typescript(),
-      terser(),
-      banner(getBanner)
-    ]
   },
-  demoConfig
-]
+  // {
+  //   input: input.main,
+  //   output: [
+  //     {
+  //       name,
+  //       file: pkg.main.replace(".js", ".min.js"),
+  //       format: "umd",
+  //     },
+  //   ],
+  //   plugins: [
+  //     json(),
+  //     resolve(),
+  //     commonjs({
+  //       extensions: [".js", ".ts"],
+  //     }),
+  //     typescript(),
+  //     terser(),
+  //     banner(getBanner),
+  //   ],
+  // },
+  // demoConfig,
+];
 
-function getBanner (){
-  return (
-    [
-      `/**!`,
-      ` * ${pkg.name} - v${pkg.version}`,
-      ` * ${pkg.description}`,
-      ` *`,
-      ` * ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`,
-      ` * ${pkg.license} (c) ${pkg.author}`,
-      `*/`,
-      ``
-    ].join('\n')
-  )
+function getBanner() {
+  return [
+    `/**!`,
+    ` * ${pkg.name} - v${pkg.version}`,
+    ` * ${pkg.description}`,
+    ` *`,
+    ` * ${dayjs().format("YYYY-MM-DD HH:mm:ss")}`,
+    ` * ${pkg.license} (c) ${pkg.author}`,
+    `*/`,
+    ``,
+  ].join("\n");
 }

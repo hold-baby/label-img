@@ -1,28 +1,34 @@
-import React from "react"
-import { render } from "react-dom"
-import { LabelImgProvider } from "./label-img-provider"
-import Control from "./control"
-import { StoreProvider } from "./store-provider"
-import Listener from "./listener"
-import { CreateInstance } from "./instance"
-import { Row } from "antd"
-import "./app.less"
+import { useEffect, useRef } from "react";
+import { render } from "react-dom";
+import LabelImg from "src/index";
 
-const Main = () => {
+const App = () => {
+  const ref = useRef<HTMLDivElement>(null);
 
-  return (
-    <StoreProvider>
-      <LabelImgProvider>
-        <div className="pw">
-          <Row justify="center">
-            <CreateInstance />
-            <Control />
-            <Listener />
-          </Row>
-        </div>
-      </LabelImgProvider>
-    </StoreProvider>
-  )
-}
+  useEffect(() => {
+    const lb = new LabelImg(ref.current as HTMLDivElement, {});
 
-render(<Main />, document.getElementById("app"))
+    // 注册图形
+    lb.register({
+      id: "po",
+      type: "Rect",
+    });
+
+    const testImgUrl = "https://hold-baby.github.io/label-img/dog.jpg";
+    lb.loadSource(testImgUrl, () => {
+      console.log("图片加载成功");
+
+      lb.createShape({
+        registerID: "po",
+        points: [
+          [20, 20],
+          [40, 40],
+        ],
+      });
+    });
+  }, []);
+
+  return <div ref={ref}></div>;
+};
+
+render(<App />, document.getElementById("app"));

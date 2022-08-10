@@ -2,12 +2,11 @@ module.exports = {
   presets: [
     "@babel/react",
     [
-      '@babel/preset-env', {
-        targets: {
-          node: 'current'
-        }
-      }
+      "@babel/preset-env",
+      {
+        targets: "> 0.25%, not dead",
+      },
     ],
-    '@babel/preset-typescript'
-  ]
+    "@babel/preset-typescript",
+  ],
 };

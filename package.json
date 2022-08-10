@@ -1,21 +1,18 @@
 {
   "name": "label-img",
-  "version": "0.0.72",
+  "version": "1.0.0.beta",
   "description": "image annotation tool with javascript",
   "main": "dist/labelImg.js",
-  "build": "dist/labelImg.min.js",
-  "eg": "example/labelImg.js",
-  "types": "dist/index.d.ts",
+  "types": "dist/labelImg.d.ts",
   "files": [
     "dist/"
   ],
   "scripts": {
+    "clean": "rm -r dist",
+    "prebuild": "yarn clean",
     "build": "rollup -c build/rollup.config.build.js && ls -l ./dist",
     "dev": "rollup -c build/rollup.config.js -w",
     "test": "jest __tests__/**",
-    "version": "conventional-changelog -p angular -i CHANGELOG.md -s && git add CHANGELOG.md",
-    "postversion": "git push",
-    "prepublishOnly": "yarn build",
     "prepare": "husky install"
   },
   "repository": {
@@ -86,6 +83,7 @@
     "typescript": "4.1.2"
   },
   "dependencies": {
-    "lodash": "^4.17.20"
+    "lodash": "^4.17.20",
+    "nanoid": "^4.0.0"
   }
 }
