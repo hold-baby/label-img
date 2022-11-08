@@ -12,7 +12,6 @@
     "prebuild": "yarn clean",
     "build": "rollup -c build/rollup.config.build.js && ls -l ./dist",
     "dev": "rollup -c build/rollup.config.js -w",
-    "test": "jest __tests__/**",
     "prepare": "husky install"
   },
   "repository": {
@@ -57,12 +56,14 @@
     "@types/lodash": "4.14.165",
     "@types/react": "^17.0.33",
     "@types/react-dom": "^17.0.10",
+    "@types/uuid": "^8.3.4",
     "antd": "^4.16.13",
-    "babel-jest": "^27.0.2",
+    "babel-jest": "^29.2.2",
     "conventional-changelog-cli": "^2.1.1",
     "dayjs": "1.9.7",
     "husky": "^7.0.4",
-    "jest": "^27.0.4",
+    "jest": "^29.2.2",
+    "jest-environment-jsdom": "^29.2.2",
     "less": "^4.1.2",
     "lint-staged": "^12.3.4",
     "postcss": "^8.3.11",
@@ -84,6 +85,7 @@
   },
   "dependencies": {
     "lodash": "^4.17.20",
-    "nanoid": "^4.0.0"
+    "nanoid": "^4.0.0",
+    "uuid": "^9.0.0"
   }
 }

@@ -1,6 +1,3 @@
-// @ts-ignore
-import { nanoid } from "nanoid/index.browser";
-
 export const loadImage = (src: string) =>
   new Promise<HTMLImageElement>((c, e) => {
     const img = new Image();
@@ -14,5 +11,5 @@ export const loadImage = (src: string) =>
   });
 
 export const createID = () => {
-  return nanoid(10);
+  return Math.floor(Math.random() * 10000).toString();
 };
